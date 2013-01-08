@@ -7,4 +7,11 @@ namespace DHP_FW;
  */
 class Response {
 
+    public function send(){}
+    
+    public function header(){}
+    
+    public function status(){}
+    
+    public function sendFile($path, $mimeType){}
 }
