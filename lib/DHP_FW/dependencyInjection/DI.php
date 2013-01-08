@@ -102,39 +102,6 @@ class DI {
             } elseif ( isset( $__args__[$key] ) ) {
                 $args[] = $__args__[$key];
             }
-            # todo : dbl check that these commented rows are really not needed...
-            /*
-            switch (TRUE) {
-                
-                case isset( $this->container['class'][$constructorArgument['class']] ) && !is_a($this->container['class'][$constructorArgument['class']], 'DHP_FW\\dependencyInjection\\DIProxy'):
-                    $args[] = $this->container['class'][$constructorArgument['class']];
-                    break;
-                case isset( $this->container['class'][$constructorArgument['name']] ) && !is_a($this->container['class'][$constructorArgument['name']], 'DHP_FW\\dependencyInjection\\DIProxy'):
-                    $args[] = $this->container['class'][$constructorArgument['name']];
-                    break;
-                case isset( $this->container['object'][$constructorArgument['class']] ):
-                    $args[] = $this->container['object'][$constructorArgument['class']];
-                    break;
-                case isset( $this->container['object'][$constructorArgument['name']] ):
-                    $args[] = $this->container['object'][$constructorArgument['name']];
-                    break;
-
-                case isset( $this->container['class'][$constructorArgument['class']] ):
-                    $args[] = $this->initClass($constructorArgument['class']);
-                    break;
-                
-                case isset( $constructorArgument['class'] ):
-                    $args[] = $this->instantiateObject($constructorArgument['class']);
-                    break;
-
-                default:
-                    if ( isset( $__args__[$constructorArgument['name']] ) ) {
-                        $args[] = $__args__[$constructorArgument['name']];
-                    } elseif ( isset( $__args__[$key] ) ) {
-                        $args[] = $__args__[$key];
-                    }
-                    break;
-            }*/
         }
         return sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
     }
