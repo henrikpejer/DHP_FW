@@ -87,32 +87,15 @@ class DI {
         $constructorArguments = Utils::classConstructorArguments($class);
         $classReflector       = new \ReflectionClass( $class );
         $args                 = array();
-        if ( $class == 'DHP_FW\\App' ) {
-
-        }
         foreach ($constructorArguments as $key => $constructorArgument) {
             # get a value, if possible...
-            try {
-                if ( !empty( $constructorArgument['class'] ) ) {
-                    $__class__ = $this->get($constructorArgument['class']);
-                    if ( !empty( $__class__ ) ) {
-                        $args[] = $__class__;
-                        continue;
-                    }
-                }
+            if ( !empty( $constructorArgument['class'] ) && ($__arg__ = $this->instantiateViaConstructor($constructorArgument['class'])) !== NULL) {
+                $args[] = $__arg__;
+                continue;
             }
-            catch (\Exception $e) {
-            }
-            try {
-                if ( !empty( $constructorArgument['name'] ) ) {
-                    $__name__ = $this->get($constructorArgument['name']);
-                    if ( !empty( $__name__ ) ) {
-                        $args[] = $__name__;
-                        continue;
-                    }
-                }
-            }
-            catch (\Exception $e) {
+            if ( !empty( $constructorArgument['name'] ) && ($__arg__ = $this->instantiateViaConstructor($constructorArgument['name'])) !== NULL) {
+                $args[] = $__arg__;
+                continue;
             }
             if ( isset( $__args__[$constructorArgument['name']] ) ) {
                 $args[] = $__args__[$constructorArgument['name']];
@@ -153,9 +136,19 @@ class DI {
                     break;
             }*/
         }
-        if ( $class == 'DHP_FW\\App' ) {
-            #var_dump($args);
-        }
         return sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
+    }
+
+    private function instantiateViaConstructor($constructor){
+        $return = NULL;
+        try {
+            $__name__ = $this->get($constructor);
+            if ( !empty( $__name__ ) ) {
+                $return = $__name__;
+            }
+        }
+        catch (\Exception $e) {
+        }
+        return $return;
     }
 }
