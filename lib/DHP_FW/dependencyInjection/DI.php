@@ -89,18 +89,18 @@ class DI {
         $args                 = array();
         foreach ($constructorArguments as $key => $constructorArgument) {
             # get a value, if possible...
-            if ( !empty( $constructorArgument['class'] ) && ($__arg__ = $this->instantiateViaConstructor($constructorArgument['class'])) !== NULL) {
-                $args[] = $__arg__;
-                continue;
-            }
-            elseif ( !empty( $constructorArgument['name'] ) && ($__arg__ = $this->instantiateViaConstructor($constructorArgument['name'])) !== NULL) {
-                $args[] = $__arg__;
-                continue;
-            }
-            elseif ( isset( $__args__[$constructorArgument['name']] ) ) {
-                $args[] = $__args__[$constructorArgument['name']];
-            } elseif ( isset( $__args__[$key] ) ) {
-                $args[] = $__args__[$key];
+            switch(TRUE){
+                case ( !empty( $constructorArgument['class'] ) && ($__arg__ = $this->instantiateViaConstructor($constructorArgument['class'])) !== NULL):
+                case ( !empty( $constructorArgument['name'] ) && ($__arg__ = $this->instantiateViaConstructor($constructorArgument['name'])) !== NULL):
+                    $args[] = $__arg__;
+                    continue;
+                    break;
+                case ( isset( $__args__[$constructorArgument['name']] ) ):
+                    $args[] = $__args__[$constructorArgument['name']];
+                    break;
+                case ( isset( $__args__[$key] ) ):
+                    $args[] = $__args__[$key];
+                    break;
             }
         }
         return sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
