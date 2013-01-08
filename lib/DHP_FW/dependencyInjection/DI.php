@@ -93,11 +93,11 @@ class DI {
                 $args[] = $__arg__;
                 continue;
             }
-            if ( !empty( $constructorArgument['name'] ) && ($__arg__ = $this->instantiateViaConstructor($constructorArgument['name'])) !== NULL) {
+            elseif ( !empty( $constructorArgument['name'] ) && ($__arg__ = $this->instantiateViaConstructor($constructorArgument['name'])) !== NULL) {
                 $args[] = $__arg__;
                 continue;
             }
-            if ( isset( $__args__[$constructorArgument['name']] ) ) {
+            elseif ( isset( $__args__[$constructorArgument['name']] ) ) {
                 $args[] = $__args__[$constructorArgument['name']];
             } elseif ( isset( $__args__[$key] ) ) {
                 $args[] = $__args__[$key];
