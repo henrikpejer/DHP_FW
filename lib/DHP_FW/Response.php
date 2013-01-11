@@ -129,10 +129,10 @@ class Response {
     private function sendHeaderData($headerData){
         switch(\php_sapi_name()){
             case 'cli':
-                $this->headerDataSent[] = $headerData;
                 break;
             default:
                 \header($headerData);
         }
+        $this->headerDataSent[] = $headerData;
     }
 }
