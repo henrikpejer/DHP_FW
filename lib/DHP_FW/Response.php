@@ -82,6 +82,7 @@ class Response {
           ->header('Content-Disposition', "attachment; filename=\"{$fileName}\"")
           ->header('Content-Transfer-Encoding', 'binary')
             ->status(200);
+        $this->sendHeaders();
         $this->dataSendStatus = self::DATASENDSTATUS_STARTED;
         readfile($filePath);
         $this->dataSendStatus = self::DATASENDSTATUS_COMPLETE;
@@ -98,10 +99,11 @@ class Response {
         if ( FALSE == $this->headersSent && \headers_sent() == FALSE ) {
             foreach ($this->headers as $header => $value) {
                 if ( !isset( $value ) ) {
-                    \header($header);
+                    $completeHeader = $header;
                 } else {
-                    \header(sprintf('%s: %s', $header, $value));
+                    $completeHeader = sprintf('%s: %s', $header, $value);
                 }
+                \header($completeHeader);
             }
         }
         $this->headersSent = TRUE;

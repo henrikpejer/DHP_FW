@@ -15,6 +15,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
      * This method is called before a test is executed.
      */
     protected function setUp(){
+        ob_start();
         $this->object = new Response;
     }
 
@@ -23,6 +24,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
      * This method is called after a test is executed.
      */
     protected function tearDown(){
+        header_remove();
     }
 
     /**
@@ -72,6 +74,18 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
         $fileToTest = file_get_contents(__FILE__);
         $this->expectOutputString($fileToTest);
         $this->object->sendFile(__FILE__);
+        if( is_callable('xdebug_get_headers')){
+            $headers_list = xdebug_get_headers();
+            $headers_list_test = array(
+              "Content-description: File Transfer",
+              "Content-type: text/x-c++",
+              "Content-disposition: attachment; filename=\"ResponseTest.php\"",
+              "Content-transfer-encoding: binary",
+              "Status: 200 OK"
+            );
+            \PHPUnit_Framework_Assert::assertEquals($headers_list_test,$headers_list);
+        }
+        
         \PHPUnit_Framework_Assert::assertAttributeEquals(
             Array
             (
