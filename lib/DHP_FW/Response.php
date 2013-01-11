@@ -21,7 +21,7 @@ class Response {
     );
     
     private $headerDataSent = array();
-
+    private $doNotSendHeaders = FALSE;
     public function send($data){
         switch (gettype($data)) {
             case 'object':
@@ -96,6 +96,10 @@ class Response {
         $this->header('Location', $url);
         $this->sendHeaders();
     }
+    
+    public function surpressHeaders(){
+        $this->doNotSendHeaders = TRUE;
+    }
 
     private function sendHeaders(){
         if ( FALSE == $this->headersSent && \headers_sent() == FALSE ) {
@@ -127,11 +131,8 @@ class Response {
      * @param $headerData : String
      */
     private function sendHeaderData($headerData){
-        switch(\php_sapi_name()){
-            case 'cli':
-                break;
-            default:
-                \header($headerData);
+        if( TRUE === $this->doNotSendHeaders){
+            \header($headerData);
         }
         $this->headerDataSent[] = $headerData;
     }

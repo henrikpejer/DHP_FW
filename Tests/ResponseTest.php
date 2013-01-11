@@ -17,6 +17,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
     protected function setUp(){
         ob_start();
         $this->object = new Response;
+        $this->object->surpressHeaders();
     }
 
     /**
