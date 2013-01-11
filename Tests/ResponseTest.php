@@ -74,17 +74,17 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
         $fileToTest = file_get_contents(__FILE__);
         $this->expectOutputString($fileToTest);
         $this->object->sendFile(__FILE__);
-        if( is_callable('xdebug_get_headers')){
-            $headers_list = xdebug_get_headers();
-            $headers_list_test = array(
-              "Content-description: File Transfer",
-              "Content-type: text/x-c++",
-              "Content-disposition: attachment; filename=\"ResponseTest.php\"",
-              "Content-transfer-encoding: binary",
-              "Status: 200 OK"
-            );
-            \PHPUnit_Framework_Assert::assertEquals($headers_list_test,$headers_list);
-        }
+        $headers_list_test = array(
+          "Content-description: File Transfer",
+          "Content-type: text/x-c++",
+          "Content-disposition: attachment; filename=\"ResponseTest.php\"",
+          "Content-transfer-encoding: binary",
+            "HTTP/1.1 200 OK",
+          "Status: 200 OK"
+        );
+        
+        
+        \PHPUnit_Framework_Assert::assertAttributeEquals($headers_list_test,'headerDataSent',$this->object);
         
         \PHPUnit_Framework_Assert::assertAttributeEquals(
             Array
