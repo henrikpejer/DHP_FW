@@ -47,9 +47,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
 
         $this->object->send('this worked');
         $this->object->send(123,$arrayData);
-        \PHPUnit_Framework_Assert::assertAttributeEquals(array('HTTP/1.1 200 OK'=>NULL,
-            'Status'=>'123',
-            'HTTP/1.1 123'=>NULL ),'headers',$this->object);
+        \PHPUnit_Framework_Assert::assertAttributeEquals(array('Status'=>'123'),'headers',$this->object);
         $this->object->send($arrayWithNamedKeys);
         $this->object->send($object);
         $this->object->send(fopen(__FILE__, 'r'));
@@ -65,9 +63,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
      */
     public function testStatus() {
         $this->object->status(200);
-        \PHPUnit_Framework_Assert::assertAttributeEquals(array(
-            'HTTP/1.1 200 OK' => NULL, 'Status' => '200 OK'
-        ), 'headers', $this->object);
+        \PHPUnit_Framework_Assert::assertAttributeEquals(array('Status' => '200 OK'), 'headers', $this->object);
     }
 
     /**
@@ -142,7 +138,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
      */
     public function testRedirect() {
         $this->object->redirect('/something/something');
-        \PHPUnit_Framework_Assert::assertAttributeEquals(array('HTTP/1.1 301 Moved Permanently' => NULL, 'Status' => '301 Moved Permanently', 'Location' => '/something/something'), 'headers', $this->object);
+        \PHPUnit_Framework_Assert::assertAttributeEquals(array('Status' => '301 Moved Permanently', 'Location' => '/something/something'), 'headers', $this->object);
     }
 }
  

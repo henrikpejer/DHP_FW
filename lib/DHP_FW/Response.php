@@ -61,10 +61,10 @@ class Response {
         if ( !isset( $httpMessage ) ) {
             $httpMessage = isset( $this->headerStatus[$httpNumber] ) ? $this->headerStatus[$httpNumber] : $httpMessage;
         }
-        $httpHeader   = trim(sprintf('HTTP/1.1 %d %s', $httpNumber, $httpMessage));
+        #$httpHeader   = trim(sprintf('HTTP/1.1 %d %s', $httpNumber, $httpMessage));
         $statusHeader = trim(sprintf('%d %s', $httpNumber, $httpMessage));
         $this
-          ->header($httpHeader, NULL, FALSE)
+          #->header($httpHeader, NULL, FALSE)
           ->header('Status', $statusHeader);
     }
 
@@ -105,6 +105,11 @@ class Response {
     private function sendHeaders(){
         if ( FALSE == $this->headersSent && \headers_sent() == FALSE ) {
             foreach ($this->headers as $header => $value) {
+                switch ($header) {
+                    case 'Status':
+                        $this->sendHeaderData("HTTP/1.1 {$value}");
+                        break;
+                }
                 if ( !isset( $value ) ) {
                     $completeHeader = $header;
                 } else {
