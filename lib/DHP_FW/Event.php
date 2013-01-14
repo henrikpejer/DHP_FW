@@ -159,12 +159,7 @@ class Event {
                 array_unshift($callArgs,$__eventName__);
                 call_user_func_array(array($this, 'trigger'), $callArgs);
             }
-
         }
         return $return;
-    }
-
-    public function getCallsForEvent($call){
-        return $this->events[$call];
     }
 }
