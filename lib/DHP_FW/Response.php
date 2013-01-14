@@ -1,6 +1,7 @@
 <?php
 declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
+use DHP_FW\Event;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-01 05:35
@@ -22,6 +23,11 @@ class Response {
     
     private $headerDataSent = array();
     private $supressHeader = FALSE;
+
+    public function __construct(Event $event){
+        $this->event = $event;
+    }
+
     public function send($dataOrStatus, $data = NULL){
         if( $data !== NULL ){
             $this->status($dataOrStatus);
@@ -29,6 +35,7 @@ class Response {
             $this->status(200);
             $data = $dataOrStatus;
         }
+        $this->event->trigger('DHP_FW.Response.send',$dataOrStatus,$data);
         switch (gettype($data)) {
             case 'object':
             case 'array':
@@ -53,6 +60,7 @@ class Response {
         if ( $processHeaderName ) {
             $name = str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower($name))));
         }
+        $this->event->trigger('DHP_FW.Response.header',$name,$value);
         $this->headers[$name] = $value;
         return $this;
     }
@@ -69,6 +77,7 @@ class Response {
     }
 
     public function sendFile($filePath, $mimeType = NULL, $fileName = NULL,$downLoadFile = FALSE){
+        $this->event->trigger('DHP_FW.Response.sendFile',$filePath,$mimeType,$fileName,$downLoadFile);
         $realPath = realpath($filePath);
         if ( FALSE === $realPath || FALSE === file_exists(realpath($realPath)) ) {
             throw new \Exception( "File does not exist" );
@@ -92,6 +101,7 @@ class Response {
     }
 
     public function redirect($url, $httpStatus = 301, $httpMessage = NULL){
+        $this->event->trigger('DHP_FW.Response.redirect',$url,$httpStatus,$httpMessage);
         $this->resetHeaders();
         $this->status($httpStatus, $httpMessage);
         $this->header('Location', $url);
@@ -137,6 +147,7 @@ class Response {
     }
 
     private function sendData(){
+        $this->event->trigger('DHP_FW.Response.sendData',$this->data);
         $this->dataSendStatus = self::DATASENDSTATUS_STARTED;
         echo $this->data;
         $this->dataSendStatus = self::DATASENDSTATUS_COMPLETE;

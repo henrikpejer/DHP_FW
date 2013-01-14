@@ -224,12 +224,13 @@ class EventTest extends \PHPUnit_Framework_TestCase {
     /**
      */
     public function testRegister() {
-        \PHPUnit_Framework_Assert::assertAttributeEmpty('events', $this->object);
+        \PHPUnit_Framework_Assert::assertAttributeEquals(array('*'=>array(),'__controller__'=>array()),'events', $this->object);
         $this->object->register('PHPUnit_test', function () {
             return TRUE;
         });
-        \PHPUnit_Framework_Assert::assertAttributeCount(1, 'events', $this->object);
+        \PHPUnit_Framework_Assert::assertAttributeCount(3, 'events', $this->object);
         $eventsShouldEqual = array(
+            '*'=>array(),'__controller__'=>array(),
             'PHPUnit_test' => array(function () {
                 return TRUE;
             })

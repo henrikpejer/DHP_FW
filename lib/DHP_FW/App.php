@@ -122,7 +122,11 @@ class App {
     }
 
     private function matchUriToRoute($routeUri){
-        return $routeUri == $this->request->getUri()?TRUE:FALSE;
+        static $uri = NULL;
+        if($uri === NULL){
+            $uri = trim($this->request->getUri(),'/');
+        }
+        return $routeUri == $uri?TRUE:FALSE;
     }
 
     private function registerRoute($httpMethod, $uri, callable $closure) {

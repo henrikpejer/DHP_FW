@@ -15,7 +15,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
      * This method is called before a test is executed.
      */
     protected function setUp() {
-        $this->object = new Response;
+        $this->object = new Response(new Event());
         # $this->object->supressHeaders();
     }
 
@@ -55,8 +55,11 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testHeader() {
-        $this->object->header('Henrik', 'Pejer');
-        \PHPUnit_Framework_Assert::assertAttributeEquals(array('Henrik' => 'Pejer'), 'headers', $this->object);
+        $this->object->header('Henrik', 'Pejer')->header('Something kind of usefull');
+        $this->object->supressHeaders(TRUE);
+        $this->object->send(200);
+        \PHPUnit_Framework_Assert::assertAttributeEquals(array('Henrik' => 'Pejer','Something-Kind-Of-Usefull'=> NULL,'Status'=>'200 OK'), 'headers', $this->object);
+        
     }
 
     /**

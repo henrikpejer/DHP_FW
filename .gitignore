@@ -2,3 +2,4 @@ build/
 .idea
 Tests/NotReadable.txt
 .DS_Store
+app
