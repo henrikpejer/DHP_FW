@@ -10,4 +10,12 @@ class Blog extends \DHP_FW\Controller{
     public function index(){
         echo "Blog controller running...";
     }
+
+    public function img(){
+        $this->response->sendFile(__DIR__.'/../img.jpg');
+    }
+
+    public function downloadImg(){
+        $this->response->downloadFile(__DIR__.'/../img.jpg');
+    }
 }

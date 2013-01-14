@@ -21,8 +21,14 @@ class Response {
     );
     
     private $headerDataSent = array();
-    private $doNotSendHeaders = FALSE;
-    public function send($data){
+    private $supressHeader = FALSE;
+    public function send($dataOrStatus, $data = NULL){
+        if( $data !== NULL ){
+            $this->status($dataOrStatus);
+        }else{
+            $this->status(200);
+            $data = $dataOrStatus;
+        }
         switch (gettype($data)) {
             case 'object':
             case 'array':
@@ -55,14 +61,14 @@ class Response {
         if ( !isset( $httpMessage ) ) {
             $httpMessage = isset( $this->headerStatus[$httpNumber] ) ? $this->headerStatus[$httpNumber] : $httpMessage;
         }
-        $httpHeader   = sprintf('HTTP/1.1 %d %s', $httpNumber, $httpMessage);
-        $statusHeader = sprintf('%d %s', $httpNumber, $httpMessage);
+        $httpHeader   = trim(sprintf('HTTP/1.1 %d %s', $httpNumber, $httpMessage));
+        $statusHeader = trim(sprintf('%d %s', $httpNumber, $httpMessage));
         $this
           ->header($httpHeader, NULL, FALSE)
           ->header('Status', $statusHeader);
     }
 
-    public function sendFile($filePath, $mimeType = NULL, $fileName = NULL){
+    public function sendFile($filePath, $mimeType = NULL, $fileName = NULL,$downLoadFile = FALSE){
         $realPath = realpath($filePath);
         if ( FALSE === $realPath || FALSE === file_exists(realpath($realPath)) ) {
             throw new \Exception( "File does not exist" );
@@ -78,16 +84,11 @@ class Response {
         if ( !isset( $fileName ) ) {
             $fileName = basename($realPath);
         }
-        $this
-          ->header('Content-Description', 'File Transfer')
-          ->header('Content-Type', $mimeType)
-          ->header('Content-Disposition', "attachment; filename=\"{$fileName}\"")
-          ->header('Content-Transfer-Encoding', 'binary')
-            ->status(200);
-        $this->sendHeaders();
-        $this->dataSendStatus = self::DATASENDSTATUS_STARTED;
-        readfile($filePath);
-        $this->dataSendStatus = self::DATASENDSTATUS_COMPLETE;
+        $this->sendFileData($realPath,$fileName,$mimeType,$downLoadFile);
+    }
+
+    public function downloadFile($filePath, $mimeType = NULL, $fileName = NULL){
+        $this->sendFile($filePath,$mimeType,$fileName,TRUE);
     }
 
     public function redirect($url, $httpStatus = 301, $httpMessage = NULL){
@@ -97,8 +98,8 @@ class Response {
         $this->sendHeaders();
     }
     
-    public function surpressHeaders(){
-        $this->doNotSendHeaders = TRUE;
+    public function supressHeaders($doSurpress = TRUE){
+        $this->supressHeader = $doSurpress === TRUE?TRUE:FALSE;
     }
 
     private function sendHeaders(){
@@ -115,6 +116,21 @@ class Response {
         $this->headersSent = TRUE;
     }
 
+    private function sendFileData($filePath,$fileName,$mimeType,$downloadHeaders = FALSE){
+        $this->resetHeaders()
+          ->header('Content-Type', $mimeType)
+          ->header('Content-Transfer-Encoding', 'binary')
+          ->status(200);
+        if($downloadHeaders == TRUE){
+            $this->header('Content-Description', 'File Transfer')->header('Content-Disposition', "attachment; filename=\"{$fileName}\"");
+        }
+        $this->sendHeaders();
+        $this->dataSendStatus = self::DATASENDSTATUS_STARTED;
+        readfile($filePath);
+        $this->dataSendStatus = self::DATASENDSTATUS_COMPLETE;
+
+    }
+
     private function sendData(){
         $this->dataSendStatus = self::DATASENDSTATUS_STARTED;
         echo $this->data;
@@ -123,6 +139,7 @@ class Response {
 
     private function resetHeaders(){
         $this->headers = array();
+        return $this;
     }
 
     /**
@@ -131,7 +148,7 @@ class Response {
      * @param $headerData : String
      */
     private function sendHeaderData($headerData){
-        if( TRUE === $this->doNotSendHeaders){
+        if( FALSE === $this->supressHeader){
             \header($headerData);
         }
         $this->headerDataSent[] = $headerData;

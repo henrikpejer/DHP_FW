@@ -17,9 +17,19 @@ $app->get('testing/hesting/flecking',function(){
 $app->get('blog',function(){
    return array('controller'=>'Blog','method'=>'index');
 });
+
+
+$app->get('blog/img',function(){
+   return array('controller'=>'Blog','method'=>'img');
+});
+
+
+$app->get('blog/downloadimg',function(){
+   return array('controller'=>'Blog','method'=>'downloadImg');
+});
 $app->start();
-register_shutdown_function(function(){
+/*register_shutdown_function(function(){
     echo "\n\n";
     printf('time: %.4F s, memory: %.4F MB',(microtime(TRUE) - DHP_FW_BENCHMARK_TIMESTART),(((memory_get_peak_usage(TRUE) - DHP_FW_BENCHMARK_MEMORYSTART)/1024)/1024));
     echo "\n";
-});
+});*/

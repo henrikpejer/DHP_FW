@@ -1,4 +1,4 @@
-<phpunit verbose="true" strict="true" bootstrap="test_bootstrap.php" printer="QuietPHPUnit_ResultPrinter">
+<phpunit verbose="true" strict="true" bootstrap="test_bootstrap.php">
     <testsuites>
         <testsuite name="Complete tests">
             <directory suffix="Test.php">./Tests</directory>

@@ -99,7 +99,8 @@ class DI {
                     break;
                 case isset( $__args__[$key] ):
                     $args[] = $__args__[$key];
-                    break;
+                break;
+                default:
             }
         }
         return sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);

@@ -14,97 +14,104 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
-    protected function setUp(){
-        ob_start();
+    protected function setUp() {
         $this->object = new Response;
-        $this->object->surpressHeaders();
+        # $this->object->supressHeaders();
     }
 
     /**
      * Tears down the fixture, for example, closes a network connection.
      * This method is called after a test is executed.
      */
-    protected function tearDown(){
-        header_remove();
+    protected function tearDown() {
     }
 
     /**
      */
-    public function testSend(){
-        $output = 'this worked';
-        $arrayData = array(1,2,3);
-        $output .= json_encode($arrayData,\JSON_FORCE_OBJECT | \JSON_NUMERIC_CHECK);
-        
-        
+    public function testSend() {
+        $output    = 'this worked';
+        $arrayData = array(1, 2, 3);
+        $output .= json_encode($arrayData, \JSON_FORCE_OBJECT | \JSON_NUMERIC_CHECK);
+
+
         $arrayWithNamedKeys = array(
             'Henrik' => 'Pejer',
-            'Age' => '32',
+            'Age'    => '32',
         );
-        $output .= json_encode($arrayWithNamedKeys,\JSON_FORCE_OBJECT | \JSON_NUMERIC_CHECK);
-        $object = new \stdClass();
+        $output .= json_encode($arrayWithNamedKeys, \JSON_FORCE_OBJECT | \JSON_NUMERIC_CHECK);
+        $object            = new \stdClass();
         $object->something = 'something';
-        $output .= json_encode($object,\JSON_FORCE_OBJECT | \JSON_NUMERIC_CHECK);
-        
+        $output .= json_encode($object, \JSON_FORCE_OBJECT | \JSON_NUMERIC_CHECK);
+
         $this->expectOutputString($output);
 
-        $this->object->send('this worked'); 
-        $this->object->send($arrayData);
+        $this->object->send('this worked');
+        $this->object->send(123,$arrayData);
+        \PHPUnit_Framework_Assert::assertAttributeEquals(array('HTTP/1.1 200 OK'=>NULL,
+            'Status'=>'123',
+            'HTTP/1.1 123'=>NULL ),'headers',$this->object);
         $this->object->send($arrayWithNamedKeys);
         $this->object->send($object);
-        $this->object->send(fopen(__FILE__,'r'));
-        
+        $this->object->send(fopen(__FILE__, 'r'));
+
     }
 
-    public function testHeader(){
+    public function testHeader() {
         $this->object->header('Henrik', 'Pejer');
         \PHPUnit_Framework_Assert::assertAttributeEquals(array('Henrik' => 'Pejer'), 'headers', $this->object);
     }
 
     /**
      */
-    public function testStatus(){
+    public function testStatus() {
         $this->object->status(200);
         \PHPUnit_Framework_Assert::assertAttributeEquals(array(
-                                                              'HTTP/1.1 200 OK' => NULL, 'Status' => '200 OK'
-                                                         ), 'headers', $this->object);
+            'HTTP/1.1 200 OK' => NULL, 'Status' => '200 OK'
+        ), 'headers', $this->object);
     }
 
     /**
      */
-    public function testSendFile(){
+    public function testSendFile() {
+        $fileToTest = file_get_contents(__FILE__);
+        $this->expectOutputString($fileToTest . $fileToTest);
+        $this->object->sendFile(__FILE__, 'text/x-c++', 'downloadFileName.php');
+        $headers_list_test = array(
+            #"Content-description: File Transfer",
+            "Content-type: text/x-c++",
+            #"Content-disposition: attachment; filename=\"downloadFileName.php\"",
+            "Content-transfer-encoding: binary",
+            "HTTP/1.1 200 OK",
+            "Status: 200 OK"
+        );
+        \PHPUnit_Framework_Assert::assertAttributeEquals($headers_list_test, 'headerDataSent', $this->object);
+        $this->object->sendFile(__FILE__);
+        \PHPUnit_Framework_Assert::assertAttributeEquals($headers_list_test, 'headerDataSent', $this->object);
+    }
+
+    /**
+     */
+    public function testDownloadFile() {
         $fileToTest = file_get_contents(__FILE__);
         $this->expectOutputString($fileToTest);
-        $this->object->sendFile(__FILE__);
+        $this->object->downloadFile(__FILE__, 'text/x-c++', 'downloadFileName.php');
         $headers_list_test = array(
-          "Content-description: File Transfer",
-          "Content-type: text/x-c++",
-          "Content-disposition: attachment; filename=\"ResponseTest.php\"",
-          "Content-transfer-encoding: binary",
+            "Content-type: text/x-c++",
+            "Content-transfer-encoding: binary",
             "HTTP/1.1 200 OK",
-          "Status: 200 OK"
+            "Status: 200 OK",
+            "Content-description: File Transfer",
+          "Content-disposition: attachment; filename=\"downloadFileName.php\""
+
         );
-        
-        
-        \PHPUnit_Framework_Assert::assertAttributeEquals($headers_list_test,'headerDataSent',$this->object);
-        
-        \PHPUnit_Framework_Assert::assertAttributeEquals(
-            Array
-            (
-                'Content-description' => 'File Transfer',
-                'Content-type' => 'text/x-c++',
-                'Content-disposition' => 'attachment; filename="ResponseTest.php"',
-                'Content-transfer-encoding' => 'binary',
-                'HTTP/1.1 200 OK' => NULL,
-                'Status' => '200 OK'
-            ),
-            'headers', $this->object);
+        \PHPUnit_Framework_Assert::assertAttributeEquals($headers_list_test, 'headerDataSent', $this->object);
     }
 
     /**
      * @expectedException \Exception
      * @expectedExceptionMessage File does not exist
      */
-    public function testSendFileWithNoneExistingFile(){
+    public function testSendFileWithNoneExistingFile() {
         $this->object->sendFile('/File/Does/Not/Exist');
     }
 
@@ -112,15 +119,30 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
      * @expectedException \Exception
      * @expectedExceptionMessage Unable to read file
      */
-    public function testSendFileWithNotReadable(){
-        $file = __DIR__.'/NotReadable.txt';
-        $this->object->sendFile(__DIR__.'/NotReadable.txt');
+    public function testSendFileWithNotReadable() {
+        $fileToTest = __DIR__.'/NotReadable.txt';
+        touch($fileToTest);
+        chmod($fileToTest,0155);
+        $this->object->sendFile(__DIR__ . '/NotReadable.txt');
+        chmod($fileToTest,0755);
+        unlink($fileToTest);
+    }
+
+    public function testSurpressHeaders() {
+        $this->object->supressHeaders();
+        if (is_callable('xdebug_headers_list')) {
+            \PHPUnit_Framework_Assert::assertEquals(array(), xdebug_headers_list());
+        }
+        else {
+            \PHPUnit_Framework_Assert::assertAttributeEquals(TRUE, 'supressHeader', $this->object);
+        }
     }
 
     /**
      */
-    public function testRedirect(){
+    public function testRedirect() {
         $this->object->redirect('/something/something');
         \PHPUnit_Framework_Assert::assertAttributeEquals(array('HTTP/1.1 301 Moved Permanently' => NULL, 'Status' => '301 Moved Permanently', 'Location' => '/something/something'), 'headers', $this->object);
     }
 }
+ 

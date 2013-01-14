@@ -54,6 +54,7 @@ class DITest extends \PHPUnit_Framework_TestCase {
     }
 
     /**
+     * @covers DHP_FW\dependencyInjection\DI::instantiateObject
      */
     public function testInstantiateObject(){
         $this->object->addClass('DHP_FW\\App');
