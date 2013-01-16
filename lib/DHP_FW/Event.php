@@ -87,7 +87,7 @@ class Event {
         $eventsToReturn = array();
         foreach ($eventKeys as $event) {
             if ( isset( $this->events[$event] ) ) {
-                $eventsToReturn = array_merge($this->events[$event], $eventsToReturn);
+                $eventsToReturn = array_merge($eventsToReturn,$this->events[$event]);
             }
         }
         return $eventsToReturn;

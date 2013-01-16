@@ -239,15 +239,18 @@ class EventTest extends \PHPUnit_Framework_TestCase {
     }
     
     public function testWildcardEvents(){
-        $this->expectOutputString('yesyes');
+        $this->expectOutputString('first middle last');
         $this->object->register('phpunit*',function(){
-            echo 'yes';
+            echo 'first';
         });
         $this->object->register('phpunit.*',function(){
-            echo 'yes';
+            echo ' middle';
         });
         $this->object->register('phpunits',function(){
             echo 'no';
+        });
+        $this->object->register('__controller__',function(){
+            echo ' last';
         });
         $t = '';
         $this->object->trigger('phpunit.test',$t);
