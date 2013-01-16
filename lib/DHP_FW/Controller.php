@@ -20,6 +20,6 @@ class Controller {
         $this->event->register('__controller__', array($this, '__eventCatchall'));
     }
 
-    public function __eventCatchall($eventName, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL, &$five = NULL, &$six = NULL, &$seven = NULL) {
+    public function __eventCatchall() {
     }
 }
