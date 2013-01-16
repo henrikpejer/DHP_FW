@@ -237,4 +237,19 @@ class EventTest extends \PHPUnit_Framework_TestCase {
         );
         \PHPUnit_Framework_Assert::assertAttributeEquals($eventsShouldEqual, 'events', $this->object);
     }
+    
+    public function testWildcardEvents(){
+        $this->expectOutputString('yesyes');
+        $this->object->register('phpunit*',function(){
+            echo 'yes';
+        });
+        $this->object->register('phpunit.*',function(){
+            echo 'yes';
+        });
+        $this->object->register('phpunits',function(){
+            echo 'no';
+        });
+        $t = '';
+        $this->object->trigger('phpunit.test',$t);
+    }
 }

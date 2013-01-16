@@ -1,5 +1,5 @@
 <?php
-declare(encoding = "UTF8") ;
+declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
@@ -15,13 +15,12 @@ const EVENT_ABORT = '32e4f1d38810d19529b4d0054eab52bd';
  */
 class Event {
 
-    protected $events = array('*' => array(),'__controller__'=>array());
+    protected $events = array('*' => array(), '__controller__' => array());
 
-    public function __construct() {
+    public function __construct(){
     }
 
-
-    public function trigger($eventName, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL, &$five = NULL, &$six = NULL, &$seven = NULL) {
+    public function trigger($eventName, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL, &$five = NULL, &$six = NULL, &$seven = NULL){
         $args       = func_get_args();
         $__return__ = NULL;
         switch (sizeof($args)) {
@@ -53,112 +52,140 @@ class Event {
         return $__return__;
     }
 
-    public function register($eventName, $callable) {
-        if (!is_callable($callable)) {
+    public function register($eventName, $callable){
+        if ( !is_callable($callable) ) {
             return FALSE;
         }
-        if (!isset($this->events[$eventName])) {
+        if ( !isset( $this->events[$eventName] ) ) {
             $this->events[$eventName] = array();
         }
         $this->events[$eventName][] = $callable;
         return TRUE;
     }
 
-    private function call($eventName, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL, &$five = NULL, &$six = NULL, &$seven = NULL) {
-        $return  = NULL;
-        $numArgs = (func_num_args() - 1);
+    /**
+     * This function will get events that match the current
+     * event as well as events with wildcard, *.
+     *
+     *
+     *
+     * @param $eventName : name of event to be called
+     */
+    private function mergeEventToCall($eventName){
+        $eventKeys = array($eventName);
+        if ( strpos($eventName, '.') ) {
+            $eventParts = explode('.', $eventName);
+            $eventBase  = '';
+            foreach ($eventParts as $part) {
+                $eventBase .= $part;
+                $eventKeys[] = $eventBase . '*';
+                $eventKeys[] = $eventBase . '.*';
+            }
+        }
+        $eventKeys[]    = '*';
+        $eventKeys[]    = '__controller__';
+        $eventsToReturn = array();
+        foreach ($eventKeys as $event) {
+            if ( isset( $this->events[$event] ) ) {
+                $eventsToReturn = array_merge($this->events[$event], $eventsToReturn);
+            }
+        }
+        return $eventsToReturn;
+    }
+
+    private function call($eventName, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL, &$five = NULL, &$six = NULL, &$seven = NULL){
+        $return   = NULL;
+        $numArgs  = ( func_num_args() - 1 );
         $callArgs = NULL;
-        if (isset($this->events[$eventName])) {
-            # walk through the callables
-            foreach ( array_merge($this->events[$eventName],$this->events['*']) as $event) {
-                $__return__ = NULL;
-                switch ($numArgs) {
-                    case 0:
-                        if(!isset($callArgs)){$callArgs = array();}
-                        if (is_array($event)) {
-                            $__return__ = call_user_func($event);
-                        }
-                        else {
-                            $__return__ = $event();
-                        }
-                        break;
-                    case 1:
-                        if(!isset($callArgs)){$callArgs = array(&$one);}
-                        if (is_array($event)) {
-                            $__return__ = call_user_func_array($event, $callArgs);
-                        }
-                        else {
-                            $__return__ = $event($one);
-                        }
-                        break;
-                    case 2:
-                        if(!isset($callArgs)){$callArgs = array(&$one, &$two);}
-                        if (is_array($event)) {
-                            $__return__ = call_user_func_array($event,$callArgs);
-                        }
-                        else {
-                            $__return__ = $event($one, $two);
-                        }
-                        break;
-                    case 3:
-                        if(!isset($callArgs)){$callArgs = array(&$one, &$two, &$three);}
-                        if (is_array($event)) {
-                            $__return__ = call_user_func_array($event, $callArgs);
-                        }
-                        else {
-                            $__return__ = $event($one, $two, $three);
-                        }
-                        break;
-                    case 4:
-                        if(!isset($callArgs)){$callArgs = array(&$one, &$two, &$three, &$four);}
-                        if (is_array($event)) {
-                            $__return__ = call_user_func_array($event, $callArgs);
-                        }
-                        else {
-                            $__return__ = $event($one, $two, $three, $four);
-                        }
-                        break;
-                    case 5:
-                        if(!isset($callArgs)){$callArgs = array(&$one, &$two, &$three, &$four,&$five);}
-                        if (is_array($event)) {
-                            $__return__ = call_user_func_array($event, $callArgs);
-                        }
-                        else {
-                            $__return__ = $event($one, $two, $three, $four, $five);
-                        }
-                        break;
-                    case 6:
-                        if(!isset($callArgs)){$callArgs = array(&$one, &$two, &$three, &$four,&$five,&$six);}
-                        if (is_array($event)) {
-                            $__return__ =
-                                    call_user_func_array($event, $callArgs);
-                        }
-                        else {
-                            $__return__ = $event($one, $two, $three, $four, $five, $six);
-                        }
-                        break;
-                    case 7:
-                        if(!isset($callArgs)){$callArgs = array(&$one, &$two, &$three, &$four,&$five,&$six, &$seven);}
-                        if (is_array($event)) {
-                            $__return__ =
-                                    call_user_func_array($event, $callArgs);
-                        }
-                        else {
-                            $__return__ = $event($one, $two, $three, $four, $five, $six, $seven);
-                        }
-                        break;
-                }
-                if ($__return__ === EVENT_ABORT) {
+
+        foreach ($this->mergeEventToCall($eventName) as $event) {
+            $__return__ = NULL;
+            switch ($numArgs) {
+                case 0:
+                    if ( !isset( $callArgs ) ) {
+                        $callArgs = array();
+                    }
+                    if ( is_array($event) ) {
+                        $__return__ = call_user_func($event);
+                    } else {
+                        $__return__ = $event();
+                    }
                     break;
-                }
-                $return = $__return__;
+                case 1:
+                    if ( !isset( $callArgs ) ) {
+                        $callArgs = array(&$one);
+                    }
+                    if ( is_array($event) ) {
+                        $__return__ = call_user_func_array($event, $callArgs);
+                    } else {
+                        $__return__ = $event($one);
+                    }
+                    break;
+                case 2:
+                    if ( !isset( $callArgs ) ) {
+                        $callArgs = array(&$one, &$two);
+                    }
+                    if ( is_array($event) ) {
+                        $__return__ = call_user_func_array($event, $callArgs);
+                    } else {
+                        $__return__ = $event($one, $two);
+                    }
+                    break;
+                case 3:
+                    if ( !isset( $callArgs ) ) {
+                        $callArgs = array(&$one, &$two, &$three);
+                    }
+                    if ( is_array($event) ) {
+                        $__return__ = call_user_func_array($event, $callArgs);
+                    } else {
+                        $__return__ = $event($one, $two, $three);
+                    }
+                    break;
+                case 4:
+                    if ( !isset( $callArgs ) ) {
+                        $callArgs = array(&$one, &$two, &$three, &$four);
+                    }
+                    if ( is_array($event) ) {
+                        $__return__ = call_user_func_array($event, $callArgs);
+                    } else {
+                        $__return__ = $event($one, $two, $three, $four);
+                    }
+                    break;
+                case 5:
+                    if ( !isset( $callArgs ) ) {
+                        $callArgs = array(&$one, &$two, &$three, &$four, &$five);
+                    }
+                    if ( is_array($event) ) {
+                        $__return__ = call_user_func_array($event, $callArgs);
+                    } else {
+                        $__return__ = $event($one, $two, $three, $four, $five);
+                    }
+                    break;
+                case 6:
+                    if ( !isset( $callArgs ) ) {
+                        $callArgs = array(&$one, &$two, &$three, &$four, &$five, &$six);
+                    }
+                    if ( is_array($event) ) {
+                        $__return__ = call_user_func_array($event, $callArgs);
+                    } else {
+                        $__return__ = $event($one, $two, $three, $four, $five, $six);
+                    }
+                    break;
+                case 7:
+                    if ( !isset( $callArgs ) ) {
+                        $callArgs = array(&$one, &$two, &$three, &$four, &$five, &$six, &$seven);
+                    }
+                    if ( is_array($event) ) {
+                        $__return__ = call_user_func_array($event, $callArgs);
+                    } else {
+                        $__return__ = $event($one, $two, $three, $four, $five, $six, $seven);
+                    }
+                    break;
             }
-            ## here controller events calling, right?
-            if ($eventName !== '__controller__') {
-                $__eventName__ = '__controller__';
-                array_unshift($callArgs,$__eventName__);
-                call_user_func_array(array($this, 'trigger'), $callArgs);
+            if ( $__return__ === EVENT_ABORT ) {
+                break;
             }
+            $return = $__return__;
         }
         return $return;
     }
