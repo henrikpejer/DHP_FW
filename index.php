@@ -14,7 +14,7 @@ $app->get('testing/hesting/flecking',function(){
     echo "Fake controller run!\n";
 });
 
-$app->get('blog',function(){
+$app->any('blog',function(){
    return array('controller'=>'Blog','method'=>'index');
 });
 
@@ -32,6 +32,5 @@ $di->get('event')->register('DHP_FW.Response.send',function($status,&$data){
     $data .= sprintf('time: %.4F s, memory: %.4F MB',(microtime(TRUE) - DHP_FW_BENCHMARK_TIMESTART),(((memory_get_peak_usage(TRUE) - DHP_FW_BENCHMARK_MEMORYSTART)/1024)/1024));
     $data .= "\n";
 });
-
 
 $app->start();

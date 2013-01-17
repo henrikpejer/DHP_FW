@@ -15,7 +15,9 @@ class AppTest extends \PHPUnit_Framework_TestCase {
      * This method is called before a test is executed.
      */
     protected function setUp() {
-        $this->object = new App(new Request('GET','/'), new dependencyInjection\DI(new Event()));
+        $this->request = new Request('GET','/');
+        $this->DI = new dependencyInjection\DI(new Event());
+        $this->object = new App($this->request, $this->DI);
     }
 
     /**
@@ -104,12 +106,17 @@ class AppTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testAll() {
-        $this->object->any('/test', function () {
+        $this->request->setMethod(App::HTTP_METHOD_GET);
+        $this->request->setUri('/test');
+        $this->object = new App($this->request, $this->DI);
+        
+        $this->object->any('test', function () {
             return TRUE;
         });
         $routes = $this->object->routes();
         \PHPUnit_Framework_Assert::assertArrayHasKey(App::HTTP_METHOD_ANY, $routes);
-        \PHPUnit_Framework_Assert::assertArrayHasKey('/test', $routes[App::HTTP_METHOD_ANY]);
+        \PHPUnit_Framework_Assert::assertArrayHasKey('test', $routes[App::HTTP_METHOD_ANY]);        
+        \PHPUnit_Framework_Assert::assertTrue($this->object->start());
     }
 
     public function testRoutes() {

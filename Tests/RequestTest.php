@@ -16,7 +16,9 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
      */
     protected function setUp() {
         $_SERVER['HTTP_HOST'] = 'phpunittests.com';
-        $this->object = new Request;
+        $_GET                 = array('someGet' => 'someGetValue', 'some' => 'get value');
+        $_POST                = array('somePost' => 'somePostValue', 'some' => 'post value');
+        $this->object         = new Request;
     }
 
     /**
@@ -29,29 +31,26 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
     public function testGenerateMethods() {
         $_SERVER['REQUEST_METHOD'] = 'HEAD';
         $_SERVER['REQUEST_URI']    = '/headcheck';
-        $o = new Request();
-        \PHPUnit_Framework_Assert::assertEquals('headcheck',$o->getUri());
-        \PHPUnit_Framework_Assert::assertEquals('HEAD',$o->getMethod());
+        $o                         = new Request();
+        \PHPUnit_Framework_Assert::assertEquals('headcheck', $o->getUri());
+        \PHPUnit_Framework_Assert::assertEquals('HEAD', $o->getMethod());
         unset($_SERVER['REQUEST_METHOD']);
         unset($_SERVER['REQUEST_URI']);
     }
 
-    public function testHeaders(){
-        \PHPUnit_Framework_Assert::assertEquals(array('Host'=>'phpunittests.com'),$this->object->getHeaders());
-        \PHPUnit_Framework_Assert::assertEquals('phpunittests.com',$this->object->header('Host'));
+    public function testHeaders() {
+        \PHPUnit_Framework_Assert::assertEquals(array('Host' => 'phpunittests.com'), $this->object->getHeaders());
+        \PHPUnit_Framework_Assert::assertEquals('phpunittests.com', $this->object->header('Host'));
     }
 
 
-
     /**
-     * @todo   Implement testGetMethod().
      */
     public function testGetMethod() {
         \PHPUnit_Framework_Assert::assertEquals('GET', $this->object->getMethod());
     }
 
     /**
-     * @todo   Implement testSetMethod().
      */
     public function testSetMethod() {
         $this->object->setMethod('POST');
@@ -59,20 +58,20 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
 
     }
 
-    /**
-     * @covers DHP_FW\Request::setUri
-     * @todo   Implement testSetUri().
-     */
+
     public function testSetUri() {
         $this->object->setUri('/working');
         \PHPUnit_Framework_Assert::assertEquals('/working', $this->object->getUri());
     }
 
-    /**
-     * @covers DHP_FW\Request::getUri
-     * @todo   Implement testGetUri().
-     */
+
     public function testGetUri() {
         \PHPUnit_Framework_Assert::assertEquals('', $this->object->getUri());
+    }
+
+    public function testQuery() {
+        \PHPUnit_Framework_Assert::assertEquals('someGetValue', $this->object->query->someGet);
+        \PHPUnit_Framework_Assert::assertEquals('somePostValue', $this->object->param->somePost);
+        \PHPUnit_Framework_Assert::assertEquals('post value', $this->object->params->some);
     }
 }

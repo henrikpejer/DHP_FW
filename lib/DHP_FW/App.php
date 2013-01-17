@@ -91,10 +91,8 @@ class App {
     }
 
     public function start(){
-        if(!isset($this->routes[$this->request->getMethod()])){
-            return NULL;
-        }
-        foreach($this->routes[$this->request->getMethod()] as $uri => $closure){
+        $routesToProcess = isset($this->routes[$this->request->getMethod()])?array_merge($this->routes[self::HTTP_METHOD_ANY],$this->routes[$this->request->getMethod()]):$this->routes[self::HTTP_METHOD_ANY];
+        foreach($routesToProcess as $uri => $closure){
             if( TRUE == $this->matchUriToRoute($uri)){
                 $closureResult = $closure();
                 switch(TRUE){
@@ -108,6 +106,7 @@ class App {
                 }
             }
         }
+        return NULL;
     }
 
 
@@ -122,11 +121,7 @@ class App {
     }
 
     private function matchUriToRoute($routeUri){
-        static $uri = NULL;
-        if($uri === NULL){
-            $uri = trim($this->request->getUri(),'/');
-        }
-        return $routeUri == $uri?TRUE:FALSE;
+        return $routeUri == trim($this->request->getUri(),'/')?TRUE:FALSE;
     }
 
     private function registerRoute($httpMethod, $uri, callable $closure) {
