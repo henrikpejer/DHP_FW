@@ -16,9 +16,12 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
      */
     protected function setUp() {
         $_SERVER['HTTP_HOST'] = 'phpunittests.com';
+        $_SERVER['HTTP_CONTENT_TYPE'] = 'Application/json: encoding=utf8';
         $_GET                 = array('someGet' => 'someGetValue', 'some' => 'get value');
         $_POST                = array('somePost' => 'somePostValue', 'some' => 'post value');
-        $this->object         = new Request;
+
+
+        $this->object         = new Request(NULL,NULL,'{"something":"else"}');
     }
 
     /**
@@ -39,7 +42,7 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testHeaders() {
-        \PHPUnit_Framework_Assert::assertEquals(array('Host' => 'phpunittests.com'), $this->object->getHeaders());
+        \PHPUnit_Framework_Assert::assertEquals(array('Host' => 'phpunittests.com','Content-Type'=>'Application/json: encoding=utf8'), $this->object->getHeaders());
         \PHPUnit_Framework_Assert::assertEquals('phpunittests.com', $this->object->header('Host'));
     }
 
@@ -69,9 +72,13 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
         \PHPUnit_Framework_Assert::assertEquals('', $this->object->getUri());
     }
 
-    public function testQuery() {
+    public function testInputParameters() {
         \PHPUnit_Framework_Assert::assertEquals('someGetValue', $this->object->query->someGet);
         \PHPUnit_Framework_Assert::assertEquals('somePostValue', $this->object->param->somePost);
         \PHPUnit_Framework_Assert::assertEquals('post value', $this->object->params->some);
+    }
+
+    public function testBodyData(){
+        \PHPUnit_Framework_Assert::assertEquals((object) array('something'=>'else'),$this->object->body);
     }
 }

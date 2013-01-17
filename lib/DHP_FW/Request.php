@@ -12,11 +12,13 @@ class Request {
     private $uri = NULL;
     private $method = NULL;
     private $headers = NULL;
+    private $_body = NULL;
     public $query, $param, $params, $body, $files = NULL;
 
-    public function __construct($method = NULL, $uri = NULL) {
+    public function __construct($method = NULL, $uri = NULL, $body = NULL) {
         $this->method = $method === NULL ? $this->generateMethod() : $method;
         $this->uri    = $uri === NULL ? $this->generateUri() : ltrim($uri, '/');
+        $this->_body = $body;
         $this->parseRequestHeaders();
         $this->parseInputData();
     }
@@ -49,10 +51,27 @@ class Request {
         $this->query  = new ParameterBagReadOnly($_GET);
         $this->param  = new ParameterBagReadOnly($_POST);
         $this->files  = new ParameterBagReadOnly($_FILES);
-        $this->body   = file_get_contents('php://input');
-        $this->params = new ParameterBagReadOnly(array_merge(
-            $_GET,
-            $_POST));
+        $this->params = new ParameterBagReadOnly(array_merge($_GET,$_POST));
+        $this->parseBodyData();
+    }
+
+    protected function parseBodyData(){
+        if(!isset($this->_body)){
+            $this->_body = file_get_contents('php://input');
+        }
+        $__body__ = NULL;
+        switch(TRUE){
+            case $this->header('Content-Type') !== NULL:
+                if(strpos($this->header('Content-Type'),'json') !== FALSE){
+                    # most likely, it IS json
+                    $__body__ = json_decode($this->_body);
+                }
+                break;
+            default:
+                $__body__ = NULL;
+                break;
+        }
+        $this->body = $__body__;
     }
 
     protected function generateMethod() {
