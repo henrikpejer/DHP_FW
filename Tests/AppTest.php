@@ -158,4 +158,20 @@ class AppTest extends \PHPUnit_Framework_TestCase {
 
         ,'customParamTypes',$this->object);
     }
+    
+    public function testControllerWithParams(){
+        $app = new App(new Request('GET','/blog/this-is-the-title'), $this->DI);
+        $app->get('blog/:title',function($title){
+            return $title;
+        });
+        \PHPUnit_Framework_Assert::assertEquals('this-is-the-title',$app->start());
+        
+        $app = new App(new Request('GET','/blog/this-is-the-title'), $this->DI);
+        eval('namespace app\\Controllers; class blogcontroller extends \\DHP_FW\\controller{function blogpage($title){return $title;}}');
+        
+        $app->get('/blog/:title',function(){
+            return array('controller'=>'blogcontroller','method'=>'blogpage');
+        });
+        \PHPUnit_Framework_Assert::assertEquals('this-is-the-title',$app->start());
+    }
 }

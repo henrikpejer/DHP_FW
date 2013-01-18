@@ -92,13 +92,24 @@ class App {
 
     public function start(){
         $routesToProcess = isset($this->routes[$this->request->getMethod()])?array_merge($this->routes[self::HTTP_METHOD_ANY],$this->routes[$this->request->getMethod()]):$this->routes[self::HTTP_METHOD_ANY];
+        $uriToMatch = trim($this->request->getUri(),'/');
         foreach($routesToProcess as $uri => $closure){
-            if( TRUE == $this->matchUriToRoute($uri)){
-                $closureResult = $closure();
+            if( FALSE !== ($routeMatchReturn = $this->matchUriToRoute($uriToMatch, $uri))){
+                if( is_array($routeMatchReturn)){
+                    $closureResult = call_user_func_array($closure,$routeMatchReturn);
+                }else{
+                    $closureResult = $closure();    
+                }
+                
                 switch(TRUE){
                     case is_array($closureResult) && isset($closureResult['controller']) && isset($closureResult['method']):
                         $controller = $this->loadController($closureResult);
-                        return $controller->$closureResult['method']();
+                        # todo: handle params in url and send them to controller
+                        if( is_array($routeMatchReturn)){
+                            return call_user_func_array(array($controller,$closureResult['method']),$routeMatchReturn);    
+                        }else{
+                            return $controller->$closureResult['method']();
+                        }
                         break;
                     default:
                         return $closureResult;
@@ -120,8 +131,43 @@ class App {
         return $this->DI->instantiateObject('\\app\\controllers\\'.$controllerToLoad['controller']);
     }
 
-    private function matchUriToRoute($routeUri){
-        return $routeUri == trim($this->request->getUri(),'/')?TRUE:FALSE;
+    # todo: handle params in url
+    private function matchUriToRoute($__uri__,$routeUri){
+        $__haveParams__ = strpos($routeUri,':');
+        if($__haveParams__ === FALSE && $routeUri == $__uri__){
+            return TRUE;
+        }
+        if( TRUE == $__haveParams__ ){
+            return $this->parseUriForParameters($__uri__,$routeUri);
+        }
+        return FALSE;
+    }
+    
+    /*
+     * This will parse a route, looking like this,
+     * blog/:title
+     * 
+     * into
+     * 
+     * array('title'=>'value_in_url')
+     */
+    private function parseUriForParameters($uri,$routeUri){
+        # get parts of uri & routeUri, that is, split by /
+        $routeUriParts = explode('/',trim($routeUri,'/'));
+        $uriParts = explode('/',trim($uri,'/'));
+        if(sizeof($uriParts) != sizeof($routeUriParts)){
+            return FALSE;
+        }
+        $return = array();
+        foreach($routeUriParts as $index => $part){
+            if($part != $uriParts[$index]){
+                if($part{0} != ':'){    #wrong route after all!
+                    return FALSE;
+                }
+                $return[] = $uriParts[$index];
+            }
+        }
+        return $return;
     }
 
     private function registerRoute($httpMethod, $uri, callable $closure) {

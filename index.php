@@ -19,6 +19,10 @@ $app->any('blog',function(){
 });
 
 
+$app->any('blog/page/:title',function(){
+   return array('controller'=>'Blog','method'=>'page');
+});
+
 $app->get('blog/img',function(){
    return array('controller'=>'Blog','method'=>'img');
 });
