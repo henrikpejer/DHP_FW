@@ -121,7 +121,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
     public function testSendFileWithNotReadable() {
         $fileToTest = __DIR__.'/NotReadable.txt';
         touch($fileToTest);
-        chmod($fileToTest,0155);
+        chmod($fileToTest,0355);
         $this->object->sendFile(__DIR__ . '/NotReadable.txt');
         chmod($fileToTest,0755);
         unlink($fileToTest);
