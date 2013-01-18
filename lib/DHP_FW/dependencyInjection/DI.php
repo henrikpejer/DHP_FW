@@ -18,6 +18,7 @@ class DI {
     public function __construct(\DHP_FW\Event $Event){
         $this->event                                 = $Event;
         $this->container['object'][get_class($this)] = $this;
+        $this->container['object'][get_class($Event)] = $Event;
         $this->addObjectAlias('DI', get_class($this));
     }
 
@@ -83,7 +84,7 @@ class DI {
     }
 
     public function instantiateObject($class, array $__args__ = array()){
-        $this->event->trigger('DHP_FW.DI.instantiate', $class);
+        $this->event->trigger('DHP_FW.DI.instantiate', $class, $__args__);
         $constructorArguments = Utils::classConstructorArguments($class);
         $classReflector       = new \ReflectionClass( $class );
         $args                 = array();
@@ -101,6 +102,7 @@ class DI {
                     $args[] = $__args__[$key];
                 break;
                 default:
+                    $args[] = NULL;
             }
         }
         return sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);

@@ -1,4 +1,5 @@
 <?php
+namespace{
 declare( encoding = "UTF8" ) ;
 define( 'DHP_FW_BENCHMARK_TIMESTART', microtime(TRUE) );
 define( 'DHP_FW_BENCHMARK_MEMORYSTART', memory_get_peak_usage() );
@@ -24,11 +25,18 @@ $di    = new DI( $event );
 $di->addClass('DHP_FW\\Request');
 $di->addClassAlias('Request','DHP_FW\\Request');
 $di->addClass('DHP_FW\\App');
-$app = $di->get('DHP_FW\\App');
+$di->addClassAlias('app','DHP_FW\\App');
+$app = $di->get('app');
 $di
-  ->addObjectAlias('app', 'DHP_FW\\App')
   ->addObject($event)
   ->addObjectAlias('event', 'DHP_FW\\Event');
 
 $appControllerLoader = new SplClassLoader( 'app', dirname($_SERVER['SCRIPT_FILENAME']) );
 $appControllerLoader->register();
+}
+namespace app{
+function next(){
+    global $app;
+    $app->continueWithNextRoute();
+}
+}

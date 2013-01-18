@@ -15,9 +15,10 @@ class AppTest extends \PHPUnit_Framework_TestCase {
      * This method is called before a test is executed.
      */
     protected function setUp() {
-        $this->request = new Request('GET','/');
-        $this->DI = new dependencyInjection\DI(new Event());
-        $this->object = new App($this->request, $this->DI);
+        $__event__ = new Event();
+        $this->request = new Request('GET','/',NULL,$__event__);
+        $this->DI = new dependencyInjection\DI($__event__);
+        $this->object = new App($this->request, $this->DI,$__event__);
     }
 
     /**
@@ -108,7 +109,7 @@ class AppTest extends \PHPUnit_Framework_TestCase {
     public function testAll() {
         $this->request->setMethod(App::HTTP_METHOD_GET);
         $this->request->setUri('/test');
-        $this->object = new App($this->request, $this->DI);
+        $this->object = new App($this->request, $this->DI, new Event());
         
         $this->object->any('test', function () {
             return TRUE;
@@ -160,7 +161,7 @@ class AppTest extends \PHPUnit_Framework_TestCase {
     }
     
     public function testControllerWithParams(){
-        $app = new App(new Request('GET','/blog/this-is-the-title'), $this->DI);
+        $app = new App(new Request('GET','/blog/this-is-the-title',NULL, new Event()), $this->DI, new Event());
         $app->get('blog/title',function($title){
             return "error";
         });
@@ -182,7 +183,7 @@ class AppTest extends \PHPUnit_Framework_TestCase {
         
         \PHPUnit_Framework_Assert::assertEquals('this is the title check',$app->start());
         
-        $app = new App(new Request('GET','/blog/this-is-the-title'), $this->DI);
+        $app = new App(new Request('GET','/blog/this-is-the-title',NULL, new Event()), $this->DI, new Event());
         eval('namespace app\\Controllers; class blogcontroller extends \\DHP_FW\\controller{function blogpage($title){return $title;}}');
         
         $app->get('blog/:title',function(){
@@ -192,5 +193,36 @@ class AppTest extends \PHPUnit_Framework_TestCase {
             return $title . ' check';
         });
         \PHPUnit_Framework_Assert::assertEquals('this is the title check',$app->start());
+    }
+
+    public function testContinue(){
+        $this->expectOutputString('Check something');
+        $app = new App(new Request('GET','/blog/this-is-the-title',NULL, new Event()), $this->DI, new Event());
+        $app->any('blog/*',function() use($app){
+            $app->continueWithNextRoute();
+            echo "Check something";
+        });
+        $app->get('blog/:title',function($title){
+              return $title;
+          });
+          $app->param('title',function($title){
+              return $title . ' check';
+          });
+        \PHPUnit_Framework_Assert::assertEquals('this is the title check',$app->start());
+    }
+    public function testContinueWithoutNext(){
+        $this->expectOutputString('Check something');
+        $app = new App(new Request('GET','/blog/this-is-the-title',NULL, new Event()), $this->DI, new Event());
+        $app->any('blog/*',function() use($app){
+            echo "Check something";
+        });
+        $app->get('blog/:title',function($title){
+              return $title;
+          });
+          $app->param('title',function($title){
+              return $title . ' check';
+          });
+        \PHPUnit_Framework_Assert::assertNull($app->start());
+
     }
 }

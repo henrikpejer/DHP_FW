@@ -2,7 +2,7 @@
 declare(encoding = "UTF8") ;
 namespace DHP_FW;
 use DHP_FW\ParameterBagReadOnly;
-
+use DHP_FW\Event;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-01 05:34
@@ -15,10 +15,11 @@ class Request {
     private $_body = NULL;
     public $query, $param, $params, $body, $files = NULL;
 
-    public function __construct($method = NULL, $uri = NULL, $body = NULL) {
+    public function __construct($method = NULL, $uri = NULL, $body = NULL, Event $event) {
         $this->method = $method === NULL ? $this->generateMethod() : $method;
         $this->uri    = $uri === NULL ? $this->generateUri() : ltrim($uri, '/');
         $this->_body = $body;
+        $this->event = $event;
         $this->parseRequestHeaders();
         $this->parseInputData();
     }

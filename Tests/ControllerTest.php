@@ -19,7 +19,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase {
      */
     protected function setUp() {
         $this->e      = new Event();
-        $this->object = new Controller(new Request(), new Response($this->e), $this->e);
+        $this->object = new Controller(new Request(NULL,NULL,NULL,$this->e), new Response($this->e), $this->e);
     }
 
     /**
@@ -33,7 +33,7 @@ class ControllerTest extends \PHPUnit_Framework_TestCase {
      * @covers DHP_FW\Controller::__eventCatchall
      */
     public function test__eventCatchall() {
-        $mock = $this->getMock('DHP_FW\\Controller',array(),array(new Request(),new Response($this->e), $this->e));
+        $mock = $this->getMock('DHP_FW\\Controller',array(),array(new Request(NULL,NULL,NULL,new Event()),new Response($this->e), $this->e));
         $mock->expects($this->exactly(1))->method('__eventCatchall');
         $e = 'something';
         #$this->expectOutputString('hell!');

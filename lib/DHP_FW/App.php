@@ -2,6 +2,8 @@
 declare(encoding = "UTF8") ;
 namespace DHP_FW;
 use DHP_FW\dependencyInjection\DI;
+use DHP_FW\Event;
+
 /**
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-01 05:53
@@ -20,10 +22,11 @@ class App {
     const HTTP_METHOD_ANY    = 'ANY';
 
     private $customParamTypes = array();
+    private $CONTINUEROUTE = FALSE;
 
 
-    public function __construct($Request, DI $DI) {
-        $this->routes = array(
+    public function __construct($Request, DI $DI, Event $event) {
+        $this->routes  = array(
             self::HTTP_METHOD_GET    => array(),
             self::HTTP_METHOD_POST   => array(),
             self::HTTP_METHOD_DELETE => array(),
@@ -31,7 +34,8 @@ class App {
             self::HTTP_METHOD_ANY    => array()
         );
         $this->request = $Request;
-        $this->DI = $DI;
+        $this->DI      = $DI;
+        $this->event   = $event;
     }
 
     # get routes
@@ -78,7 +82,7 @@ class App {
     }
 
     public function enabled($configToCheck) {
-        return isset($this->configs[$configToCheck]) && $this->configs[$configToCheck] === TRUE?TRUE:FALSE;
+        return isset($this->configs[$configToCheck]) && $this->configs[$configToCheck] === TRUE ? TRUE : FALSE;
     }
 
     public function disable($configToDisable) {
@@ -86,37 +90,49 @@ class App {
         return $this;
     }
 
-    public function param($paramName, callable $closure){
+    public function param($paramName, callable $closure) {
         $this->customParamTypes[$paramName] = $closure;
     }
 
-    public function start(){
-        $routesToProcess = isset($this->routes[$this->request->getMethod()])?array_merge($this->routes[self::HTTP_METHOD_ANY],$this->routes[$this->request->getMethod()]):$this->routes[self::HTTP_METHOD_ANY];
-        $uriToMatch = trim($this->request->getUri(),'/');
-        foreach($routesToProcess as $uri => $closure){
-            if( FALSE !== ($routeMatchReturn = $this->matchUriToRoute($uriToMatch, $uri))){
-                if( is_array($routeMatchReturn)){
-                    $closureResult = call_user_func_array($closure,$routeMatchReturn);
-                }else{
-                    $closureResult = $closure();    
+    public function continueWithNextRoute(){
+        $this->CONTINUEROUTE = TRUE;
+    }
+
+    public function start() {
+        $routesToProcess =
+                isset($this->routes[$this->request->getMethod()]) ? array_merge($this->routes[self::HTTP_METHOD_ANY], $this->routes[$this->request->getMethod()]) : $this->routes[self::HTTP_METHOD_ANY];
+        $uriToMatch      = trim($this->request->getUri(), '/');
+        $return = NULL;
+        foreach ($routesToProcess as $uri => $closure) {
+            $this->CONTINUEROUTE = FALSE;
+            if (FALSE !== ($routeMatchReturn = $this->matchUriToRoute($uriToMatch, $uri))) {
+                if (is_array($routeMatchReturn)) {
+                    $closureResult = call_user_func_array($closure, $routeMatchReturn);
                 }
-                switch(TRUE){
+                else {
+                    $closureResult = $closure();
+                }
+                switch (TRUE) {
                     case is_array($closureResult) && isset($closureResult['controller']) && isset($closureResult['method']):
                         $controller = $this->loadController($closureResult);
                         # todo: handle params in url and send them to controller
-                        if( is_array($routeMatchReturn)){
-                            return call_user_func_array(array($controller,$closureResult['method']),$routeMatchReturn);    
-                        }else{
-                            return $controller->$closureResult['method']();
+                        if (is_array($routeMatchReturn)) {
+                            $return = call_user_func_array(array($controller, $closureResult['method']), $routeMatchReturn);
+                        }
+                        else {
+                            $return = $controller->$closureResult['method']();
                         }
                         break;
                     default:
-                        return $closureResult;
+                        $return = $closureResult;
                         break;
+                }
+                if( FALSE == $this->CONTINUEROUTE ){
+                    break;
                 }
             }
         }
-        return NULL;
+        return $return;
     }
 
 
@@ -126,22 +142,22 @@ class App {
      *
      * @param $controllerToLoad
      */
-    private function loadController($controllerToLoad){
-        return $this->DI->instantiateObject('\\app\\controllers\\'.$controllerToLoad['controller']);
+    private function loadController($controllerToLoad) {
+        return $this->DI->instantiateObject('\\app\\controllers\\' . $controllerToLoad['controller']);
     }
 
     # todo: handle params in url
-    private function matchUriToRoute($__uri__,$routeUri){
-        $__haveParams__ = strpos($routeUri,':');
-        if($__haveParams__ === FALSE && $routeUri == $__uri__){
+    private function matchUriToRoute($__uri__, $routeUri) {
+        $__haveParams__ = strpos($routeUri, ':');
+        if ($__haveParams__ === FALSE && ($routeUri == $__uri__ || preg_match('#^'.str_replace('*','.*',$routeUri).'#',$__uri__)) ) {
             return TRUE;
         }
-        if( TRUE == $__haveParams__ ){
-            return $this->parseUriForParameters($__uri__,$routeUri);
+        if (TRUE == $__haveParams__) {
+            return $this->parseUriForParameters($__uri__, $routeUri);
         }
         return FALSE;
     }
-    
+
     /*
      * This will parse a route, looking like this,
      * blog/:title
@@ -150,42 +166,43 @@ class App {
      * 
      * array('title'=>'value_in_url')
      */
-    private function parseUriForParameters($uri,$routeUri){
+    private function parseUriForParameters($uri, $routeUri) {
         # get parts of uri & routeUri, that is, split by /
-        $routeUriParts = explode('/',trim($routeUri,'/'));
-        $uriParts = explode('/',trim($uri,'/'));
-        if(sizeof($uriParts) != sizeof($routeUriParts)){
+        $routeUriParts = explode('/', trim($routeUri, '/'));
+        $uriParts      = explode('/', trim($uri, '/'));
+        if (sizeof($uriParts) != sizeof($routeUriParts)) {
             return FALSE;
         }
         $return = array();
-        foreach($routeUriParts as $index => $part){
-            if($part != $uriParts[$index]){
-                if($part{0} != ':'){    #wrong route after all!
+        foreach ($routeUriParts as $index => $part) {
+            if ($part != $uriParts[$index]) {
+                if ($part{0} != ':') { #wrong route after all!
                     return FALSE;
                 }
                 $realValue = $this->cleanUriPartForParam($uriParts[$index]);
-                $return[] = $this->checkParameterType($part,$realValue);
+                $return[]  = $this->checkParameterType($part, $realValue);
             }
         }
         return $return;
     }
-    
-    private function cleanUriPartForParam($param){
-        $param = str_replace('-',' ',$param);
+
+    private function cleanUriPartForParam($param) {
+        $param = str_replace('-', ' ', $param);
         $param = urldecode($param);
         return $param;
     }
-    
-    private function checkParameterType($parameterType,$paramValue){
-        $parameterType = str_replace(':','',$parameterType);
-        $return = $paramValue;
-        if(isset($this->customParamTypes[$parameterType])){
-            $return = call_user_func_array($this->customParamTypes[$parameterType],array($paramValue));
+
+    private function checkParameterType($parameterType, $paramValue) {
+        $parameterType = str_replace(':', '', $parameterType);
+        $return        = $paramValue;
+        if (isset($this->customParamTypes[$parameterType])) {
+            $return = call_user_func_array($this->customParamTypes[$parameterType], array($paramValue));
         }
         return $return;
     }
 
     private function registerRoute($httpMethod, $uri, callable $closure) {
+        $this->event->trigger('DHP_FW.App.registerRoute', $httpMethod, $uri, $closure);
         if (!is_array($httpMethod)) {
             $httpMethod = array($httpMethod);
         }
