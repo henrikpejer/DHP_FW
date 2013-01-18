@@ -149,7 +149,7 @@ class App {
     # todo: handle params in url
     private function matchUriToRoute($__uri__, $routeUri) {
         $__haveParams__ = strpos($routeUri, ':');
-        if ($__haveParams__ === FALSE && ($routeUri == $__uri__ || preg_match('#^'.str_replace('*','.*',$routeUri).'#',$__uri__)) ) {
+        if ($__haveParams__ === FALSE && ($routeUri == $__uri__ || preg_match('#^'.str_replace('*','.*',$routeUri).'$#',$__uri__)) ) {
             return TRUE;
         }
         if (TRUE == $__haveParams__) {
