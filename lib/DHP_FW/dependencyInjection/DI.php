@@ -22,7 +22,7 @@ class DI {
         $this->addObjectAlias('DI', get_class($this));
     }
 
-    public function get($name){
+    public function get($name, array $args = array()){
         $this->event->trigger('DHP_FW.DI.get', $name);
         $objectName = str_replace(array('/', '.'), '\\', $name);
         if ( isset( $this->container['object'][$objectName] ) ) {
@@ -36,7 +36,7 @@ class DI {
         }
         # last thing to try -> load it as if it were a class, right?
         try {
-            $o = $this->instantiateObject($name);
+            $o = $this->instantiateObject($name, $args);
         }
         catch (\Exception $e) {
             //throw $e;

@@ -13,7 +13,8 @@ class Request {
     private $method = NULL;
     private $headers = NULL;
     private $_body = NULL;
-    public $query, $param, $params, $body, $files = NULL;
+    private $publicValues = NULL;
+    #public $query, $param, $params, $body, $files = NULL;
 
     public function __construct($method = NULL, $uri = NULL, $body = NULL, Event $event) {
         $this->method = $method === NULL ? $this->generateMethod() : $method;
@@ -49,11 +50,23 @@ class Request {
     }
 
     private function parseInputData() {
-        $this->query  = new ParameterBagReadOnly($_GET);
-        $this->param  = new ParameterBagReadOnly($_POST);
-        $this->files  = new ParameterBagReadOnly($_FILES);
-        $this->params = new ParameterBagReadOnly(array_merge($_GET,$_POST));
-        $this->parseBodyData();
+        $values = array(
+            'query'=>new ParameterBagReadOnly($_GET),
+            'param'  => new ParameterBagReadOnly($_POST),
+            'files' => new ParameterBagReadOnly($_FILES),
+            'params' => new ParameterBagReadOnly(array_merge($_GET,$_POST))
+        );
+        $body = $this->parseBodyData();
+        $values['body'] = is_array($body)?new ParameterBagReadOnly($body):$body;
+        $this->publicValues = $values;
+    }
+
+    public function __get($name){
+        return isset($this->publicValues[$name])?$this->publicValues[$name]:NULL;
+    }
+
+    public function __set($name,$value){
+        return $this->publicValues[$name] = $value;
     }
 
     protected function parseBodyData(){
@@ -72,7 +85,7 @@ class Request {
                 $__body__ = NULL;
                 break;
         }
-        $this->body = $__body__;
+        return $__body__;
     }
 
     protected function generateMethod() {

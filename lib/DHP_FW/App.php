@@ -98,6 +98,16 @@ class App {
         $this->CONTINUEROUTE = TRUE;
     }
 
+    public function middleware($middleware){
+        if(!class_exists($middleware,TRUE)){
+            $middleware = '\\DHP_FW\\middleware\\'.$middleware;
+        }
+        if(!class_exists($middleware,TRUE)){
+            $middleware = '\\App\\middleware\\'.$middleware;
+        }
+        $this->DI->get($middleware);
+    }
+
     public function start() {
         $routesToProcess =
                 isset($this->routes[$this->request->getMethod()]) ? array_merge($this->routes[self::HTTP_METHOD_ANY], $this->routes[$this->request->getMethod()]) : $this->routes[self::HTTP_METHOD_ANY];
@@ -127,7 +137,7 @@ class App {
                         $return = $closureResult;
                         break;
                 }
-                if( FALSE == $this->CONTINUEROUTE ){
+                if( FALSE === $this->CONTINUEROUTE ){
                     break;
                 }
             }
