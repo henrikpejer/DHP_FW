@@ -121,12 +121,11 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
     public function testSendFileWithNotReadable() {
         $fileToTest = __DIR__.'/NotReadable.txt';
         touch($fileToTest);
-        chmod($fileToTest,0355);
+        chmod($fileToTest,0377);
         $this->object->sendFile(__DIR__ . '/NotReadable.txt');
-        chmod($fileToTest,0755);
-        unlink($fileToTest);
+        unlink(realpath($fileToTest));
     }
-
+    
     public function testSurpressHeaders() {
         $this->object->supressHeaders();
         if (is_callable('xdebug_headers_list')) {

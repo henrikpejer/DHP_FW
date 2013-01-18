@@ -100,7 +100,6 @@ class App {
                 }else{
                     $closureResult = $closure();    
                 }
-                
                 switch(TRUE){
                     case is_array($closureResult) && isset($closureResult['controller']) && isset($closureResult['method']):
                         $controller = $this->loadController($closureResult);
@@ -164,8 +163,24 @@ class App {
                 if($part{0} != ':'){    #wrong route after all!
                     return FALSE;
                 }
-                $return[] = $uriParts[$index];
+                $realValue = $this->cleanUriPartForParam($uriParts[$index]);
+                $return[] = $this->checkParameterType($part,$realValue);
             }
+        }
+        return $return;
+    }
+    
+    private function cleanUriPartForParam($param){
+        $param = str_replace('-',' ',$param);
+        $param = urldecode($param);
+        return $param;
+    }
+    
+    private function checkParameterType($parameterType,$paramValue){
+        $parameterType = str_replace(':','',$parameterType);
+        $return = $paramValue;
+        if(isset($this->customParamTypes[$parameterType])){
+            $return = call_user_func_array($this->customParamTypes[$parameterType],array($paramValue));
         }
         return $return;
     }
