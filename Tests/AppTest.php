@@ -223,6 +223,17 @@ class AppTest extends \PHPUnit_Framework_TestCase {
               return $title . ' check';
           });
         \PHPUnit_Framework_Assert::assertNull($app->start());
-
+    }
+    
+    public function testMiddleware(){
+        $_COOKIE = array('cookieName'=>'CoookieValue');
+        $req = new Request('GET','/blog/this-is-the-title',NULL, new Event());
+        $this->DI->addObject($req);
+        $app = new App($req, $this->DI, new Event());
+        $app->middleware('Cookie')->get('blog/:title',function($title)use($req){
+            return $title.$req->cookie->cookieName;
+        });
+        
+        \PHPUnit_Framework_Assert::assertEquals('this is the titleCoookieValue',$app->start());
     }
 }

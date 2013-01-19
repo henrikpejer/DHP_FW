@@ -98,6 +98,7 @@ class App {
         $this->CONTINUEROUTE = TRUE;
     }
 
+    # todo : figure out dependencies... or not?
     public function middleware($middleware){
         if(!class_exists($middleware,TRUE)){
             $middleware = '\\DHP_FW\\middleware\\'.$middleware;
@@ -106,6 +107,7 @@ class App {
             $middleware = '\\App\\middleware\\'.$middleware;
         }
         $this->DI->get($middleware);
+        return $this;
     }
 
     public function start() {
