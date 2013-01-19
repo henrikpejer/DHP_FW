@@ -125,7 +125,6 @@ class App {
                 switch (TRUE) {
                     case is_array($closureResult) && isset($closureResult['controller']) && isset($closureResult['method']):
                         $controller = $this->loadController($closureResult);
-                        # todo: handle params in url and send them to controller
                         if (is_array($routeMatchReturn)) {
                             $return = call_user_func_array(array($controller, $closureResult['method']), $routeMatchReturn);
                         }
@@ -156,7 +155,6 @@ class App {
         return $this->DI->instantiateObject('\\app\\controllers\\' . $controllerToLoad['controller']);
     }
 
-    # todo: handle params in url
     private function matchUriToRoute($__uri__, $routeUri) {
         $__haveParams__ = strpos($routeUri, ':');
         if ($__haveParams__ === FALSE && ($routeUri == $__uri__ || preg_match('#^'.str_replace('*','.*',$routeUri).'$#',$__uri__)) ) {
