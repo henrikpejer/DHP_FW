@@ -69,4 +69,26 @@ class DITest extends \PHPUnit_Framework_TestCase {
         $c = $this->object->get('DHP_FW\\Controller');
         \PHPUnit_Framework_Assert::assertInstanceOf('DHP_FW\\Controller', $c);
     }
+
+    public function testSameObjectIsLoaded(){
+        $e = $this->object->get('DHP_FW\Event');
+        $ref = spl_object_hash($e);
+        $this->object->addObjectAlias('event','DHP_FW\Event');
+        $this->object->addObject($e,'masta');
+        \PHPUnit_Framework_Assert::assertEquals($ref,spl_object_hash($this->object->get('event')));
+        \PHPUnit_Framework_Assert::assertEquals($ref,spl_object_hash($this->object->get('\\DHP_FW\\Event')));
+        \PHPUnit_Framework_Assert::assertEquals($ref,spl_object_hash($this->object->get('masta')));
+        \PHPUnit_Framework_Assert::assertEquals(array(
+            'object'=>array(
+                'DHP_FW\\dependencyInjection\DI',
+                'DHP_FW\Event',
+                'DI',
+                'event',
+                'masta'
+               ),
+            'class'=>array(),
+            'parameters'=>array()
+        ),$this->object->getObjectsInDI());
+
+    }
 }

@@ -11,7 +11,7 @@ class DI {
 
     private $event = NULL;
 
-    public $container = array(
+    private $container = array(
         'object' => array(), 'class' => array(), 'parameters' => array()
     );
 
@@ -65,6 +65,14 @@ class DI {
         return $this->container['class'][$class] = new DIProxy( $class, $constructorArgs, $this );
     }
 
+    public function getObjectsInDI(){
+        $return = array();
+        foreach($this->container as $key => $object){
+            $return[$key] = array_keys($object);
+        }
+        return $return;
+    }
+
     private function initClass($classToInit){
         $key = $classToInit;
         /**
@@ -105,7 +113,9 @@ class DI {
                     $args[] = NULL;
             }
         }
-        return sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
+        $return = sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
+        $this->container['object'][get_class($return)] = $return;
+        return $return;
     }
 
     private function instantiateViaConstructor($constructor){
