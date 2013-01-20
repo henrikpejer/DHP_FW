@@ -65,18 +65,18 @@ class Event {
     }
 
     /**
-     * @param $delegate : object that will emit the event
-     * @param $me : object that will catch the event, show have a delegate function
+     * @param $objectToSubscribeTo : object that will emit the event
+     * @param $subscriber : object that will catch the event, show have a delegate function
      */
-    public function delegate($delegate, &$me){
-        $delegate = spl_object_hash($delegate);
-        if(!isset($this->delegates[$delegate])){
-            $this->delegates[$delegate] = array();
+    public function subscribe($objectToSubscribeTo, &$subscriber){
+        $objectToSubscribeTo = spl_object_hash($objectToSubscribeTo);
+        if(!isset($this->delegates[$objectToSubscribeTo])){
+            $this->delegates[$objectToSubscribeTo] = array();
         }
-        $this->delegates[$delegate][spl_object_hash($me)] = &$me;
+        $this->delegates[$objectToSubscribeTo][spl_object_hash($subscriber)] = &$subscriber;
     }
 
-    public function triggerDelegate($delegate,$method, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL){;
+    public function triggerSubscribe($delegate,$method, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL){;
         $__objectHash__ = spl_object_hash($delegate);
         $return = NULL;
         if(isset($this->delegates[$__objectHash__])){

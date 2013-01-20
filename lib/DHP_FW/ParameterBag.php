@@ -21,7 +21,7 @@ class ParameterBag {
     public function __set($name,$value){
         #echo "Set called!";
         # run delegation, if any, to notice that we DO have changed data
-        \app\DI()->get('\\DHP_FW\\Event')->triggerDelegate($this, 'dataChanged',$name,$value);
+        \app\DI()->get('\\DHP_FW\\Event')->triggerSubscribe($this, 'dataChanged',$name,$value);
         #var_dump(\app\DI()->get('\\DHP_FW\\Event'));
         return $this->_values[$name] = $value;
     }

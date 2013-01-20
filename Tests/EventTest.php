@@ -298,7 +298,7 @@ class EventTest extends \PHPUnit_Framework_TestCase {
 
         function setDelegationOff(){
             $v = "error";
-            $this->event->triggerDelegate($this,"delegate", $v);
+            $this->event->triggerSubscribe($this,"delegate", $v);
             echo $v;
         }
         }');
@@ -307,9 +307,9 @@ class EventTest extends \PHPUnit_Framework_TestCase {
         $maintwo = new \anotherMain();
         $mainthree = new \anotherErrorMain();
         $delegate = new \delegate($this->object);
-        $this->object->delegate($delegate,$main);
-        $this->object->delegate($delegate,$maintwo);
-        $this->object->delegate($delegate,$mainthree);
+        $this->object->subscribe($delegate,$main);
+        $this->object->subscribe($delegate,$maintwo);
+        $this->object->subscribe($delegate,$mainthree);
         $delegate->setDelegationOff();
 
     }

@@ -42,6 +42,6 @@ class Session {
     private function setupFlashData() {
         $this->flash = new ParameterBag(array());
         $e = \app\DI()->get('DHP_FW\\Event');
-        $e->delegate($this->flash,$this);
+        $e->subscribe($this->flash,$this);
     }
 }
