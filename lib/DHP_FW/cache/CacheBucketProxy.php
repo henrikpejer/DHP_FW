@@ -1,7 +1,7 @@
 <?php
 declare(encoding = "UTF8") ;
 namespace DHP_FW\cache;
-use DHP_FW\cache\CacheStorage;
+use \DHP_FW\cache\CacheStorage;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-16 22:08

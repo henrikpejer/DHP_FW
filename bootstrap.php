@@ -24,9 +24,15 @@ $event = new \DHP_FW\Event();
 $di    = new DI( $event );
 $di->addClass('DHP_FW\\Request');
 $di->addClassAlias('Request','DHP_FW\\Request');
+$di->addClass('DHP_FW\\Response');
+$di->addClassAlias('Response','DHP_FW\\Response');
 $di->addClass('DHP_FW\\App');
 $di->addClassAlias('app','DHP_FW\\App');
 $app = $di->get('app');
+if($di->get('Response')->checkCache()){
+    exit;
+}
+
 #$di->addObjectAlias('event', 'DHP_FW\\Event');
 
 $appControllerLoader = new SplClassLoader( 'app', dirname($_SERVER['SCRIPT_FILENAME']) );

@@ -5,11 +5,11 @@ namespace{
      * Date: 2013-01-05 21:44
      */
 
-ob_start();
-date_default_timezone_set('Europe/Stockholm');
-require_once 'lib/splClassLoader.php';
-$classLoader = new SplClassLoader('DHP_FW', __DIR__ . DIRECTORY_SEPARATOR . 'lib');
-$classLoader->register();
+    ob_start();
+    date_default_timezone_set('Europe/Stockholm');
+    require_once 'lib/splClassLoader.php';
+    $classLoader = new SplClassLoader('DHP_FW', __DIR__ . DIRECTORY_SEPARATOR . 'lib');
+    $classLoader->register();
 }
 namespace app{
     $event = new \DHP_FW\Event();
@@ -23,7 +23,7 @@ namespace app{
         global $app;
         return $app;
     }
-    function DI(){
+    function &DI(){
         global $di;
         return $di;
     }

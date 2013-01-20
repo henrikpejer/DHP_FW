@@ -96,6 +96,9 @@ class DI {
         $this->event->trigger('DHP_FW.DI.instantiate', $class, $__args__);
         $constructorArguments = Utils::classConstructorArguments($class);
         $classReflector       = new \ReflectionClass( $class );
+        if($classReflector->isInterface()){
+            return NULL;
+        }
         $args                 = array();
         foreach ($constructorArguments as $key => $constructorArgument) {
             # get a value, if possible...

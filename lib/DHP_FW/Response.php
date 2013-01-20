@@ -24,9 +24,14 @@ class Response {
 
     private $headerDataSent = array();
     private $supressHeader = FALSE;
+    private $dataIsCache = FALSE;
 
     public function __construct(Event $event) {
         $this->event = $event;
+    }
+
+    public function cacheSent(){
+        return $this->dataIsCache;
     }
 
     public function send($dataOrStatus, $data = NULL) {
@@ -111,6 +116,25 @@ class Response {
         $this->supressHeader = $doSurpress === TRUE ? TRUE : FALSE;
     }
 
+    public function checkCache(){
+        $request = \app\DI()->get('DHP_FW\\Request');
+        if($request->getMethod() == \DHP_FW\App::HTTP_METHOD_GET){
+            $uri = $request->getUri();
+            $__cache__ = \app\DI()->get('DHP_FW\\cache\\Cache')->bucket('app')->get("uri_{$uri}_data");
+            if(isset($__cache__) && is_array($__cache__)){
+                $this->dataIsCache = TRUE;
+                foreach($__cache__['headers'] as $header){
+                    $this->sendHeaderData($header);
+                }
+                $this->sendHeaderData('DHP_FW_CACHE: YES!');
+                $this->data = $__cache__['data'];
+                $this->sendData();
+                return TRUE;
+            }
+        }
+        return FALSE;
+    }
+
     private function sendHeaders() {
         if (FALSE == $this->headersSent && \headers_sent() == FALSE) {
             foreach ($this->headers as $header => $value) {
@@ -148,10 +172,17 @@ class Response {
     }
 
     private function sendData() {
-        $this->event->trigger('DHP_FW.Response.sendData', $this->data);
+        if ($this->dataIsCache == FALSE) {
+            $this->event->trigger('DHP_FW.Response.sendData', $this->data);
+        }
         $this->dataSendStatus = self::DATASENDSTATUS_STARTED;
         echo $this->data;
         $this->dataSendStatus = self::DATASENDSTATUS_COMPLETE;
+        if ($this->dataIsCache == FALSE) {
+            # lets cache this, ok?
+            \app\DI()->get('DHP_FW\\cache\\Cache')->bucket('app')->set("uri_" . \app\DI()->get('DHP_FW\\Request')
+                    ->getUri() . "_data", array('headers' => $this->headerDataSent, 'data' => $this->data),5);
+        }
     }
 
     private function resetHeaders() {
@@ -168,6 +199,8 @@ class Response {
         if (FALSE === $this->supressHeader) {
             \header($headerData);
         }
-        $this->headerDataSent[] = $headerData;
+        if($this->dataIsCache == FALSE){
+            $this->headerDataSent[] = $headerData;
+        }
     }
 }

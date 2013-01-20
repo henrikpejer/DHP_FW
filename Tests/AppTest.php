@@ -236,4 +236,14 @@ class AppTest extends \PHPUnit_Framework_TestCase {
         
         \PHPUnit_Framework_Assert::assertEquals('this is the titleCoookieValue',$app->start());
     }
+
+    public function testCache(){
+        $this->expectOutputString('Hallelooja');
+        $this->object->get('',function(){
+                    \app\DI()->get('DHP_FW\\Response')->send(200,'Hallelooja');
+               });
+        $this->object->start();
+        $cache = \app\DI()->get('DHP_FW\\cache\\Cache')->bucket('app')->get('uri__data');
+        \PHPUnit_Framework_Assert::assertEquals('Hallelooja',$cache['data']);
+    }
 }

@@ -13,17 +13,21 @@ use DHP_FW\Event;
 class App {
 
     protected $routes = array();
-    protected $configs = array();
+    protected $configs = array(
+        'cacheStorage' => 'DHP_FW\\cache\\Apc',
+    );
+    protected $cache = NULL;
+
     const HTTP_METHOD_GET    = 'GET';
     const HTTP_METHOD_POST   = 'POST';
     const HTTP_METHOD_DELETE = 'DELETE';
     const HTTP_METHOD_PUT    = 'PUT';
     const HTTP_METHOD_HEAD   = 'HEAD';
     const HTTP_METHOD_ANY    = 'ANY';
+    const ROUTE_CONTINUE     = 'YES';
 
     private $customParamTypes = array();
     private $CONTINUEROUTE = FALSE;
-
 
     public function __construct($Request, DI $DI, Event $event) {
         $this->routes  = array(
@@ -36,6 +40,7 @@ class App {
         $this->request = $Request;
         $this->DI      = $DI;
         $this->event   = $event;
+        $this->setupCache();
     }
 
     # get routes
@@ -94,17 +99,17 @@ class App {
         $this->customParamTypes[$paramName] = $closure;
     }
 
-    public function continueWithNextRoute(){
-        $this->CONTINUEROUTE = TRUE;
+    public function continueWithNextRoute() {
+        $this->CONTINUEROUTE = self::ROUTE_CONTINUE;
     }
 
     # todo : figure out dependencies... or not?
-    public function middleware($middleware){
-        if(!class_exists($middleware,TRUE)){
-            $middleware = '\\DHP_FW\\middleware\\'.$middleware;
+    public function middleware($middleware) {
+        if (!class_exists($middleware, TRUE)) {
+            $middleware = '\\DHP_FW\\middleware\\' . $middleware;
         }
-        if(!class_exists($middleware,TRUE)){
-            $middleware = '\\App\\middleware\\'.$middleware;
+        if (!class_exists($middleware, TRUE)) {
+            $middleware = '\\App\\middleware\\' . $middleware;
         }
         $this->DI->get($middleware);
         return $this;
@@ -114,7 +119,7 @@ class App {
         $routesToProcess =
                 isset($this->routes[$this->request->getMethod()]) ? array_merge($this->routes[self::HTTP_METHOD_ANY], $this->routes[$this->request->getMethod()]) : $this->routes[self::HTTP_METHOD_ANY];
         $uriToMatch      = trim($this->request->getUri(), '/');
-        $return = NULL;
+        $return          = NULL;
         foreach ($routesToProcess as $uri => $closure) {
             $this->CONTINUEROUTE = FALSE;
             if (FALSE !== ($routeMatchReturn = $this->matchUriToRoute($uriToMatch, $uri))) {
@@ -128,7 +133,8 @@ class App {
                     case is_array($closureResult) && isset($closureResult['controller']) && isset($closureResult['method']):
                         $controller = $this->loadController($closureResult);
                         if (is_array($routeMatchReturn)) {
-                            $return = call_user_func_array(array($controller, $closureResult['method']), $routeMatchReturn);
+                            $return =
+                                    call_user_func_array(array($controller, $closureResult['method']), $routeMatchReturn);
                         }
                         else {
                             $return = $controller->$closureResult['method']();
@@ -138,7 +144,7 @@ class App {
                         $return = $closureResult;
                         break;
                 }
-                if( FALSE === $this->CONTINUEROUTE ){
+                if (self::ROUTE_CONTINUE !== $this->CONTINUEROUTE) {
                     break;
                 }
             }
@@ -159,7 +165,7 @@ class App {
 
     private function matchUriToRoute($__uri__, $routeUri) {
         $__haveParams__ = strpos($routeUri, ':');
-        if ($__haveParams__ === FALSE && ($routeUri == $__uri__ || preg_match('#^'.str_replace('*','.*',$routeUri).'$#',$__uri__)) ) {
+        if ($__haveParams__ === FALSE && ($routeUri == $__uri__ || preg_match('#^' . str_replace('*', '.*', $routeUri) . '$#', $__uri__))) {
             return TRUE;
         }
         if (TRUE == $__haveParams__) {
@@ -220,5 +226,16 @@ class App {
             $this->routes[$method][$uri] = $closure;
         }
         return $this;
+    }
+
+    /**
+     * Gets cacheStorage, inits it and sets the cache of!
+     */
+    private function setupCache() {
+        $storage     = $this->DI->get($this->configs['cacheStorage']);
+        $this->cache = $this->DI->get('\\DHP_FW\\cache\\Cache', array($storage));
+        $this->cache->bucket('app');
+        $this->cache->bucket('data');
+        $this->cache->bucket('sys');
     }
 }
