@@ -82,8 +82,8 @@ class DITest extends \PHPUnit_Framework_TestCase {
             'object'=>array(
                 'DHP_FW\\dependencyInjection\DI',
                 'DHP_FW\Event',
-                'DI',
                 'event',
+                'DI',
                 'masta'
                ),
             'class'=>array(),
