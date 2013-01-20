@@ -35,6 +35,10 @@ class Session {
         $this->dataChanged = TRUE;
     }
 
+    public function dataIsChanged(){
+        return $this->dataChanged;
+    }
+
     private function setupFlashData() {
         $this->flash = new ParameterBag(array());
         $e = \app\DI()->get('DHP_FW\\Event');

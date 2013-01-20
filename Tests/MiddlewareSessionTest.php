@@ -30,9 +30,11 @@ class SessionTest extends \PHPUnit_Framework_TestCase {
     public function testDataChanged() {
         \PHPUnit_Framework_Assert::assertNull($this->object->flash->henrik);
         \PHPUnit_Framework_Assert::assertAttributeEquals(FALSE,'dataChanged',$this->object);
+        \PHPUnit_Framework_Assert::assertFalse($this->object->dataIsChanged());
         $this->object->flash->henrik = 'pejer';
         \PHPUnit_Framework_Assert::assertEquals('pejer',$this->object->flash->henrik);
-        #\PHPUnit_Framework_Assert::assertAttributeEquals(TRUE,'dataChanged',$this->object);
+        \PHPUnit_Framework_Assert::assertAttributeEquals(TRUE,'dataChanged',$this->object);
+        \PHPUnit_Framework_Assert::assertTrue($this->object->dataIsChanged());
     }
     public function test__set() {
         \PHPUnit_Framework_Assert::assertNull($this->object->henrik);
