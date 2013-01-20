@@ -19,6 +19,7 @@ class DI {
         $this->event                                 = $Event;
         $this->container['object'][get_class($this)] = $this;
         $this->container['object'][get_class($Event)] = $Event;
+        $this->container['object']['event'] = &$this->container['object'][get_class($Event)];
         $this->addObjectAlias('DI', get_class($this));
     }
 
