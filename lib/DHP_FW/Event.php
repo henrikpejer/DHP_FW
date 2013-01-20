@@ -16,6 +16,7 @@ const EVENT_ABORT = '32e4f1d38810d19529b4d0054eab52bd';
 class Event {
 
     protected $events = array('*' => array(), '__controller__' => array());
+    public $delegates = array();
 
     public function __construct(){
     }
@@ -61,6 +62,32 @@ class Event {
         }
         $this->events[$eventName][] = $callable;
         return TRUE;
+    }
+
+    /**
+     * @param $delegate : object that will emit the event
+     * @param $me : object that will catch the event, show have a delegate function
+     */
+    public function delegate($delegate, &$me){
+        $delegate = spl_object_hash($delegate);
+        if(!isset($this->delegates[$delegate])){
+            $this->delegates[$delegate] = array();
+        }
+        $this->delegates[$delegate][spl_object_hash($me)] = &$me;
+    }
+
+    public function triggerDelegate($delegate,$method, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL){;
+        $__objectHash__ = spl_object_hash($delegate);
+        $return = NULL;
+        if(isset($this->delegates[$__objectHash__])){
+            foreach($this->delegates[$__objectHash__] as $target){
+                $return = $target->$method($one,$two,$three,$four);
+                if($return === FALSE){
+                    break;
+                }
+            }
+        }
+        return $return;
     }
 
     /**

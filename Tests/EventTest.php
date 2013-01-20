@@ -255,4 +255,62 @@ class EventTest extends \PHPUnit_Framework_TestCase {
         $t = '';
         $this->object->trigger('phpunit.test',$t);
     }
+
+    /*
+     * Now, delegation should be when one objects wants to lets its 'watchers'
+     * know that something happend.
+     *
+     * So to test this, we should have two objects, where one is a delegate to
+     * the other. And when something happens, the delegate should be notified.
+     */
+    public function testDelegation(){
+        $this->expectOutputString('Worked fine also.');
+        eval('class main{
+            function delegate(&$one){
+             $one = "Worked fine";
+        }
+}        ');
+
+        eval('class anotherMain{
+
+        function delegate(&$one){
+            $one .= " also.";
+            return FALSE;
+        }
+
+        }
+        ');
+
+        eval('class anotherErrorMain{
+
+        function delegate(&$one){
+            $one = "This should not be run";
+        }
+
+        }
+        ');
+
+
+        eval('class delegate{
+        function __construct($event){
+            $this->event = $event;
+        }
+
+        function setDelegationOff(){
+            $v = "error";
+            $this->event->triggerDelegate($this,"delegate", $v);
+            echo $v;
+        }
+        }');
+
+        $main = new \main();
+        $maintwo = new \anotherMain();
+        $mainthree = new \anotherErrorMain();
+        $delegate = new \delegate($this->object);
+        $this->object->delegate($delegate,$main);
+        $this->object->delegate($delegate,$maintwo);
+        $this->object->delegate($delegate,$mainthree);
+        $delegate->setDelegationOff();
+
+    }
 }

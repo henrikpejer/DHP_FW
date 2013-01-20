@@ -1,7 +1,7 @@
 <?php
 declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
-
+use DHP_FW\Event;
 /**
  *
  * Created by: Henrik Pejer, mr@henrikpejer.com
@@ -19,6 +19,10 @@ class ParameterBag {
     }
 
     public function __set($name,$value){
+        #echo "Set called!";
+        # run delegation, if any, to notice that we DO have changed data
+        \app\DI()->get('\\DHP_FW\\Event')->triggerDelegate($this, 'dataChanged',$name,$value);
+        #var_dump(\app\DI()->get('\\DHP_FW\\Event'));
         return $this->_values[$name] = $value;
     }
 

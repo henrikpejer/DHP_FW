@@ -27,16 +27,24 @@ $di->addClassAlias('Request','DHP_FW\\Request');
 $di->addClass('DHP_FW\\App');
 $di->addClassAlias('app','DHP_FW\\App');
 $app = $di->get('app');
-$di
-  ->addObject($event)
-  ->addObjectAlias('event', 'DHP_FW\\Event');
+#$di->addObjectAlias('event', 'DHP_FW\\Event');
 
 $appControllerLoader = new SplClassLoader( 'app', dirname($_SERVER['SCRIPT_FILENAME']) );
 $appControllerLoader->register();
+
+
 }
 namespace app{
-function next(){
-    global $app;
-    $app->continueWithNextRoute();
-}
+    function next(){
+        global $app;
+        $app->continueWithNextRoute();
+    }
+    function getApp(){
+        global $app;
+        return $app;
+    }
+    function DI(){
+        global $di;
+        return $di;
+    }
 }

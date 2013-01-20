@@ -9,8 +9,7 @@ require_once 'bootstrap.php';
 #var_dump($_SERVER);
 #var_dump($_ENV);
 #var_dump($di->get('request'));
-
-$app->middleware('Benchmark')->middleware('Cookie');
+$app->middleware('Benchmark')->middleware('Cookie')->middleware('Session');
 
 $app->get('testing/hesting/flecking',function(){
     echo "Fake controller run!\n";

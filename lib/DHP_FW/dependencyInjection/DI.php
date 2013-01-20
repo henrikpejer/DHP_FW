@@ -23,6 +23,7 @@ class DI {
     }
 
     public function get($name, array $args = array()){
+        $name = trim($name,'\\');
         $this->event->trigger('DHP_FW.DI.get', $name);
         $objectName = str_replace(array('/', '.'), '\\', $name);
         if ( isset( $this->container['object'][$objectName] ) ) {
@@ -39,19 +40,18 @@ class DI {
             $o = $this->instantiateObject($name, $args);
         }
         catch (\Exception $e) {
-            //throw $e;
             return NULL;
         }
         return $o;
     }
 
     public function addObjectAlias($name, $reference){
-        $this->container['object'][$name] = & $this->container['object'][$reference];
+        $this->container['object'][$name] = $this->container['object'][$reference];
         return $this;
     }
 
     public function addClassAlias($name, $reference){
-        $this->container['class'][$name] = & $this->container['class'][$reference];
+        $this->container['class'][$name] = $this->container['class'][$reference];
         return $this;
     }
 
@@ -79,7 +79,7 @@ class DI {
         } while (is_string($key));
         $o                                        = $key->init();
         $this->container['object'][get_class($o)] = $o;
-        $this->container['class'][$classToInit]   = & $this->container['object'][get_class($o)];
+        $this->container['class'][$classToInit]   = $this->container['object'][get_class($o)];
         return $o;
     }
 
