@@ -1,7 +1,6 @@
 <?php
 declare(encoding = "UTF8") ;
 namespace DHP_FW\cache;
-use \DHP_FW\cache\CacheStorage;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-16 20:29
@@ -9,7 +8,7 @@ use \DHP_FW\cache\CacheStorage;
 class Cache {
 
     private $buckets = array();
-    public function __construct(CacheStorage $storage){
+    public function __construct(CacheStorageInterface $storage){
         $this->storage = $storage;
     }
 

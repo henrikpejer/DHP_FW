@@ -10,7 +10,7 @@ use DHP_FW\Event;
  *
  * App class, used to handle app routes and more.
  */
-class App {
+class App implements \DHP_FW\AppInterface{
 
     protected $routes = array();
     protected $configs = array(
@@ -18,18 +18,10 @@ class App {
     );
     protected $cache = NULL;
 
-    const HTTP_METHOD_GET    = 'GET';
-    const HTTP_METHOD_POST   = 'POST';
-    const HTTP_METHOD_DELETE = 'DELETE';
-    const HTTP_METHOD_PUT    = 'PUT';
-    const HTTP_METHOD_HEAD   = 'HEAD';
-    const HTTP_METHOD_ANY    = 'ANY';
-    const ROUTE_CONTINUE     = 'YES';
-
     private $customParamTypes = array();
     private $CONTINUEROUTE = FALSE;
 
-    public function __construct($Request, DI $DI, Event $event) {
+    public function __construct(\DHP_FW\RequestInterface $Request, \DHP_FW\dependencyInjection\DIInterface $DI, \DHP_FW\EventInterface $event) {
         $this->routes  = array(
             self::HTTP_METHOD_GET    => array(),
             self::HTTP_METHOD_POST   => array(),

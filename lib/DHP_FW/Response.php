@@ -8,7 +8,7 @@ use DHP_FW\Event;
  * Date: 2013-01-01 05:35
  */
 
-class Response {
+class Response implements ResponseInterface{
 
     const DATASENDSTATUS_NOT_STARTED = 0;
     const DATASENDSTATUS_STARTED     = 1;
@@ -26,7 +26,7 @@ class Response {
     private $supressHeader = FALSE;
     private $dataIsCache = FALSE;
 
-    public function __construct(Event $event) {
+    public function __construct(EventInterface $event) {
         $this->event = $event;
     }
 
@@ -181,7 +181,7 @@ class Response {
         if ($this->dataIsCache == FALSE) {
             # lets cache this, ok?
             \app\DI()->get('DHP_FW\\cache\\Cache')->bucket('app')->set("uri_" . \app\DI()->get('DHP_FW\\Request')
-                    ->getUri() . "_data", array('headers' => $this->headerDataSent, 'data' => $this->data),5);
+                    ->getUri() . "_data", array('headers' => $this->headerDataSent, 'data' => $this->data),600);
         }
     }
 

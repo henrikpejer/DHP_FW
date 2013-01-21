@@ -1,16 +1,15 @@
 <?php
 declare(encoding = "UTF8") ;
 namespace DHP_FW\cache;
-use \DHP_FW\cache\CacheStorage;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-16 22:08
  */
-class CacheBucketProxy implements CacheStorage{
+class CacheBucketProxy implements CacheStorageInterface{
     private $prefix = NULL;
     private $storage = NULL;
 
-    public function __construct($prefix, CacheStorage $storage) {
+    public function __construct($prefix, CacheStorageInterface $storage) {
         $this->prefix = $prefix;
         $this->storage = $storage;
     }
@@ -20,7 +19,7 @@ class CacheBucketProxy implements CacheStorage{
         return $this->storage->set($key,$value,$ttl);
     }
 
-    public function get($key, \closure $closure = NULL, $ttl = NULL) {
+    public function get($key, callable $closure = NULL, $ttl = NULL) {
         $key = $this->prefix.'_'.$key;
         return $this->storage->get($key,$closure,$ttl);
     }

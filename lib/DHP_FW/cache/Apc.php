@@ -1,12 +1,11 @@
 <?php
 declare(encoding = "UTF8") ;
 namespace DHP_FW\cache;
-use DHP_FW\cache\CacheStorage;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-16 20:41
  */
-class Apc implements CacheStorage{
+class Apc implements CacheStorageInterface{
 
     private $defaultTtl = NULL;
 
@@ -19,10 +18,10 @@ class Apc implements CacheStorage{
         return apc_store($key,$value, $ttl);
     }
 
-    public function get($key, \closure $closure = NULL, $ttl = NULL) {
+    public function get($key, callable $closure = NULL, $ttl = NULL) {
         $__success__ = NULL;
         $return = apc_fetch($key,$__success__);
-        if($return === FALSE && isset($closure)){  # something went bad, right?
+        if($return === FALSE && $closure !== NULL && is_callable($closure)){  # something went bad, right?
             ob_start();
             $__return__ = $closure();
             $__echo__ = ob_get_clean();

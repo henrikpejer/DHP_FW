@@ -13,7 +13,7 @@ const EVENT_ABORT = '32e4f1d38810d19529b4d0054eab52bd';
  * Objects can subscribe to events happening in the system and
  * functions will be called, with or without arguments.
  */
-class Event {
+class Event implements \DHP_FW\EventInterface{
 
     protected $events = array('*' => array(), '__controller__' => array());
     public $delegates = array();

@@ -1,7 +1,6 @@
 <?php
 declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
-use DHP_FW\ParameterBag;
 
 /**
  *
@@ -9,7 +8,7 @@ use DHP_FW\ParameterBag;
  * Date: 2013-01-17 16:37
  *
  */ 
-class ParameterBagReadOnly extends ParameterBag{
+class ParameterBagReadOnly extends ParameterBag implements ParameterBagReadOnlyInterface{
 
     protected  $_values;
     

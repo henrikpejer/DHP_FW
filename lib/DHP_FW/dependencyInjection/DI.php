@@ -7,7 +7,7 @@ use DHP_FW\Utils;
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-01 20:42
  */
-class DI {
+class DI implements DIInterface{
 
     private $event = NULL;
 
@@ -15,7 +15,7 @@ class DI {
         'object' => array(), 'class' => array(), 'parameters' => array()
     );
 
-    public function __construct(\DHP_FW\Event $Event){
+    public function __construct(\DHP_FW\EventInterface $Event){
         $this->event                                 = $Event;
         $this->container['object'][get_class($this)] = $this;
         $this->container['object'][get_class($Event)] = $Event;

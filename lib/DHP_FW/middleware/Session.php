@@ -1,23 +1,21 @@
 <?php
 declare(encoding = "UTF8") ;
 namespace DHP_FW\middleware;
-use DHP_FW\ParameterBag;
-use DHP_FW\Event;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-18 23:40
  */
-class Session {
+class Session implements MiddlewareInterface{
 
     private $sessionData = NULL;
     private $dataChanged = FALSE;
     private $event = NULL;
     public $flash = NULL;
 
-    public function __construct(\DHP_FW\Request $req){
+    public function __construct(\DHP_FW\RequestInterface $req, \DHP_FW\EventInterface $event){
         $this->load();
         $this->setupFlashData();
-        $req->session = $this;
+        $this->event = $event;
     }
 
     private function load(){}
@@ -40,8 +38,8 @@ class Session {
     }
 
     private function setupFlashData() {
+        # todo : refactor away this, right?
         $this->flash = new ParameterBag(array());
-        $e = \app\DI()->get('DHP_FW\\Event');
-        $e->subscribe($this->flash,$this);
+        $this->event->subscribe($this->flash,$this);
     }
 }

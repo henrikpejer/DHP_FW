@@ -5,13 +5,13 @@ namespace DHP_FW\dependencyInjection;
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-01 20:44
  */
-class DIProxy {
+class DIProxy implements DIProxyInterface{
     private $classToInstantiate = NULL;
     private $argumentsToConstructor = array();
     private $methodCalls = array();
     private $object = NULL;
 
-    public function __construct($class, array $arguments = array(), DI $DI) {
+    public function __construct($class, array $arguments = array(), DIInterface $DI) {
         $this->classToInstantiate     = $class;
         $this->argumentsToConstructor = $arguments;
         $this->DI = $DI;
