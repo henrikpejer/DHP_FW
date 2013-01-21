@@ -5,7 +5,7 @@ namespace DHP_FW\cache;
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-16 22:08
  */
-class CacheBucketProxy implements CacheStorageInterface{
+class CacheBucketProxy implements CacheBucketProxyInterface{
     private $prefix = NULL;
     private $storage = NULL;
 
