@@ -13,7 +13,7 @@ interface ParameterBagInterface {
      *
      * @param array $values initial values
      */
-    function __construct(array $values, \DHP_FW\EventInterface $event);
+    function __construct(array $values);    # , \DHP_FW\EventInterface $event
 
     /**
      * Use this to get the value

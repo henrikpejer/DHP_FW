@@ -13,7 +13,7 @@ interface DIProxyInterface {
      * @param array                          $arguments arguments needed for instantiation
      * @param \DHP_FW\dependencyInjection\DI $DI reference to the object needed to aid instantiation
      */
-    function __construct($class, array $arguments = array(), \DHP_FW\dependencyInjection\DIInterface $DI);
+    function __construct($class, \DHP_FW\dependencyInjection\DIInterface &$DI);
 
     /**
      * Returns the values needed for the proxy to instantiate the class

@@ -1,133 +1,143 @@
 <?php
-declare( encoding = "UTF8" ) ;
+declare(encoding = "UTF8") ;
 namespace DHP_FW\dependencyInjection;
 use DHP_FW\Utils;
 
 /**
  * User: Henrik Pejer mr@henrikpejer.com
- * Date: 2013-01-01 20:42
+ * Date: 2013-01-22 20:32
  */
-class DI implements DIInterface{
+class DI implements \DHP_FW\dependencyInjection\DIInterface {
+    private $config, $store;
 
-    private $event = NULL;
-
-    private $container = array(
-        'object' => array(), 'class' => array(), 'parameters' => array()
-    );
-
-    public function __construct(\DHP_FW\EventInterface $Event){
-        $this->event                                 = $Event;
-        $this->container['object'][get_class($this)] = $this;
-        $this->container['object'][get_class($Event)] = $Event;
-        $this->container['object']['event'] = &$this->container['object'][get_class($Event)];
-        $this->addObjectAlias('DI', get_class($this));
+    /**
+     * Starts the whole DI off.
+     *
+     * Config should be initial values for what means what, so to speak.
+     *
+     * This will also load the event-library, since it is used throughout
+     * the application.
+     *
+     * @param array $config
+     */
+    function __construct(array $config = array()) {
+        $this->config = (object)$config;
+        $this->store  = new \StdClass;
     }
 
-    public function get($name, array $args = array()){
-        $name = trim($name,'\\');
-        $this->event->trigger('DHP_FW.DI.get', $name);
-        $objectName = str_replace(array('/', '.'), '\\', $name);
-        if ( isset( $this->container['object'][$objectName] ) ) {
-            return $this->container['object'][$objectName];
+    /**
+     * Here we set a key, value. This will be used when we further down the road
+     * need to get something.
+     *
+     * These will also be used when we want to instantiate things.
+     *
+     * @param $name name of key, string
+     * @param $value value, could be anything
+     * @return \DHP_FW\dependencyInjection\DIProxyInterface
+     */
+    function set($name, $value) {
+        return $this->store->{$name} = new DIProxy($value, $this);
+    }
+
+    /**
+     * Here we set an alias for an key:
+     *
+     * alias('DHP_FW\Request','app\Request')
+     *
+     * means that if one asks for DHP_FWE/Request, you get app/request instead.
+     *
+     * Original has to exist already, or an exception will be thrown.
+     *
+     * @param $alias the alias for...
+     * @param $original original
+     * @return $this
+     */
+    function alias($alias, $original) {
+        if (!isset($this->store->{$original})) {
+            throw new \InvalidArgumentException('Original must already exist');
         }
-        if ( isset( $this->container['class'][$objectName] ) ) {
-            if ( is_object($this->container['class'][$objectName]) && is_a($this->container['class'][$objectName], 'DHP_FW\\dependencyInjection\\DIProxy') ) {
-                $this->initClass($objectName);
+        $this->store->{$alias} = & $this->store->{$original};
+    }
+
+    /**
+     * This will return whatever it is that we want. IF object has been loaded,
+     * return that. If not, instantiate it and.... be happy with it!
+     *
+     * @param $name name of object to load
+     * @return mixed
+     */
+    function get($name) {
+        if (!isset($this->store->{$name})) {
+            return NULL;
+        }else {
+            if (is_a($this->store->{$name}, '\DHP_FW\dependencyInjection\DIProxy')) {
+                $this->store->{$name} = $this->store->{$name}->init();
             }
-            return $this->container['class'][$objectName];
         }
-        # last thing to try -> load it as if it were a class, right?
-        try {
-            $o = $this->instantiateObject($name, $args);
-        }
-        catch (\Exception $e) {
-            return NULL;
-        }
-        return $o;
+        return $this->store->{$name};
     }
 
-    public function addObjectAlias($name, $reference){
-        $this->container['object'][$name] = $this->container['object'][$reference];
-        return $this;
+    /**
+     * A short for set($name,$value)
+     *
+     * @param $name
+     * @param $value
+     * @return mixed
+     */
+    function __set($name, $value) {
+        return $this->set($name, $value);
     }
 
-    public function addClassAlias($name, $reference){
-        $this->container['class'][$name] = $this->container['class'][$reference];
-        return $this;
+    /**
+     * A short for get($name);
+     * @param $name
+     * @return mixed
+     */
+    function __get($name) {
+        return $this->get($name);
     }
 
-    public function addObject($object, $name = NULL){
-        $name                             = $name === NULL ? get_class($object) : $name;
-        $this->container['object'][$name] = $object;
-        return $this;
-    }
-
-    public function addClass($class, array $constructorArgs = array()){
-        return $this->container['class'][$class] = new DIProxy( $class, $constructorArgs, $this );
-    }
-
-    public function getObjectsInDI(){
-        $return = array();
-        foreach($this->container as $key => $object){
-            $return[$key] = array_keys($object);
-        }
-        return $return;
-    }
-
-    private function initClass($classToInit){
-        $key = $classToInit;
-        /**
-         * Here is a tricky part - we could have aliases to unfinished
-         * objects here and the way to figure this out is to look at the
-         * value we get. If it is a string, it is an alias and we should
-         * continue to look for the actual object we should init.
-         *
-         */
-        do {
-            $key = $this->container['class'][$key];
-        } while (is_string($key));
-        $o                                        = $key->init();
-        $this->container['object'][get_class($o)] = $o;
-        $this->container['class'][$classToInit]   = $this->container['object'][get_class($o)];
-        return $o;
-    }
-
-    public function instantiateObject($class, array $__args__ = array()){
-        $this->event->trigger('DHP_FW.DI.instantiate', $class, $__args__);
+    public function instantiateObject($class, array $__args__ = array()) {
+        # $this->event->trigger('DHP_FW.DI.instantiate', $class, $__args__);
         $constructorArguments = Utils::classConstructorArguments($class);
-        $classReflector       = new \ReflectionClass( $class );
-        if($classReflector->isInterface()){
+        $classReflector       = new \ReflectionClass($class);
+        if ($classReflector->isInterface()) {
             return NULL;
         }
-        $args                 = array();
+        $args = array();
         foreach ($constructorArguments as $key => $constructorArgument) {
             # get a value, if possible...
-            switch(TRUE){
-                case ( !empty( $constructorArgument['class'] ) && ($__arg__ = $this->instantiateViaConstructor($constructorArgument['class'])) !== NULL):
-                case ( !empty( $constructorArgument['name'] ) && ($__arg__ = $this->instantiateViaConstructor($constructorArgument['name'])) !== NULL):
+            switch (TRUE) {
+                case (!empty($constructorArgument['class']) && (
+                $__arg__ = $this->instantiateViaConstructor($constructorArgument['class'])) !== NULL):
+                case (!empty($constructorArgument['name']) && (
+                $__arg__ = $this->instantiateViaConstructor($constructorArgument['name'])) !== NULL):
                     $args[] = $__arg__;
                     break;
-                case isset( $__args__[$constructorArgument['name']] ):
+                case isset($__args__[$constructorArgument['name']]):
                     $args[] = $__args__[$constructorArgument['name']];
                     break;
-                case isset( $__args__[$key] ):
+                case isset($__args__[$key]):
                     $args[] = $__args__[$key];
-                break;
+                    break;
                 default:
                     $args[] = NULL;
             }
         }
-        $return = sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
-        $this->container['object'][get_class($return)] = $return;
+        $return =
+                sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
+        # $this->container['object'][get_class($return)] = $return;
         return $return;
     }
 
-    private function instantiateViaConstructor($constructor){
+    private function instantiateViaConstructor($constructor) {
         $return = NULL;
         try {
-            $__name__ = $this->get($constructor);
-            if ( !empty( $__name__ ) ) {
-                $return = $__name__;
+            if (isset($this->storage->{$constructor})) {
+                $__name__ = $this->storage->{$constructor};
+                if (!empty($__name__)) {
+                    $return = $__name__;
+                }
             }
         }
         catch (\Exception $e) {

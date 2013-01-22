@@ -6,79 +6,81 @@ namespace DHP_FW\dependencyInjection;
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-01 20:42
  */
+
+/**
+ * Lets redo this the right way. Big job, got to be done, no other way around it.
+ *
+ * The thought here being, that, we should have some sort of basic key -> value store
+ * where we use the keys as hints to when we want to load something.
+ *
+ * This loading can either be a concrete class or an interface : if interface, we must
+ * resolve to what that actually means.
+ *
+ */
 interface DIInterface {
 
-    /**
-     * Adds the objects needed to DI to function
-     *
-     * @param Event $Event
-     */
-    function __construct(\DHP_FW\EventInterface $Event);
 
     /**
-     * This method is responsible for getting and returning and object. If
-     * the object is not already instantiated, it will try to create it for us.
+     * Starts the whole DI off.
      *
-     * @param       $name what we want
-     * @param array $args some arguments that we want to instantiate it with
+     * Config should be initial values for what means what, so to speak.
+     *
+     * This will also load the event-library, since it is used throughout
+     * the application.
+     *
+     * @param array $config
+     */
+    function __construct(array $config = NULL);
+
+    /**
+     * Here we set a key, value. This will be used when we further down the road
+     * need to get something.
+     *
+     * These will also be used when we want to instantiate things.
+     *
+     * @param $name name of key, string
+     * @param $value value, could be anything
+     * @return DIProxyInterface instance, most likely a reference :)
+     */
+    function set($name,$value);
+
+    /**
+     * Here we set an alias for an key:
+     *
+     * alias('DHP_FW\Request','app\Request')
+     *
+     * means that if one asks for DHP_FWE/Request, you get app/request instead.
+     *
+     * Original has to exist already, or an exception will be thrown.
+     *
+     * @param $alias the alias for...
+     * @param $original original
+     * @return $this
+     */
+    function alias($alias, $original);
+
+    /**
+     * This will return whatever it is that we want. IF object has been loaded,
+     * return that. If not, instantiate it and.... be happy with it!
+     *
+     * @param $name name of object to load
      * @return mixed
      */
-    # todo : should we have args here... really? Probably not, right?
-    function get($name, array $args = array());
+    function get($name);
 
     /**
-     * Sets an alias for a object already in the container
+     * A short for set($name,$value)
      *
      * @param $name
-     * @param $reference
+     * @param $value
      * @return mixed
      */
-    # todo : perhaps refactor away...?
-    function addObjectAlias($name, $reference);
+    function __set($name,$value);
 
     /**
-     * Adds an alias for a class already in the container
-     *
+     * A short for get($name);
      * @param $name
-     * @param $reference
      * @return mixed
      */
-    # todo : refactor away, right?
-    function addClassAlias($name, $reference);
-
-    /**
-     * Adds an already instantiated object
-     *
-     * @param      $object
-     * @param null $name An 'alias', if none given, the class of the object
-     * @return mixed
-     */
-    function addObject($object, $name = NULL);
-
-    /**
-     * Adds a class that should be instantiated and returns that object. This is
-     * so that the DI knows how to instantiate that class, once it is needed
-     *
-     * @param       $class
-     * @param array $constructorArgs
-     * @return mixed
-     */
-    function addClass($class, array $constructorArgs = array());
-
-    /**
-     * This will return an array with ONLY the names of the objects
-     * not all the objects
-     *
-     * @return array
-     */
-    function getObjectsInDI();
-
-    /**
-     * Used to instantiate an object
-     * @param       $class name of the class to instantiate
-     * @param array $__args__ the args used to instantiate the clas
-     * @return mixed
-     */
-    # todo : why is this not private....?
-    function instantiateObject($class, array $__args__ = array());
+    function __get($name);
 }

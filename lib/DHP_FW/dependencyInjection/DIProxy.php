@@ -11,9 +11,8 @@ class DIProxy implements DIProxyInterface{
     private $methodCalls = array();
     private $object = NULL;
 
-    public function __construct($class, array $arguments = array(), DIInterface $DI) {
+    public function __construct($class, DIInterface &$DI) {
         $this->classToInstantiate     = $class;
-        $this->argumentsToConstructor = $arguments;
         $this->DI = $DI;
     }
 

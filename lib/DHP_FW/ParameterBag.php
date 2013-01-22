@@ -9,7 +9,7 @@ namespace DHP_FW;
  */ 
 class ParameterBag implements ParameterBagInterface {
     private $_values, $event;
-    public function __construct(array $values, \DHP_FW\EventInterface $event){
+    public function __construct(array $values){ # $this->storage->{$constructor}
         $this->_values = $values;
         $this->event = $event;
     }
@@ -20,7 +20,7 @@ class ParameterBag implements ParameterBagInterface {
 
     public function __set($name,$value){
         # run delegation, if any, to notice that we DO have changed data
-        $this->event->triggerSubscribe($this, 'dataChanged',$name,$value);
+        #$this->event->triggerSubscribe($this, 'dataChanged',$name,$value);
         return $this->_values[$name] = $value;
     }
 }
