@@ -11,9 +11,10 @@ interface ParameterBagInterface {
     /**
      * A bag with values. or, parameters
      *
-     * @param array $values initial values
+     * @param array          $values initial values
+     * @param EventInterface $event
      */
-    function __construct(array $values);    # , \DHP_FW\EventInterface $event
+    function __construct(array $values, \DHP_FW\EventInterface $event);    # , \DHP_FW\EventInterface $event
 
     /**
      * Use this to get the value

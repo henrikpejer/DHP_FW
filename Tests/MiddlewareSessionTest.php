@@ -16,7 +16,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase {
      */
     protected function setUp() {
         $this->e      = new \DHP_FW\Event();
-        $this->object = new Session(new \DHP_FW\Request('GET','/',NULL,$this->e));
+        $this->object = new Session(new \DHP_FW\Request('GET','/',NULL,$this->e),$this->e);
     }
 
     /**

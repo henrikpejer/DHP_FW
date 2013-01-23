@@ -1,8 +1,6 @@
 <?php
 declare(encoding = "UTF8") ;
 namespace DHP_FW;
-use DHP_FW\dependencyInjection\DI;
-use DHP_FW\Event;
 
 /**
  * User: Henrik Pejer mr@henrikpejer.com
@@ -14,7 +12,7 @@ class App implements \DHP_FW\AppInterface{
 
     protected $routes = array();
     protected $configs = array(
-        'cacheStorage' => 'DHP_FW\\cache\\Apc',
+        'use_cache' => FALSE
     );
     protected $cache = NULL;
 
@@ -65,7 +63,7 @@ class App implements \DHP_FW\AppInterface{
         return $this->registerRoute(self::HTTP_METHOD_ANY, $uri, $closure);
     }
 
-    public function verb(array $methods, $uri, $closure) {
+    public function verb(array $methods, $uri, callable $closure) {
         return $this->registerRoute($methods, $uri, $closure);
     }
 
@@ -96,12 +94,12 @@ class App implements \DHP_FW\AppInterface{
     }
 
     # todo : figure out dependencies... or not?
-    public function middleware($middleware) {
+    public function middleware( $middleware) {
         if (!class_exists($middleware, TRUE)) {
-            $middleware = '\\DHP_FW\\middleware\\' . $middleware;
+            $middleware = 'DHP_FW\middleware\\' . $middleware;
         }
         if (!class_exists($middleware, TRUE)) {
-            $middleware = '\\App\\middleware\\' . $middleware;
+            $middleware = 'App\middleware\\' . $middleware;
         }
         $this->DI->get($middleware);
         return $this;
@@ -115,6 +113,9 @@ class App implements \DHP_FW\AppInterface{
         foreach ($routesToProcess as $uri => $closure) {
             $this->CONTINUEROUTE = FALSE;
             if (FALSE !== ($routeMatchReturn = $this->matchUriToRoute($uriToMatch, $uri))) {
+                if($uriToMatch == 'blog/this-is-the-title'){
+                    
+                }
                 if (is_array($routeMatchReturn)) {
                     $closureResult = call_user_func_array($closure, $routeMatchReturn);
                 }
@@ -224,10 +225,11 @@ class App implements \DHP_FW\AppInterface{
      * Gets cacheStorage, inits it and sets the cache of!
      */
     private function setupCache() {
-        $storage     = $this->DI->get($this->configs['cacheStorage']);
-        $this->cache = $this->DI->get('\\DHP_FW\\cache\\Cache', array($storage));
-        $this->cache->bucket('app');
-        $this->cache->bucket('data');
-        $this->cache->bucket('sys');
+        if ( $this->enabled('use_cache') ) {
+            $this->cache = $this->DI->get('DHP_FW\cache\Cache');
+            $this->cache->bucket('app');
+            $this->cache->bucket('data');
+            $this->cache->bucket('sys');
+        }
     }
 }

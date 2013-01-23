@@ -9,11 +9,9 @@ class DIProxy implements DIProxyInterface{
     private $classToInstantiate = NULL;
     private $argumentsToConstructor = array();
     private $methodCalls = array();
-    private $object = NULL;
 
-    public function __construct($class, DIInterface &$DI) {
+    public function __construct($class) {
         $this->classToInstantiate     = $class;
-        $this->DI = $DI;
     }
 
     public function get() {
@@ -24,22 +22,12 @@ class DIProxy implements DIProxyInterface{
 
     public function addMethodCall($method, $args = array()) {
         $args = !is_array($args)?array($args):$args;
-        $this->methodCalls[] = array('method' => $method, 'args' => $args);
+        $this->methodCalls[] = (object) array('method' => $method, 'args' => $args);
         return $this;
     }
 
     public function setArguments(Array $args) {
         $this->argumentsToConstructor = $args;
         return $this;
-    }
-
-    public function init(){
-        if(!isset($this->object)){
-            $this->object = $this->DI->instantiateObject($this->classToInstantiate,$this->argumentsToConstructor);
-            foreach($this->methodCalls as $methodCall){
-                call_user_func_array(array($this->object,$methodCall['method']),$methodCall['args']);
-            }
-        }
-        return $this->object;
     }
 }

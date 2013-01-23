@@ -1,5 +1,5 @@
 <?php
-declare(encoding = "UTF8") ;
+declare( encoding = "UTF8" ) ;
 namespace DHP_FW\dependencyInjection;
 use DHP_FW\Utils;
 
@@ -20,9 +20,10 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
      *
      * @param array $config
      */
-    function __construct(array $config = array()) {
-        $this->config = (object)$config;
+    function __construct(array $config = array()){
+        $this->config = (object) $config;
         $this->store  = new \StdClass;
+        $this->store->{'DHP_FW\dependencyInjection\DIInterface'} = $this;
     }
 
     /**
@@ -31,12 +32,17 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
      *
      * These will also be used when we want to instantiate things.
      *
-     * @param $name name of key, string
-     * @param $value value, could be anything
+     * @param $name  String, name of key, string
+     * @param $value String, value could be anything
      * @return \DHP_FW\dependencyInjection\DIProxyInterface
      */
-    function set($name, $value) {
-        return $this->store->{$name} = new DIProxy($value, $this);
+    public function set($name, $value){
+        if(is_string($value)){
+            $this->store->{$name} = new DIProxy( $value );
+        }else{
+            $this->store->{$name} = $value;
+        }
+        return $this->store->{$name};
     }
 
     /**
@@ -48,13 +54,14 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
      *
      * Original has to exist already, or an exception will be thrown.
      *
-     * @param $alias the alias for...
-     * @param $original original
+     * @param $alias    String, alias for...
+     * @param $original String,
+     * @throws \InvalidArgumentException
      * @return $this
      */
-    function alias($alias, $original) {
-        if (!isset($this->store->{$original})) {
-            throw new \InvalidArgumentException('Original must already exist');
+   public function alias($alias, $original){
+        if ( !isset( $this->store->{$original} ) ) {
+            throw new \InvalidArgumentException( 'Original must already exist' );
         }
         $this->store->{$alias} = & $this->store->{$original};
     }
@@ -66,14 +73,35 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
      * @param $name name of object to load
      * @return mixed
      */
-    function get($name) {
-        if (!isset($this->store->{$name})) {
-            return NULL;
-        }else {
-            if (is_a($this->store->{$name}, '\DHP_FW\dependencyInjection\DIProxy')) {
-                $this->store->{$name} = $this->store->{$name}->init();
+    function get($name){
+        if(!isset($this->store->{$name})){
+            $frameworkClass = $this->findMatchWithinFramework($name);
+            if($frameworkClass == NULL){
+                # lets try to load this as-if it where a class being called, ok?
+                try{
+                    if(class_exists($frameworkClass)){
+                        $frameworkClass = new $name;
+                    }
+                    else{
+                        return NULL;
+                    }
+                }catch(\Exception $e){
+                    return NULL;   
+                }
             }
+            $this->set($name,$frameworkClass);
         }
+        $__object__ = $this->store->{$name};
+        if ( is_a($__object__, '\DHP_FW\dependencyInjection\DIProxy') ) {
+            $__initProcess__ = $__object__->get();
+            $instance = $this->instantiateObject($__initProcess__['class'], $__initProcess__['args']);
+            foreach ($__initProcess__['methods'] as $methodAndArgs) {
+                call_user_func_array(array($instance, $methodAndArgs->method), $methodAndArgs->args);
+            }
+
+            $this->store->{$name} = & $instance;
+        }
+
         return $this->store->{$name};
     }
 
@@ -84,64 +112,54 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
      * @param $value
      * @return mixed
      */
-    function __set($name, $value) {
+    public function __set($name, $value){
         return $this->set($name, $value);
     }
 
     /**
      * A short for get($name);
+     *
      * @param $name
      * @return mixed
      */
-    function __get($name) {
+    public function __get($name){
         return $this->get($name);
     }
 
-    public function instantiateObject($class, array $__args__ = array()) {
+    public function instantiateObject($class, array $__args__ = array()){
         # $this->event->trigger('DHP_FW.DI.instantiate', $class, $__args__);
         $constructorArguments = Utils::classConstructorArguments($class);
-        $classReflector       = new \ReflectionClass($class);
-        if ($classReflector->isInterface()) {
+        $classReflector       = new \ReflectionClass( $class );
+        if ( $classReflector->isInterface() ) {
             return NULL;
         }
         $args = array();
         foreach ($constructorArguments as $key => $constructorArgument) {
             # get a value, if possible...
             switch (TRUE) {
-                case (!empty($constructorArgument['class']) && (
-                $__arg__ = $this->instantiateViaConstructor($constructorArgument['class'])) !== NULL):
-                case (!empty($constructorArgument['name']) && (
-                $__arg__ = $this->instantiateViaConstructor($constructorArgument['name'])) !== NULL):
+                case isset( $__args__[$key] ):
+                    $args[] = $__args__[$key];
+                    break;
+                case ( !empty( $constructorArgument['class'] ) && ( $__arg__ = $this->get($constructorArgument['class']) ) !== NULL ):
+                case ( !empty( $constructorArgument['name'] ) && ( $__arg__ = $this->get($constructorArgument['name']) ) !== NULL ):
                     $args[] = $__arg__;
                     break;
-                case isset($__args__[$constructorArgument['name']]):
+                case isset( $__args__[$constructorArgument['name']] ):
                     $args[] = $__args__[$constructorArgument['name']];
                     break;
-                case isset($__args__[$key]):
-                    $args[] = $__args__[$key];
+                case isset($constructorArgument['default']):
+                    $args[] = $constructorArgument['default'];
                     break;
                 default:
                     $args[] = NULL;
             }
         }
-        $return =
-                sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
-        # $this->container['object'][get_class($return)] = $return;
+        $return = sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
         return $return;
     }
 
-    private function instantiateViaConstructor($constructor) {
-        $return = NULL;
-        try {
-            if (isset($this->storage->{$constructor})) {
-                $__name__ = $this->storage->{$constructor};
-                if (!empty($__name__)) {
-                    $return = $__name__;
-                }
-            }
-        }
-        catch (\Exception $e) {
-        }
-        return $return;
+    private function findMatchWithinFramework($name){
+        $DHP_FWClass = str_replace('Interface', '', $name);
+        return strpos($name, 'DHP_FW\\') == 0 && class_exists($DHP_FWClass)?$DHP_FWClass:NULL;
     }
 }

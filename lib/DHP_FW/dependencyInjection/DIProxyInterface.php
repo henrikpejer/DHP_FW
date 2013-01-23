@@ -6,19 +6,18 @@ namespace DHP_FW\dependencyInjection;
  * Date: 2013-01-01 20:44
  */
 interface DIProxyInterface {
+    
     /**
      * Sets up the class so that it can instantiate the class
      *
-     * @param                                $class class to proxy
-     * @param array                          $arguments arguments needed for instantiation
-     * @param \DHP_FW\dependencyInjection\DI $DI reference to the object needed to aid instantiation
+     * @param $class String, class to proxy
      */
-    function __construct($class, \DHP_FW\dependencyInjection\DIInterface &$DI);
+    function __construct($class);
 
     /**
      * Returns the values needed for the proxy to instantiate the class
      *
-     * @return array
+     * @return array[class,args,methods]
      */
     function get();
 
@@ -27,7 +26,7 @@ interface DIProxyInterface {
      * instantiated, we add that method and arguments here. They will be called in the
      * order they where added.
      *
-     * @param       $method name of the method
+     * @param       $method String, name  of the method
      * @param array $args arguments to that method
      * @return mixed
      */
@@ -41,16 +40,4 @@ interface DIProxyInterface {
      * @return $this
      */
     function setArguments(Array $args);
-
-    /**
-     * This method will instantiate and return the object that this is
-     * a proxy for. The __constructor will be called with the arguments
-     * provided. If any methods wer set via the addMethodCall, those will
-     * be called aswell.
-     *
-     * Finally the object will be returned.
-     *
-     * @return mixed
-     */
-    function init();
 }

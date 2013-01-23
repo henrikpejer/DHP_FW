@@ -7,14 +7,22 @@ namespace{
 
     ob_start();
     date_default_timezone_set('Europe/Stockholm');
-    require_once 'lib/splClassLoader.php';
-    $classLoader = new SplClassLoader('DHP_FW', __DIR__ . DIRECTORY_SEPARATOR . 'lib');
-    $classLoader->register();
-}
+    require_once __DIR__ . DIRECTORY_SEPARATOR . 'lib/splClassLoader.php';
+      $classLoader = new SplClassLoader( 'DHP_FW', __DIR__ . DIRECTORY_SEPARATOR . 'lib' );
+      $classLoader->register();
+  
+      $DI = new DHP_FW\dependencyInjection\DI();
+      $storage     = $DI->get('DHP_FW\cache\Apc');
+      $DI
+        ->set('DHP_FW\cache\Cache', 'DHP_FW\cache\Cache')
+        ->setArguments(array($storage));
+      $app = $DI->get('DHP_FW\AppInterface');
+      $appControllerLoader = new SplClassLoader( 'app', dirname($_SERVER['SCRIPT_FILENAME']) );
+      $appControllerLoader->register();}
 namespace app{
     $event = new \DHP_FW\Event();
-    $di = new \DHP_FW\dependencyInjection\DI($event);
-    $app = $di->get('\\DHP_FW\App');
+    #$di = new \DHP_FW\dependencyInjection\DI($event);
+    $app = $DI->get('DHP_FW\App');
     function next(){
         global $app;
         $app->continueWithNextRoute();
@@ -24,7 +32,7 @@ namespace app{
         return $app;
     }
     function &DI(){
-        global $di;
-        return $di;
+        global $DI;
+        return $DI;
     }
 }

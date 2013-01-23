@@ -3,17 +3,15 @@
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-02 21:28
  */
-
-require_once 'lib/splClassLoader.php';
-
-$classLoader = new SplClassLoader('DHP_FW', __DIR__ . DIRECTORY_SEPARATOR . 'lib');
-$classLoader->register();
-
-$DI = new DHP_FW\dependencyInjection\DI();
-
-$DI->set('DHP_FW\EventInterface','\StdClass');
-$DI->alias('event','DHP_FW\EventInterface');
-var_dump($DI->get('event'));
+require_once __DIR__.DIRECTORY_SEPARATOR.'bootstrap.php';
+#$req = $DI->get('DHP_FW\Request');
+#$e = $DI->get('DHP_FW\EventInterface');
+#$e->register('test',function(){
+#    echo 'done';
+#});
+#var_dump(spl_object_hash($e));
+#var_dump($req);
+#$e->trigger('test');
 /*
 require_once 'bootstrap.php';
 #header('Status: 404 Not Found');

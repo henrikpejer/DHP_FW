@@ -19,9 +19,9 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
         $_GET                 = array('someGet' => 'someGetValue', 'some' => 'get value');
         $_POST                = array('somePost' => 'somePostValue', 'some' => 'post value');
 
-        $DI = new \DHP_FW\dependencyInjection\DI(new Event());
-        $DI->addClass('DHP_FW\\Request')->setArguments(array(NULL,NULL,'{"something":"else"}'));
-        $this->object = $DI->get('DHP_FW\\Request');
+        $DI = \app\DI();#new \DHP_FW\dependencyInjection\DI(new Event());
+        $DI->set('DHP_FW\RequestInterface','DHP_FW\Request')->setArguments(array(NULL,NULL,'{"something":"else"}'));
+        $this->object = $DI->get('DHP_FW\RequestInterface');
         #$this->object         = new Request();
     }
 

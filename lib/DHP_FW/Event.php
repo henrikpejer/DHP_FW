@@ -124,7 +124,6 @@ class Event implements \DHP_FW\EventInterface{
         $return   = NULL;
         $numArgs  = ( func_num_args() - 1 );
         $callArgs = NULL;
-
         foreach ($this->mergeEventToCall($eventName) as $event) {
             $__return__ = NULL;
             switch ($numArgs) {

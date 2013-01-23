@@ -36,20 +36,13 @@ class UtilsTest extends \PHPUnit_Framework_TestCase {
     /**
      */
     public function testClassConstructorArguments() {
-        $args = Utils::classConstructorArguments('\\DHP_FW\\dependencyInjection\\DIProxy');
-        \PHPUnit_Framework_Assert::assertEquals(3, sizeof($args));
+        $args = Utils::classConstructorArguments('DHP_FW\dependencyInjection\DIProxy');
+        \PHPUnit_Framework_Assert::assertEquals(1, sizeof($args));
         \PHPUnit_Framework_Assert::assertEquals(array(
             'name'     => 'class',
             'required' => TRUE,
             'class'    => NULL
         ), $args[0]);
-
-        \PHPUnit_Framework_Assert::assertEquals(array(
-            'name'     => 'arguments',
-            'required' => TRUE,
-            'class'    => NULL
-        ), $args[1]);
-
         $args = Utils::classConstructorArguments('testUtilsClass');
         \PHPUnit_Framework_Assert::assertEquals(2, sizeof($args));
         \PHPUnit_Framework_Assert::assertEquals(array(

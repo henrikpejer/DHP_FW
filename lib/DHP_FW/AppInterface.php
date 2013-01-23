@@ -23,13 +23,13 @@ interface AppInterface {
      * @param DI    $DI
      * @param Event $event
      */
-    function __construct(\DHP_FW\interfaces\Request $Request, \DHP_FW\interfaces\DI $DI, \DHP_FW\interfaces\Event $event);
+    function __construct(\DHP_FW\RequestInterface $Request, \DHP_FW\dependencyInjection\DIInterface $DI, EventInterface $event);
 
     /**
      * Sets routes for GET-requests
      *
      * @param $uri string, uri to match
-     * @param $closure closure to call when matched
+     * @param $closure callable to call when matched
      * @return mixed
      */
     function get($uri, callable $closure);
@@ -38,7 +38,7 @@ interface AppInterface {
      * Sets routes for POST-requests
      *
      * @param $uri string, uri to match
-     * @param $closure closure to call when matched
+     * @param $closure callable to call when matched
      * @return mixed
      */
     function post($uri, callable $closure);
@@ -47,7 +47,7 @@ interface AppInterface {
      * Sets routes for DELETE-requests
      *
      * @param $uri string, uri to match
-     * @param $closure closure to call when matched
+     * @param $closure callable to call when matched
      * @return mixed
      */
     function delete($uri, callable $closure);
@@ -56,7 +56,7 @@ interface AppInterface {
      * Sets routes for PUT-requests
      *
      * @param $uri string, uri to match
-     * @param $closure closure to call when matched
+     * @param $closure callable to call when matched
      * @return mixed
      */
     function put($uri, callable $closure);
@@ -65,7 +65,7 @@ interface AppInterface {
      * Sets routes for HEAD-requests
      *
      * @param $uri string, uri to match
-     * @param $closure closure to call when matched
+     * @param $closure callable to call when matched
      * @return mixed
      */
        function head($uri, callable $closure);
@@ -75,7 +75,7 @@ interface AppInterface {
      * Sets routes for any and all types of requests
      *
      * @param $uri string, uri to match
-     * @param $closure closure to call when matched
+     * @param $closure callable to call when matched
      * @return mixed
      */
     function any($uri, callable $closure);
@@ -159,10 +159,10 @@ interface AppInterface {
      * will be instantiated before routes have been resolved. For instance, session, is a
      * middleware.
      *
-     * @param $middleware
+     * @param $middleware String, the name of the middleware we want to load...
      * @return $this
      */
-    function middleware(\DHP_FW\interfaces\Middleware $middleware);
+    function middleware( $middleware);
 
     /**
      * This method starts the app, basicly resolves routes, call the current route.

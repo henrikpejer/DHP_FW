@@ -17,7 +17,7 @@ class AppTest extends \PHPUnit_Framework_TestCase {
     protected function setUp() {
         $__event__ = new Event();
         $this->request = new Request('GET','/',NULL,$__event__);
-        $this->DI = new dependencyInjection\DI($__event__);
+        $this->DI = \app\DI();
         $this->object = new App($this->request, $this->DI,$__event__);
     }
 
@@ -228,9 +228,10 @@ class AppTest extends \PHPUnit_Framework_TestCase {
     public function testMiddleware(){
         $_COOKIE = array('cookieName'=>'CoookieValue');
         $req = new Request('GET','/blog/this-is-the-title',NULL, new Event());
-        $this->DI->addObject($req);
+        $this->DI->set('DHP_FW\RequestInterface',$req);
         $app = new App($req, $this->DI, new Event());
-        $app->middleware('Cookie')->get('blog/:title',function($title)use($req){
+        $app->middleware('Cookie');
+        $app->get('blog/:title',function($title)use($req){
             return $title.$req->cookie->cookieName;
         });
         

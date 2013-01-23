@@ -15,7 +15,7 @@ class DITest extends \PHPUnit_Framework_TestCase {
      * This method is called before a test is executed.
      */
     protected function setUp(){
-        $this->object = new DI( new \DHP_FW\Event() );
+        $this->object = new DI();
     }
 
     /**
@@ -26,13 +26,12 @@ class DITest extends \PHPUnit_Framework_TestCase {
     }
 
     /**
-     * @covers DHP_FW\dependencyInjection\DI::addObjectAlias
-     * @todo   Implement testAddObjectAlias().
      */
     public function testAddObjectAlias(){
-        $o = new \DHP_FW\Event();
-        $this->object->addObject($o);
-        $this->object->addObjectAlias('Event', 'DHP_FW\\Event');
+        #$o = new \DHP_FW\Event();
+        $this->object->set('DHP_FW\EventInterface','DHP_FW\Event');
+        #$this->object->addObject($o);
+        $this->object->alias('Event', 'DHP_FW\EventInterface');
         $e = $this->object->get('Event');
         \PHPUnit_Framework_Assert::assertInstanceOf('DHP_FW\\Event', $e);
     }
@@ -40,15 +39,15 @@ class DITest extends \PHPUnit_Framework_TestCase {
     /**
      */
     public function testAddClassAlias(){
-        $this->object->addClass('DHP_FW\\Event');
-        $this->object->addClassAlias('Event', 'DHP_FW\\Event');
+        $this->object->set('DHP_FW\EventInterface','DHP_FW\Event');
+        $this->object->alias('Event','DHP_FW\EventInterface');
         $o = $this->object->get('Event');
-        \PHPUnit_Framework_Assert::assertInstanceOf('DHP_FW\\Event', $o);
+        \PHPUnit_Framework_Assert::assertInstanceOf('DHP_FW\Event', $o);
     }
 
     public function testAddObject(){
         $o = new \DHP_FW\Event();
-        $this->object->addObject($o, 'Event');
+        $this->object->set('Event',$o);
         $o = $this->object->get('Event');
         \PHPUnit_Framework_Assert::assertInstanceOf('DHP_FW\\Event', $o);
     }
@@ -57,38 +56,26 @@ class DITest extends \PHPUnit_Framework_TestCase {
      * @covers DHP_FW\dependencyInjection\DI::instantiateObject
      */
     public function testInstantiateObject(){
-        $this->object->addClass('DHP_FW\\App');
-        $this->object->addClass('DHP_FW\\Request', array('method' => 'GET', 1 => '/urlofrequest'));
-        $this->object->addClass('DHP_FW\\Controller');
-        $this->object->addClassAlias('Request', 'DHP_FW\\Request');
+        $this->object->set('DHP_FW\AppInterface','DHP_FW\App');
+        $this->object->set('DHP_FW\RequestInterface','DHP_FW\Request')->setArguments( array('method' => 'GET', 1 => '/urlofrequest'));
+        $this->object->set('DHP_FW\ControllerInterface','DHP_FW\\Controller');
+        $this->object->alias('Request','DHP_FW\RequestInterface');
         #var_dump(array_keys($this->object->container['class']));
         
-        $o = $this->object->get('DHP_FW\\App');
-        \PHPUnit_Framework_Assert::assertInstanceOf('DHP_FW\\App', $o);
+        $o = $this->object->get('DHP_FW\App');
+        \PHPUnit_Framework_Assert::assertInstanceOf('DHP_FW\App', $o);
         
-        $c = $this->object->get('DHP_FW\\Controller');
-        \PHPUnit_Framework_Assert::assertInstanceOf('DHP_FW\\Controller', $c);
+        $c = $this->object->get('DHP_FW\Controller');
+        \PHPUnit_Framework_Assert::assertInstanceOf('DHP_FW\Controller', $c);
     }
 
     public function testSameObjectIsLoaded(){
         $e = $this->object->get('DHP_FW\Event');
         $ref = spl_object_hash($e);
-        $this->object->addObjectAlias('event','DHP_FW\Event');
-        $this->object->addObject($e,'masta');
+        $this->object->set('event',$e);
+        $this->object->alias('masta','event');
         \PHPUnit_Framework_Assert::assertEquals($ref,spl_object_hash($this->object->get('event')));
-        \PHPUnit_Framework_Assert::assertEquals($ref,spl_object_hash($this->object->get('\\DHP_FW\\Event')));
+        \PHPUnit_Framework_Assert::assertEquals($ref,spl_object_hash($this->object->get('DHP_FW\Event')));
         \PHPUnit_Framework_Assert::assertEquals($ref,spl_object_hash($this->object->get('masta')));
-        \PHPUnit_Framework_Assert::assertEquals(array(
-            'object'=>array(
-                'DHP_FW\\dependencyInjection\DI',
-                'DHP_FW\Event',
-                'event',
-                'DI',
-                'masta'
-               ),
-            'class'=>array(),
-            'parameters'=>array()
-        ),$this->object->getObjectsInDI());
-
     }
 }

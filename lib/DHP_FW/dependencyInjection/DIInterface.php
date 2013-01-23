@@ -38,8 +38,8 @@ interface DIInterface {
      *
      * These will also be used when we want to instantiate things.
      *
-     * @param $name name of key, string
-     * @param $value value, could be anything
+     * @param $name String of key, string
+     * @param $value String could be anything
      * @return DIProxyInterface instance, most likely a reference :)
      */
     function set($name,$value);
@@ -53,8 +53,8 @@ interface DIInterface {
      *
      * Original has to exist already, or an exception will be thrown.
      *
-     * @param $alias the alias for...
-     * @param $original original
+     * @param $alias String alias for...
+     * @param $original String
      * @return $this
      */
     function alias($alias, $original);
@@ -62,8 +62,12 @@ interface DIInterface {
     /**
      * This will return whatever it is that we want. IF object has been loaded,
      * return that. If not, instantiate it and.... be happy with it!
+     * 
+     * This will use the values in DIProxy to instantiate and if needed
+     * call a few methods to setup whatever is needed for that object
+     * to get it going
      *
-     * @param $name name of object to load
+     * @param $name String of object to load
      * @return mixed
      */
     function get($name);

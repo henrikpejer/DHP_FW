@@ -6,7 +6,7 @@ namespace DHP_FW;
  * Date: 2013-01-01 05:34
  */
 class Request implements \DHP_FW\RequestInterface{
-
+    private $event;
     private $uri = NULL;
     private $method = NULL;
     private $headers = NULL;
@@ -49,13 +49,13 @@ class Request implements \DHP_FW\RequestInterface{
 
     private function parseInputData() {
         $values = array(
-            'query'=>new ParameterBagReadOnly($_GET),
-            'param'  => new ParameterBagReadOnly($_POST),
-            'files' => new ParameterBagReadOnly($_FILES),
-            'params' => new ParameterBagReadOnly(array_merge($_GET,$_POST))
+            'query'=>new ParameterBagReadOnly($_GET,$this->event),
+            'param'  => new ParameterBagReadOnly($_POST,$this->event),
+            'files' => new ParameterBagReadOnly($_FILES,$this->event),
+            'params' => new ParameterBagReadOnly(array_merge($_GET,$_POST),$this->event)
         );
         $body = $this->parseBodyData();
-        $values['body'] = is_array($body)?new ParameterBagReadOnly($body):$body;
+        $values['body'] = is_array($body)?new ParameterBagReadOnly($body,$this->event):$body;
         $this->publicValues = $values;
     }
 

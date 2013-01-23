@@ -15,7 +15,7 @@ class DIProxyTest extends \PHPUnit_Framework_TestCase {
      * This method is called before a test is executed.
      */
     protected function setUp(){
-        $this->object = new DIProxy( 'DHP_FW\\Event', array(), new DI( new \DHP_FW\Event() ) );
+        $this->object = new DIProxy( 'DHP_FW\\Event');
     }
 
     /**
@@ -36,7 +36,7 @@ class DIProxyTest extends \PHPUnit_Framework_TestCase {
      */
     public function testAddMethodCall(){
         $shouldBe = array(
-            'class' => 'DHP_FW\\Event', 'args' => array(), 'methods' => array(array('method' => 'getClass', 'args' => array()))
+            'class' => 'DHP_FW\\Event', 'args' => array(), 'methods' => array((object) array('method' => 'getClass', 'args' => array()))
         );
         $this->object->addMethodCall('getClass');
         \PHPUnit_Framework_Assert::assertEquals($shouldBe, $this->object->get());
@@ -50,13 +50,5 @@ class DIProxyTest extends \PHPUnit_Framework_TestCase {
         );
         $this->object->setArguments(array('something'));
         \PHPUnit_Framework_Assert::assertEquals($shouldBe, $this->object->get());
-    }
-
-    /**
-     */
-    public function testInit(){
-        $this->object->addMethodCall('trigger',array('nonexisting.event'));
-        $o = $this->object->init();
-        \PHPUnit_Framework_Assert::assertInstanceOf('DHP_FW\\Event',$o);
     }
 }
