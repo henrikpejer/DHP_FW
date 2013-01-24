@@ -61,15 +61,15 @@ class Response implements ResponseInterface {
     private $supressHeader = FALSE;
     private $dataIsCache = FALSE;
 
-    public function __construct(EventInterface $event){
+    public function __construct(EventInterface $event) {
         $this->event = $event;
     }
 
-    public function cacheSent(){
+    public function cacheSent() {
         return $this->dataIsCache;
     }
 
-    public function send($dataOrStatus, $data = NULL){
+    public function send($dataOrStatus, $data = NULL) {
         if ( $data !== NULL ) {
             $this->status($dataOrStatus);
         } else {
@@ -80,7 +80,8 @@ class Response implements ResponseInterface {
         switch (gettype($data)) {
             case 'object':
             case 'array':
-                $this->data = json_encode($data, \JSON_FORCE_OBJECT | \JSON_NUMERIC_CHECK);
+                $this->data =
+                  json_encode($data, \JSON_FORCE_OBJECT | \JSON_NUMERIC_CHECK);
                 break;
             case 'string':
             case 'double':
@@ -97,24 +98,27 @@ class Response implements ResponseInterface {
         $this->sendData();
     }
 
-    public function header($name, $value = NULL, $processHeaderName = TRUE){
+    public function header($name, $value = NULL, $processHeaderName = TRUE) {
         if ( $processHeaderName ) {
-            $name = str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower($name))));
+            $name =
+              str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower($name))));
         }
         $this->event->trigger('DHP_FW.Response.header', $name, $value);
         $this->headers[$name] = $value;
         return $this;
     }
 
-    public function status($httpNumber, $httpMessage = NULL){
+    public function status($httpNumber, $httpMessage = NULL) {
         if ( !isset( $httpMessage ) ) {
-            $httpMessage = isset( $this->headerStatus[$httpNumber] ) ? $this->headerStatus[$httpNumber] : $httpMessage;
+            $httpMessage =
+              isset( $this->headerStatus[$httpNumber] ) ? $this->headerStatus[$httpNumber] : $httpMessage;
         }
-        $statusHeader = trim(sprintf('%d %s', $httpNumber, $httpMessage));
+        $statusHeader =
+          trim(sprintf('%d %s', $httpNumber, $httpMessage));
         $this->header('Status', $statusHeader);
     }
 
-    public function sendFile($filePath, $mimeType = NULL, $fileName = NULL, $downLoadFile = FALSE){
+    public function sendFile($filePath, $mimeType = NULL, $fileName = NULL, $downLoadFile = FALSE) {
         $this->event->trigger('DHP_FW.Response.sendFile', $filePath, $mimeType, $fileName, $downLoadFile);
         $realPath = realpath($filePath);
         if ( FALSE === $realPath || FALSE === file_exists(realpath($realPath)) ) {
@@ -134,11 +138,11 @@ class Response implements ResponseInterface {
         $this->sendFileData($realPath, $fileName, $mimeType, $downLoadFile);
     }
 
-    public function downloadFile($filePath, $mimeType = NULL, $fileName = NULL){
+    public function downloadFile($filePath, $mimeType = NULL, $fileName = NULL) {
         $this->sendFile($filePath, $mimeType, $fileName, TRUE);
     }
 
-    public function redirect($url, $httpStatus = 301, $httpMessage = NULL){
+    public function redirect($url, $httpStatus = 301, $httpMessage = NULL) {
         $this->event->trigger('DHP_FW.Response.redirect', $url, $httpStatus, $httpMessage);
         $this->resetHeaders();
         $this->status($httpStatus, $httpMessage);
@@ -146,16 +150,17 @@ class Response implements ResponseInterface {
         $this->sendHeaders();
     }
 
-    public function supressHeaders($doSurpress = TRUE){
+    public function supressHeaders($doSurpress = TRUE) {
         $this->supressHeader = $doSurpress === TRUE ? TRUE : FALSE;
     }
 
-    public function checkCache(){
+    public function checkCache() {
         $request = \app\DI()->get('DHP_FW\\Request');
         if ( $request->getMethod() == \DHP_FW\App::HTTP_METHOD_GET ) {
             $uri       = $request->getUri();
-            $__cache__ = \app\DI()->get('DHP_FW\\cache\\Cache')
-              ->bucket('app')->get("uri_{$uri}_data");
+            $__cache__ =
+              \app\DI()->get('DHP_FW\\cache\\Cache')->bucket('app')
+                ->get("uri_{$uri}_data");
             if ( isset( $__cache__ ) && is_array($__cache__) ) {
                 $this->dataIsCache = TRUE;
                 foreach ($__cache__['headers'] as $header) {
@@ -170,7 +175,7 @@ class Response implements ResponseInterface {
         return FALSE;
     }
 
-    private function sendHeaders(){
+    private function sendHeaders() {
         if ( FALSE == $this->headersSent && \headers_sent() == FALSE ) {
             foreach ($this->headers as $header => $value) {
                 switch ($header) {
@@ -181,7 +186,8 @@ class Response implements ResponseInterface {
                 if ( !isset( $value ) ) {
                     $completeHeader = $header;
                 } else {
-                    $completeHeader = sprintf('%s: %s', $header, $value);
+                    $completeHeader =
+                      sprintf('%s: %s', $header, $value);
                 }
                 $this->sendHeaderData($completeHeader);
             }
@@ -189,7 +195,7 @@ class Response implements ResponseInterface {
         $this->headersSent = TRUE;
     }
 
-    private function sendFileData($filePath, $fileName, $mimeType, $downloadHeaders = FALSE){
+    private function sendFileData($filePath, $fileName, $mimeType, $downloadHeaders = FALSE) {
         $this->resetHeaders()->header('Content-Type', $mimeType)
           ->header('Content-Transfer-Encoding', 'binary')->status(200);
         if ( $downloadHeaders == TRUE ) {
@@ -203,7 +209,7 @@ class Response implements ResponseInterface {
 
     }
 
-    private function sendData(){
+    private function sendData() {
         if ( $this->dataIsCache == FALSE ) {
             $this->event->trigger('DHP_FW.Response.sendData', $this->data);
         }
@@ -220,7 +226,7 @@ class Response implements ResponseInterface {
         }
     }
 
-    private function resetHeaders(){
+    private function resetHeaders() {
         $this->headers = array();
         return $this;
     }
@@ -231,7 +237,7 @@ class Response implements ResponseInterface {
      *
      * @param $headerData : String
      */
-    private function sendHeaderData($headerData){
+    private function sendHeaderData($headerData) {
         if ( FALSE === $this->supressHeader ) {
             \header($headerData);
         }

@@ -14,33 +14,33 @@ class Session implements MiddlewareInterface {
     private $event = NULL;
     public $flash = NULL;
 
-    public function __construct(\DHP_FW\RequestInterface $req, \DHP_FW\EventInterface $event){
+    public function __construct(\DHP_FW\RequestInterface $req, \DHP_FW\EventInterface $event) {
         $this->load();
         $this->event = $event;
         $this->setupFlashData();
         $req->session = $this;
     }
 
-    private function load(){ }
+    private function load() { }
 
-    public function __set($name, $value){
+    public function __set($name, $value) {
         $this->dataChanged        = TRUE;
         $this->sessionData[$name] = $value;
     }
 
-    public function __get($name){
+    public function __get($name) {
         return isset( $this->sessionData[$name] ) ? $this->sessionData[$name] : NULL;
     }
 
-    public function dataChanged(){
+    public function dataChanged() {
         $this->dataChanged = TRUE;
     }
 
-    public function dataIsChanged(){
+    public function dataIsChanged() {
         return $this->dataChanged;
     }
 
-    private function setupFlashData(){
+    private function setupFlashData() {
         # todo : refactor away this, right?
         $this->flash = new ParameterBag( array(), $this->event );
         $this->event->subscribe($this->flash, $this);

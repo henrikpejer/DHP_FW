@@ -7,7 +7,7 @@ namespace DHP_FW;
  */
 class Utils {
     # returns NULL when unable to load/find class
-    static public function classConstructorArguments($class){
+    static public function classConstructorArguments($class) {
         $args = array();
         try {
             $refClass    = new \ReflectionClass( $class );
@@ -16,16 +16,17 @@ class Utils {
                 $params = $constructor->getParameters();
                 if ( $params ) {
                     foreach ($params as $param) {
-                        $arg = array('name'     => $param->getName(),
-                                     'required' => TRUE,
-                                     'class'    => NULL);
+                        $arg =
+                          array('name'     => $param->getName(),
+                                'required' => TRUE, 'class' => NULL);
                         if ( $param->getClass() ) {
-                            $arg['class'] = $param->getClass()
-                              ->getName();
+                            $arg['class'] =
+                              $param->getClass()->getName();
                         }
                         if ( $param->isOptional() ) {
                             $arg['required'] = FALSE;
-                            $arg['default']  = $param->getDefaultValue();
+                            $arg['default']  =
+                              $param->getDefaultValue();
                         }
                         $args[] = $arg;
                     }

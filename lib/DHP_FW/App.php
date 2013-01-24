@@ -17,12 +17,13 @@ class App implements \DHP_FW\AppInterface {
     private $customParamTypes = array();
     private $CONTINUEROUTE = FALSE;
 
-    public function __construct(\DHP_FW\RequestInterface $Request, \DHP_FW\dependencyInjection\DIInterface $DI, \DHP_FW\EventInterface $event){
-        $this->routes  = array(self::HTTP_METHOD_GET    => array(),
-                               self::HTTP_METHOD_POST   => array(),
-                               self::HTTP_METHOD_DELETE => array(),
-                               self::HTTP_METHOD_PUT    => array(),
-                               self::HTTP_METHOD_ANY    => array());
+    public function __construct(\DHP_FW\RequestInterface $Request, \DHP_FW\dependencyInjection\DIInterface $DI, \DHP_FW\EventInterface $event) {
+        $this->routes  =
+          array(self::HTTP_METHOD_GET    => array(),
+                self::HTTP_METHOD_POST   => array(),
+                self::HTTP_METHOD_DELETE => array(),
+                self::HTTP_METHOD_PUT    => array(),
+                self::HTTP_METHOD_ANY    => array());
         $this->request = $Request;
         $this->DI      = $DI;
         $this->event   = $event;
@@ -30,67 +31,67 @@ class App implements \DHP_FW\AppInterface {
     }
 
     # get routes
-    public function get($uri, callable $closure){
+    public function get($uri, callable $closure) {
         return $this->registerRoute(self::HTTP_METHOD_GET, $uri, $closure);
     }
 
     #post routes
-    public function post($uri, callable $closure){
+    public function post($uri, callable $closure) {
         return $this->registerRoute(self::HTTP_METHOD_POST, $uri, $closure);
     }
 
     #delete routes
-    public function delete($uri, callable $closure){
+    public function delete($uri, callable $closure) {
         return $this->registerRoute(self::HTTP_METHOD_DELETE, $uri, $closure);
     }
 
     #put routes
-    public function put($uri, callable $closure){
+    public function put($uri, callable $closure) {
         return $this->registerRoute(self::HTTP_METHOD_PUT, $uri, $closure);
     }
 
     #head routes
-    public function head($uri, callable $closure){
+    public function head($uri, callable $closure) {
         return $this->registerRoute(self::HTTP_METHOD_HEAD, $uri, $closure);
     }
 
     #any http method routes
-    public function any($uri, callable $closure){
+    public function any($uri, callable $closure) {
         return $this->registerRoute(self::HTTP_METHOD_ANY, $uri, $closure);
     }
 
-    public function verb(array $methods, $uri, callable $closure){
+    public function verb(array $methods, $uri, callable $closure) {
         return $this->registerRoute($methods, $uri, $closure);
     }
 
-    public function routes(){
+    public function routes() {
         return $this->routes;
     }
 
-    public function enable($configToEnable){
+    public function enable($configToEnable) {
         $this->configs[$configToEnable] = TRUE;
         return $this;
     }
 
-    public function enabled($configToCheck){
+    public function enabled($configToCheck) {
         return isset( $this->configs[$configToCheck] ) && $this->configs[$configToCheck] === TRUE ? TRUE : FALSE;
     }
 
-    public function disable($configToDisable){
+    public function disable($configToDisable) {
         $this->configs[$configToDisable] = FALSE;
         return $this;
     }
 
-    public function param($paramName, callable $closure){
+    public function param($paramName, callable $closure) {
         $this->customParamTypes[$paramName] = $closure;
     }
 
-    public function continueWithNextRoute(){
+    public function continueWithNextRoute() {
         $this->CONTINUEROUTE = self::ROUTE_CONTINUE;
     }
 
     # todo : figure out dependencies... or not?
-    public function middleware($middleware){
+    public function middleware($middleware) {
         if ( !class_exists($middleware, TRUE) ) {
             $middleware = 'DHP_FW\middleware\\' . $middleware;
         }
@@ -101,29 +102,36 @@ class App implements \DHP_FW\AppInterface {
         return $this;
     }
 
-    public function start(){
-        $routesToProcess = isset( $this->routes[$this->request->getMethod()] ) ? array_merge($this->routes[self::HTTP_METHOD_ANY], $this->routes[$this->request->getMethod()]) : $this->routes[self::HTTP_METHOD_ANY];
+    public function start() {
+        $routesToProcess =
+          isset( $this->routes[$this->request->getMethod()] ) ? array_merge($this->routes[self::HTTP_METHOD_ANY], $this->routes[$this->request->getMethod()]) : $this->routes[self::HTTP_METHOD_ANY];
         $uriToMatch      = trim($this->request->getUri(), '/');
         $return          = NULL;
         foreach ($routesToProcess as $uri => $closure) {
             $this->CONTINUEROUTE = FALSE;
-            if ( FALSE !== ( $routeMatchReturn = $this->matchUriToRoute($uriToMatch, $uri) ) ) {
+            if ( FALSE !== ( $routeMatchReturn =
+              $this->matchUriToRoute($uriToMatch, $uri) )
+            ) {
                 if ( $uriToMatch == 'blog/this-is-the-title' ) {
 
                 }
                 if ( is_array($routeMatchReturn) ) {
-                    $closureResult = call_user_func_array($closure, $routeMatchReturn);
+                    $closureResult =
+                      call_user_func_array($closure, $routeMatchReturn);
                 } else {
                     $closureResult = $closure();
                 }
                 switch (TRUE) {
                     case is_array($closureResult) && isset( $closureResult['controller'] ) && isset( $closureResult['method'] ):
-                        $controller = $this->loadController($closureResult);
+                        $controller =
+                          $this->loadController($closureResult);
                         if ( is_array($routeMatchReturn) ) {
-                            $return = call_user_func_array(array($controller,
-                                                                 $closureResult['method']), $routeMatchReturn);
+                            $return =
+                              call_user_func_array(array($controller,
+                                                         $closureResult['method']), $routeMatchReturn);
                         } else {
-                            $return = $controller->$closureResult['method']();
+                            $return =
+                              $controller->$closureResult['method']();
                         }
                         break;
                     default:
@@ -144,11 +152,11 @@ class App implements \DHP_FW\AppInterface {
      *
      * @param $controllerToLoad
      */
-    private function loadController($controllerToLoad){
+    private function loadController($controllerToLoad) {
         return $this->DI->instantiateObject('\\app\\controllers\\' . $controllerToLoad['controller']);
     }
 
-    private function matchUriToRoute($__uri__, $routeUri){
+    private function matchUriToRoute($__uri__, $routeUri) {
         $__haveParams__ = strpos($routeUri, ':');
         if ( $__haveParams__ === FALSE && ( $routeUri == $__uri__ || preg_match('#^' . str_replace('*', '.*', $routeUri) . '$#', $__uri__) ) ) {
             return TRUE;
@@ -167,7 +175,7 @@ class App implements \DHP_FW\AppInterface {
      * 
      * array('title'=>'value_in_url')
      */
-    private function parseUriForParameters($uri, $routeUri){
+    private function parseUriForParameters($uri, $routeUri) {
         # get parts of uri & routeUri, that is, split by /
         $routeUriParts = explode('/', trim($routeUri, '/'));
         $uriParts      = explode('/', trim($uri, '/'));
@@ -180,29 +188,32 @@ class App implements \DHP_FW\AppInterface {
                 if ( $part{0} != ':' ) { #wrong route after all!
                     return FALSE;
                 }
-                $realValue = $this->cleanUriPartForParam($uriParts[$index]);
-                $return[]  = $this->checkParameterType($part, $realValue);
+                $realValue =
+                  $this->cleanUriPartForParam($uriParts[$index]);
+                $return[]  =
+                  $this->checkParameterType($part, $realValue);
             }
         }
         return $return;
     }
 
-    private function cleanUriPartForParam($param){
+    private function cleanUriPartForParam($param) {
         $param = str_replace('-', ' ', $param);
         $param = urldecode($param);
         return $param;
     }
 
-    private function checkParameterType($parameterType, $paramValue){
+    private function checkParameterType($parameterType, $paramValue) {
         $parameterType = str_replace(':', '', $parameterType);
         $return        = $paramValue;
         if ( isset( $this->customParamTypes[$parameterType] ) ) {
-            $return = call_user_func_array($this->customParamTypes[$parameterType], array($paramValue));
+            $return =
+              call_user_func_array($this->customParamTypes[$parameterType], array($paramValue));
         }
         return $return;
     }
 
-    private function registerRoute($httpMethod, $uri, callable $closure){
+    private function registerRoute($httpMethod, $uri, callable $closure) {
         $this->event->trigger('DHP_FW.App.registerRoute', $httpMethod, $uri, $closure);
         if ( !is_array($httpMethod) ) {
             $httpMethod = array($httpMethod);
@@ -216,7 +227,7 @@ class App implements \DHP_FW\AppInterface {
     /**
      * Gets cacheStorage, inits it and sets the cache of!
      */
-    private function setupCache(){
+    private function setupCache() {
         if ( $this->enabled('use_cache') ) {
             $this->cache = $this->DI->get('DHP_FW\cache\Cache');
             $this->cache->bucket('app');

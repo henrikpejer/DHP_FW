@@ -13,7 +13,7 @@ class Controller implements \DHP_FW\ControllerInterface {
 
     protected $request, $response;
 
-    public function __construct(\DHP_FW\RequestInterface $request, \DHP_FW\ResponseInterface $response, \DHP_FW\EventInterface $event){
+    public function __construct(\DHP_FW\RequestInterface $request, \DHP_FW\ResponseInterface $response, \DHP_FW\EventInterface $event) {
         $this->request  = $request;
         $this->response = $response;
         $this->event    = $event;
@@ -21,6 +21,6 @@ class Controller implements \DHP_FW\ControllerInterface {
                                                        '__eventCatchall'));
     }
 
-    public function __eventCatchall(){
+    public function __eventCatchall() {
     }
 }

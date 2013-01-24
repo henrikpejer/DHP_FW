@@ -12,7 +12,7 @@ class ParameterBagReadOnly extends ParameterBag implements ParameterBagReadOnlyI
 
     protected $_values;
 
-    public function __set($name, $value){
+    public function __set($name, $value) {
         return NULL;
     }
 }

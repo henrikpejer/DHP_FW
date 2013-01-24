@@ -20,10 +20,13 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
      *
      * @param array $config
      */
-    function __construct(array $config = array()){
-        $this->config                                            = (object) $config;
-        $this->store                                             = new \StdClass;
-        $this->store->{'DHP_FW\dependencyInjection\DIInterface'} = $this;
+    function __construct(array $config = array()) {
+        $this->config                                            =
+          (object) $config;
+        $this->store                                             =
+          new \StdClass;
+        $this->store->{'DHP_FW\dependencyInjection\DIInterface'} =
+          $this;
     }
 
     /**
@@ -37,7 +40,7 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
      *
      * @return \DHP_FW\dependencyInjection\DIProxyInterface
      */
-    public function set($name, $value){
+    public function set($name, $value) {
         if ( is_string($value) ) {
             $this->store->{$name} = new DIProxy( $value );
         } else {
@@ -61,7 +64,7 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
      * @throws \InvalidArgumentException
      * @return $this
      */
-    public function alias($alias, $original){
+    public function alias($alias, $original) {
         if ( !isset( $this->store->{$original} ) ) {
             throw new \InvalidArgumentException( 'Original must already exist' );
         }
@@ -76,7 +79,7 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
      *
      * @return mixed
      */
-    function get($name){
+    function get($name) {
         if ( !isset( $this->store->{$name} ) ) {
             $frameworkClass = $this->findMatchWithinFramework($name);
             if ( $frameworkClass == NULL ) {
@@ -96,7 +99,8 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
         $__object__ = $this->store->{$name};
         if ( is_a($__object__, '\DHP_FW\dependencyInjection\DIProxy') ) {
             $__initProcess__ = $__object__->get();
-            $instance        = $this->instantiateObject($__initProcess__['class'], $__initProcess__['args']);
+            $instance        =
+              $this->instantiateObject($__initProcess__['class'], $__initProcess__['args']);
             foreach ($__initProcess__['methods'] as $methodAndArgs) {
                 call_user_func_array(array($instance,
                                            $methodAndArgs->method), $methodAndArgs->args);
@@ -116,7 +120,7 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
      *
      * @return mixed
      */
-    public function __set($name, $value){
+    public function __set($name, $value) {
         return $this->set($name, $value);
     }
 
@@ -127,13 +131,14 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
      *
      * @return mixed
      */
-    public function __get($name){
+    public function __get($name) {
         return $this->get($name);
     }
 
-    public function instantiateObject($class, array $__args__ = array()){
+    public function instantiateObject($class, array $__args__ = array()) {
         # $this->event->trigger('DHP_FW.DI.instantiate', $class, $__args__);
-        $constructorArguments = Utils::classConstructorArguments($class);
+        $constructorArguments =
+          Utils::classConstructorArguments($class);
         $classReflector       = new \ReflectionClass( $class );
         if ( $classReflector->isInterface() ) {
             return NULL;
@@ -145,8 +150,12 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
                 case isset( $__args__[$key] ):
                     $args[] = $__args__[$key];
                     break;
-                case ( !empty( $constructorArgument['class'] ) && ( $__arg__ = $this->get($constructorArgument['class']) ) !== NULL ):
-                case ( !empty( $constructorArgument['name'] ) && ( $__arg__ = $this->get($constructorArgument['name']) ) !== NULL ):
+                case ( !empty( $constructorArgument['class'] ) && (
+                $__arg__ =
+                  $this->get($constructorArgument['class']) ) !== NULL ):
+                case ( !empty( $constructorArgument['name'] ) && (
+                $__arg__ =
+                  $this->get($constructorArgument['name']) ) !== NULL ):
                     $args[] = $__arg__;
                     break;
                 case isset( $__args__[$constructorArgument['name']] ):
@@ -159,11 +168,12 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
                     $args[] = NULL;
             }
         }
-        $return = sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
+        $return =
+          sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
         return $return;
     }
 
-    private function findMatchWithinFramework($name){
+    private function findMatchWithinFramework($name) {
         $DHP_FWClass = str_replace('Interface', '', $name);
         return strpos($name, 'DHP_FW\\') == 0 && class_exists($DHP_FWClass) ? $DHP_FWClass : NULL;
     }

@@ -19,7 +19,7 @@ interface ParameterBagInterface {
     /**
      * Use this to get the value
      *
-     * @param $name The name of the parameter we want
+     * @param $name String The name of the parameter we want
      *
      * @return mixed Returns value or NULL if not found
      */
@@ -28,8 +28,8 @@ interface ParameterBagInterface {
     /**
      * We use this to set values in the parameter bag
      *
-     * @param $name  name of the parameter to set
-     * @param $value new value of the parameter
+     * @param $name  String name of the parameter to set
+     * @param $value Mixed new value of the parameter
      *
      * @return mixed returns the value set
      */
