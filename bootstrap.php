@@ -27,7 +27,7 @@ namespace app {
     }
 
     function DI(){
-        global $di;
-        return $di;
+        global $DI;
+        return $DI;
     }
 }

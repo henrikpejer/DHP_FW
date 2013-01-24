@@ -17,6 +17,7 @@ class Session implements MiddlewareInterface{
         $this->load();
         $this->event = $event;
         $this->setupFlashData();
+        $req->session = $this;
     }
 
     private function load(){}

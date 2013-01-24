@@ -4,7 +4,6 @@
  * Date: 2013-01-02 21:28
  */
 require_once __DIR__.DIRECTORY_SEPARATOR.'bootstrap.php';
-#$req = $DI->get('DHP_FW\Request');
 #$e = $DI->get('DHP_FW\EventInterface');
 #$e->register('test',function(){
 #    echo 'done';
@@ -12,13 +11,15 @@ require_once __DIR__.DIRECTORY_SEPARATOR.'bootstrap.php';
 #var_dump(spl_object_hash($e));
 #var_dump($req);
 #$e->trigger('test');
-/*
-require_once 'bootstrap.php';
+
+#require_once 'bootstrap.php';
 #header('Status: 404 Not Found');
 #var_dump($_SERVER);
 #var_dump($_ENV);
 #var_dump($di->get('request'));
-$app->middleware('Benchmark')->middleware('Cookie')->middleware('Session');
+$app->middleware('Benchmark');
+$app->middleware('Cookie');
+$app->middleware('Session');
 
 $app->get('testing/hesting/flecking',function(){
     echo "Fake controller run!\n";
@@ -41,4 +42,4 @@ $app->get('blog/img',function(){
 $app->get('blog/downloadimg',function(){
    return array('controller'=>'Blog','method'=>'downloadImg');
 });
-$app->start();*/
+$app->start();
