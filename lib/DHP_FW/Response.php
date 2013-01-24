@@ -212,12 +212,13 @@ class Response implements ResponseInterface {
     private function sendData() {
         if ( $this->dataIsCache == FALSE ) {
             $this->event->trigger('DHP_FW.Response.sendData', $this->data);
+            $this->event->trigger('DHP_FW.Response.afterSendData',$this->data);
         }
         $this->dataSendStatus = self::DATASENDSTATUS_STARTED;
         echo $this->data;
         $this->dataSendStatus = self::DATASENDSTATUS_COMPLETE;
         if ( $this->dataIsCache == FALSE ) {
-            # lets cache this, ok?
+            # lets cacheObject this, ok?
             # todo : this should go through app directly, me thinks and not through DI...
             \app\DI()->get('DHP_FW\\cache\\Cache')->bucket('app')
               ->set("uri_" . \app\DI()->get('DHP_FW\\Request')

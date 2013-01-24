@@ -17,7 +17,7 @@ interface AppInterface {
     const ROUTE_CONTINUE     = 'YES';
 
     /**
-     * Sets up the routes possible, setups the cache
+     * Sets up the routes possible, setups the cacheObject
      *
      * @param       $Request
      * @param DI    $DI

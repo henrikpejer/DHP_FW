@@ -13,7 +13,7 @@ interface ResponseInterface {
 
     # todo : this is most likely not necessary - refactor away please!
     /**
-     * @return boolean if cache already have been sent or not
+     * @return boolean if cacheObject already have been sent or not
      */
     function cacheSent();
 
@@ -100,10 +100,10 @@ interface ResponseInterface {
     function supressHeaders($doSurpress = TRUE);
 
     /**
-     * This method will check if a cache of the response exists in cache
+     * This method will check if a cacheObject of the response exists in cacheObject
      * and will send that immediately.
      *
-     * @return boolean true if cache was used, false if not
+     * @return boolean true if cacheObject was used, false if not
      */
     function checkCache();
 }

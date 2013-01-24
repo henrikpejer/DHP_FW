@@ -50,10 +50,7 @@ class ApcTest extends \PHPUnit_Framework_TestCase {
         \PHPUnit_Framework_Assert::assertFalse($this->object->get('nonExisting'));
     }
 
-    /**
-     * @covers DHP_FW\cache\Apc::flush
-     * @todo   Implement testFlush().
-     */
+
     public function testFlush() {
         $this->object->set('nonExisting', 'something');
         \PHPUnit_Framework_Assert::assertEquals('something', $this->object->get('nonExisting'));

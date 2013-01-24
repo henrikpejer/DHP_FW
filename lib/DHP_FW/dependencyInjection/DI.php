@@ -75,7 +75,7 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
      * This will return whatever it is that we want. IF object has been loaded,
      * return that. If not, instantiate it and.... be happy with it!
      *
-     * @param $name name of object to load
+     * @param $name String name of object to load
      *
      * @return mixed
      */

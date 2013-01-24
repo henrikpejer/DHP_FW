@@ -17,8 +17,9 @@ namespace{
         ->set('DHP_FW\cache\Cache', 'DHP_FW\cache\Cache')
         ->setArguments(array($storage));
       $app = $DI->get('DHP_FW\AppInterface');
-      $appControllerLoader = new SplClassLoader( 'app', dirname($_SERVER['SCRIPT_FILENAME']) );
-      $appControllerLoader->register();}
+     $appControllerLoader = new SplClassLoader( 'app', __DIR__ . DIRECTORY_SEPARATOR);
+       $appControllerLoader->register();
+}
 namespace app{
     $event = new \DHP_FW\Event();
     #$di = new \DHP_FW\dependencyInjection\DI($event);

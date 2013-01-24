@@ -8,7 +8,7 @@ namespace DHP_FW\cache;
 interface CacheStorageInterface {
 
     /**
-     * Used to set a value in the cache.
+     * Used to set a value in the cacheObject.
      *
      * @param      $key   cache key for the value
      * @param      $value the value
@@ -20,7 +20,7 @@ interface CacheStorageInterface {
 
     /**
      * Used to get a value associated with a key from the
-     * cache storage.
+     * cacheObject storage.
      *
      * If it isn't set and a closure is provided, the closure
      * will be called and the return of that output will be used
@@ -44,8 +44,8 @@ interface CacheStorageInterface {
     public function delete($key);
 
     /**
-     * This will flush the whole cache so nothing will be served
-     * from the cache.
+     * This will flush the whole cacheObject so nothing will be served
+     * from the cacheObject.
      *
      * @return mixed
      */

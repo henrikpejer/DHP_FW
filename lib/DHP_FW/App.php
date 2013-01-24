@@ -1,5 +1,5 @@
 <?php
-declare( encoding = "UTF8" ) ;
+declare(encoding = "UTF8") ;
 namespace DHP_FW;
 
 /**
@@ -12,18 +12,18 @@ class App implements \DHP_FW\AppInterface {
 
     protected $routes = array();
     protected $configs = array('use_cache' => FALSE);
-    protected $cache = NULL;
+    protected $cacheObject = NULL;
 
     private $customParamTypes = array();
     private $CONTINUEROUTE = FALSE;
 
     public function __construct(\DHP_FW\RequestInterface $Request, \DHP_FW\dependencyInjection\DIInterface $DI, \DHP_FW\EventInterface $event) {
         $this->routes  =
-          array(self::HTTP_METHOD_GET    => array(),
-                self::HTTP_METHOD_POST   => array(),
-                self::HTTP_METHOD_DELETE => array(),
-                self::HTTP_METHOD_PUT    => array(),
-                self::HTTP_METHOD_ANY    => array());
+                array(self::HTTP_METHOD_GET    => array(),
+                      self::HTTP_METHOD_POST   => array(),
+                      self::HTTP_METHOD_DELETE => array(),
+                      self::HTTP_METHOD_PUT    => array(),
+                      self::HTTP_METHOD_ANY    => array());
         $this->request = $Request;
         $this->DI      = $DI;
         $this->event   = $event;
@@ -70,11 +70,12 @@ class App implements \DHP_FW\AppInterface {
 
     public function enable($configToEnable) {
         $this->configs[$configToEnable] = TRUE;
-        return $this;
+        return $this->configs[$configToEnable];
     }
 
     public function enabled($configToCheck) {
-        return isset( $this->configs[$configToCheck] ) && $this->configs[$configToCheck] === TRUE ? TRUE : FALSE;
+        $return = isset($this->configs[$configToCheck]) && $this->configs[$configToCheck] === TRUE ? TRUE : FALSE;
+        return $return;
     }
 
     public function disable($configToDisable) {
@@ -92,56 +93,117 @@ class App implements \DHP_FW\AppInterface {
 
     # todo : figure out dependencies... or not?
     public function middleware($middleware) {
-        if ( !class_exists($middleware, TRUE) ) {
-            $middleware = 'DHP_FW\middleware\\' . $middleware;
-        }
-        if ( !class_exists($middleware, TRUE) ) {
-            $middleware = 'App\middleware\\' . $middleware;
+        if (!class_exists($middleware, TRUE)) {
+            if (class_exists('DHP_FW\middleware\\' . $middleware, TRUE)) {
+                $middleware = 'DHP_FW\middleware\\' . $middleware;
+            }
+            elseif (class_exists('app\middleware\\' . $middleware, TRUE)) {
+                $middleware = 'app\middleware\\' . $middleware;
+            }
         }
         $this->DI->get($middleware);
         return $this;
     }
 
     public function start() {
-        $routesToProcess =
-          isset( $this->routes[$this->request->getMethod()] ) ? array_merge($this->routes[self::HTTP_METHOD_ANY], $this->routes[$this->request->getMethod()]) : $this->routes[self::HTTP_METHOD_ANY];
+        $uri = $this->request->getUri();
+        # do we have a cache, of the data, for this request?
+        $cacheForUri = $this->event->trigger('DHP_FW.app.cacheForRequest', $uri);
+        if (isset($cacheForUri) && $cacheForUri != FALSE) {
+            $this->response = $this->DI->get('DHP_FW\ResponseInterface');
+            foreach ($cacheForUri['headers'] as $name => $value) {
+                $this->response->header($name, $value);
+            }
+            $this->response->send($cacheForUri['data']);
+            return TRUE;
+        }
+        $routesToProcess = isset($this->routes[$this->request->getMethod()]) ? array_merge($this->routes[self::HTTP_METHOD_ANY], $this->routes[$this->request->getMethod()]) : $this->routes[self::HTTP_METHOD_ANY];
         $uriToMatch      = trim($this->request->getUri(), '/');
-        $return          = NULL;
-        foreach ($routesToProcess as $uri => $closure) {
-            $this->CONTINUEROUTE = FALSE;
-            if ( FALSE !== ( $routeMatchReturn =
-              $this->matchUriToRoute($uriToMatch, $uri) )
-            ) {
-                if ( $uriToMatch == 'blog/this-is-the-title' ) {
-
-                }
-                if ( is_array($routeMatchReturn) ) {
-                    $closureResult =
-                      call_user_func_array($closure, $routeMatchReturn);
-                } else {
-                    $closureResult = $closure();
-                }
-                switch (TRUE) {
-                    case is_array($closureResult) && isset( $closureResult['controller'] ) && isset( $closureResult['method'] ):
-                        $controller =
-                          $this->loadController($closureResult);
-                        if ( is_array($routeMatchReturn) ) {
-                            $return =
-                              call_user_func_array(array($controller,
-                                                         $closureResult['method']), $routeMatchReturn);
-                        } else {
-                            $return =
-                              $controller->$closureResult['method']();
-                        }
-                        break;
-                    default:
-                        $return = $closureResult;
-                        break;
-                }
-                if ( self::ROUTE_CONTINUE !== $this->CONTINUEROUTE ) {
-                    break;
+        $routesMatched = array();
+        $routeKeys = $this->cache_system('routes_'.$this->request->getMethod().':'.$this->request->getUri());
+        if( !empty($routeKeys) ){
+            var_dump($routeKeys);
+            foreach($routeKeys as $uri => $routeMatchReturn){
+                $routesMatched[] = array('closure'=>$routesToProcess[$uri],'route'=>$routeMatchReturn);
+            }
+        }else{
+            $routesMatched = array();
+            $routeKeysToCache = array();
+            foreach ($routesToProcess as $uri => $closure) {
+                $this->CONTINUEROUTE = FALSE;
+                if (FALSE !== ($routeMatchReturn = $this->matchUriToRoute($uriToMatch, $uri))) {
+                    $routeKeysToCache[$uri] = $routeMatchReturn;
+                    $routesMatched[] = array('closure'=>$closure,'route'=>$routeMatchReturn);
                 }
             }
+        }
+        $return = $this->runMatchedRoutes($routesMatched);
+        # save this in cache for later use, cache routes!
+        $this->cache_system('routes_'.$this->request->getMethod().':'.$this->request->getUri(),$routeKeysToCache,300);
+        return $return;
+    }
+
+    public function cache($key, $value = NULL, $ttl = NULL) {
+        return $this->__setCache('app',$key,$value,$ttl);
+        $return = NULL;
+        if ($this->enabled('use_cache')) {
+            if (isset($value)) {
+                $value = is_callable($value) ? $value : function () use ($value) {
+                    return $value;
+                };
+            }
+            $return = $this->cacheObject->bucket('app')->get($key, $value, $ttl);
+        }
+        return $return;
+    }
+
+    private function __setCache($prefix,$key,$value = NULL,$ttl = NULL){
+        $return = NULL;
+        if ($this->enabled('use_cache')) {
+            if (isset($value)) {
+                $value = is_callable($value) ? $value : function () use ($value) {
+                    return $value;
+                };
+            }
+            $return = $this->cacheObject->bucket($prefix)->get($key, $value, $ttl);
+        }
+        return $return;
+
+    }
+
+    private function cache_system($key, $value = NULL, $ttl = NULL){
+        return $this->__setCache('sys',$key,$value,$ttl);
+    }
+
+    private function runMatchedRoutes($routes){
+        $return = NULL;
+        foreach($routes as $route){
+            $closure = $route['closure'];
+            $routeMatchReturn = $route['route'];
+            if (is_array($routeMatchReturn)) {
+                $closureResult = call_user_func_array($closure, $routeMatchReturn);
+            }
+            else {
+                $closureResult = $closure();
+            }
+            switch (TRUE) {
+                case is_array($closureResult) && isset($closureResult['controller']) && isset($closureResult['method']):
+                    $controller = $this->loadController($closureResult);
+                    if (is_array($routeMatchReturn)) {
+                        $return = call_user_func_array(array($controller, $closureResult['method']), $routeMatchReturn);
+                    }
+                    else {
+                        $return = $controller->$closureResult['method']();
+                    }
+                    break;
+                default:
+                    $return = $closureResult;
+                    break;
+            }
+            if (self::ROUTE_CONTINUE !== $this->CONTINUEROUTE) {
+                break;
+            }
+
         }
         return $return;
     }
@@ -158,10 +220,10 @@ class App implements \DHP_FW\AppInterface {
 
     private function matchUriToRoute($__uri__, $routeUri) {
         $__haveParams__ = strpos($routeUri, ':');
-        if ( $__haveParams__ === FALSE && ( $routeUri == $__uri__ || preg_match('#^' . str_replace('*', '.*', $routeUri) . '$#', $__uri__) ) ) {
+        if ($__haveParams__ === FALSE && ($routeUri == $__uri__ || preg_match('#^' . str_replace('*', '.*', $routeUri) . '$#', $__uri__))) {
             return TRUE;
         }
-        if ( TRUE == $__haveParams__ ) {
+        if (TRUE == $__haveParams__) {
             return $this->parseUriForParameters($__uri__, $routeUri);
         }
         return FALSE;
@@ -179,19 +241,19 @@ class App implements \DHP_FW\AppInterface {
         # get parts of uri & routeUri, that is, split by /
         $routeUriParts = explode('/', trim($routeUri, '/'));
         $uriParts      = explode('/', trim($uri, '/'));
-        if ( sizeof($uriParts) != sizeof($routeUriParts) ) {
+        if (sizeof($uriParts) != sizeof($routeUriParts)) {
             return FALSE;
         }
         $return = array();
         foreach ($routeUriParts as $index => $part) {
-            if ( $part != $uriParts[$index] ) {
-                if ( $part{0} != ':' ) { #wrong route after all!
+            if ($part != $uriParts[$index]) {
+                if ($part{0} != ':') { #wrong route after all!
                     return FALSE;
                 }
                 $realValue =
-                  $this->cleanUriPartForParam($uriParts[$index]);
+                        $this->cleanUriPartForParam($uriParts[$index]);
                 $return[]  =
-                  $this->checkParameterType($part, $realValue);
+                        $this->checkParameterType($part, $realValue);
             }
         }
         return $return;
@@ -206,16 +268,16 @@ class App implements \DHP_FW\AppInterface {
     private function checkParameterType($parameterType, $paramValue) {
         $parameterType = str_replace(':', '', $parameterType);
         $return        = $paramValue;
-        if ( isset( $this->customParamTypes[$parameterType] ) ) {
+        if (isset($this->customParamTypes[$parameterType])) {
             $return =
-              call_user_func_array($this->customParamTypes[$parameterType], array($paramValue));
+                    call_user_func_array($this->customParamTypes[$parameterType], array($paramValue));
         }
         return $return;
     }
 
     private function registerRoute($httpMethod, $uri, callable $closure) {
         $this->event->trigger('DHP_FW.App.registerRoute', $httpMethod, $uri, $closure);
-        if ( !is_array($httpMethod) ) {
+        if (!is_array($httpMethod)) {
             $httpMethod = array($httpMethod);
         }
         foreach ($httpMethod as $method) {
@@ -225,14 +287,14 @@ class App implements \DHP_FW\AppInterface {
     }
 
     /**
-     * Gets cacheStorage, inits it and sets the cache of!
+     * Gets cacheStorage, inits it and sets the cacheObject of!
      */
-    private function setupCache() {
-        if ( $this->enabled('use_cache') ) {
-            $this->cache = $this->DI->get('DHP_FW\cache\Cache');
-            $this->cache->bucket('app');
-            $this->cache->bucket('data');
-            $this->cache->bucket('sys');
+    public function setupCache() {
+        if ($this->enabled('use_cache')) {
+            $this->cacheObject = $this->DI->get('DHP_FW\cache\Cache');
+            $this->cacheObject->bucket('app');
+            $this->cacheObject->bucket('data');
+            $this->cacheObject->bucket('sys');
         }
     }
 }
