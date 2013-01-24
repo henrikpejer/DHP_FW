@@ -1,5 +1,5 @@
 <?php
-declare(encoding = "UTF8") ;
+declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
 
 /**
@@ -28,8 +28,9 @@ interface AppInterface {
     /**
      * Sets routes for GET-requests
      *
-     * @param $uri string, uri to match
+     * @param $uri     string, uri to match
      * @param $closure callable to call when matched
+     *
      * @return mixed
      */
     function get($uri, callable $closure);
@@ -37,8 +38,9 @@ interface AppInterface {
     /**
      * Sets routes for POST-requests
      *
-     * @param $uri string, uri to match
+     * @param $uri     string, uri to match
      * @param $closure callable to call when matched
+     *
      * @return mixed
      */
     function post($uri, callable $closure);
@@ -46,8 +48,9 @@ interface AppInterface {
     /**
      * Sets routes for DELETE-requests
      *
-     * @param $uri string, uri to match
+     * @param $uri     string, uri to match
      * @param $closure callable to call when matched
+     *
      * @return mixed
      */
     function delete($uri, callable $closure);
@@ -55,8 +58,9 @@ interface AppInterface {
     /**
      * Sets routes for PUT-requests
      *
-     * @param $uri string, uri to match
+     * @param $uri     string, uri to match
      * @param $closure callable to call when matched
+     *
      * @return mixed
      */
     function put($uri, callable $closure);
@@ -64,22 +68,22 @@ interface AppInterface {
     /**
      * Sets routes for HEAD-requests
      *
-     * @param $uri string, uri to match
+     * @param $uri     string, uri to match
      * @param $closure callable to call when matched
+     *
      * @return mixed
      */
-       function head($uri, callable $closure);
-
+    function head($uri, callable $closure);
 
     /**
      * Sets routes for any and all types of requests
      *
-     * @param $uri string, uri to match
+     * @param $uri     string, uri to match
      * @param $closure callable to call when matched
+     *
      * @return mixed
      */
     function any($uri, callable $closure);
-
 
     /**
      * Sets routes for an array of methods at the same time, ie possible
@@ -88,9 +92,11 @@ interface AppInterface {
      * @param array $methods an array of methods to set this route for
      * @param       $uri
      * @param       $closure
+     *
      * @return mixed
      */
-    public function verb(array $methods, $uri,callable $closure);
+    public function verb(array $methods, $uri, callable $closure);
+
     /**
      * Return the routes set.
      *
@@ -102,14 +108,16 @@ interface AppInterface {
      * Sets a config value to true
      *
      * @param $configToEnable name of config to set to true
+     *
      * @return $this
      */
-     function enable($configToEnable);
+    function enable($configToEnable);
 
     /**
      * Checks if a config value is true or false
      *
      * @param $configToCheck
+     *
      * @return boolean
      */
     function enabled($configToCheck);
@@ -118,6 +126,7 @@ interface AppInterface {
      * Sets a config value to FALSE
      *
      * @param $configToDisable config value to set to FALSE
+     *
      * @return $this
      */
     function disable($configToDisable);
@@ -131,7 +140,8 @@ interface AppInterface {
      * and returns that user to the controller method, thus injecting a user object.
      *
      * @param $paramName name of param in route uri
-     * @param $closure a closure to run when that param name is used
+     * @param $closure   a closure to run when that param name is used
+     *
      * @return mixed
      */
     function param($paramName, callable $closure);
@@ -160,9 +170,10 @@ interface AppInterface {
      * middleware.
      *
      * @param $middleware String, the name of the middleware we want to load...
+     *
      * @return $this
      */
-    function middleware( $middleware);
+    function middleware($middleware);
 
     /**
      * This method starts the app, basicly resolves routes, call the current route.

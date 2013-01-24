@@ -1,5 +1,5 @@
 <?php
-declare(encoding = "UTF8") ;
+declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
@@ -7,24 +7,23 @@ namespace DHP_FW;
  */
 class Utils {
     # returns NULL when unable to load/find class
-    static public function classConstructorArguments($class) {
+    static public function classConstructorArguments($class){
         $args = array();
         try {
-            $refClass    = new \ReflectionClass($class);
+            $refClass    = new \ReflectionClass( $class );
             $constructor = $refClass->getConstructor();
-            if ($constructor) {
+            if ( $constructor ) {
                 $params = $constructor->getParameters();
-                if ($params) {
+                if ( $params ) {
                     foreach ($params as $param) {
-                        $arg = array(
-                            'name'     => $param->getName(),
-                            'required' => TRUE,
-                            'class'    => NULL
-                        );
-                        if ($param->getClass()) {
-                            $arg['class'] = $param->getClass()->getName();
+                        $arg = array('name'     => $param->getName(),
+                                     'required' => TRUE,
+                                     'class'    => NULL);
+                        if ( $param->getClass() ) {
+                            $arg['class'] = $param->getClass()
+                              ->getName();
                         }
-                        if ($param->isOptional()) {
+                        if ( $param->isOptional() ) {
                             $arg['required'] = FALSE;
                             $arg['default']  = $param->getDefaultValue();
                         }
@@ -32,7 +31,7 @@ class Utils {
                     }
                 }
             }
-        }catch(\Exception $e){  # exception thrown, return null
+        } catch (\Exception $e) { # exception thrown, return null
             throw $e;
         }
         return $args;

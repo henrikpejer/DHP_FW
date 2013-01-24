@@ -1,5 +1,5 @@
 <?php
-declare(encoding = "UTF8") ;
+declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
@@ -7,8 +7,11 @@ namespace DHP_FW;
  */
 interface EventInterface {
     function trigger($eventName, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL, &$five = NULL, &$six = NULL, &$seven = NULL);
+
     function register($eventName, $callable);
+
     function subscribe($objectToSubscribeTo, &$subscriber);
-    function triggerSubscribe($delegate,$method, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL);
+
+    function triggerSubscribe($delegate, $method, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL);
 
 }

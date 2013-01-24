@@ -13,9 +13,10 @@ const EVENT_ABORT = '32e4f1d38810d19529b4d0054eab52bd';
  * Objects can subscribe to events happening in the system and
  * functions will be called, with or without arguments.
  */
-class Event implements \DHP_FW\EventInterface{
+class Event implements \DHP_FW\EventInterface {
 
-    protected $events = array('*' => array(), '__controller__' => array());
+    protected $events = array('*'              => array(),
+                              '__controller__' => array());
     public $delegates = array();
 
     public function __construct(){
@@ -66,23 +67,24 @@ class Event implements \DHP_FW\EventInterface{
 
     /**
      * @param $objectToSubscribeTo : object that will emit the event
-     * @param $subscriber : object that will catch the event, show have a delegate function
+     * @param $subscriber          : object that will catch the event, show have a delegate function
      */
     public function subscribe($objectToSubscribeTo, &$subscriber){
         $objectToSubscribeTo = spl_object_hash($objectToSubscribeTo);
-        if(!isset($this->delegates[$objectToSubscribeTo])){
+        if ( !isset( $this->delegates[$objectToSubscribeTo] ) ) {
             $this->delegates[$objectToSubscribeTo] = array();
         }
-        $this->delegates[$objectToSubscribeTo][spl_object_hash($subscriber)] = &$subscriber;
+        $this->delegates[$objectToSubscribeTo][spl_object_hash($subscriber)] = & $subscriber;
     }
 
-    public function triggerSubscribe($delegate,$method, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL){;
+    public function triggerSubscribe($delegate, $method, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL){
+        ;
         $__objectHash__ = spl_object_hash($delegate);
-        $return = NULL;
-        if(isset($this->delegates[$__objectHash__])){
-            foreach($this->delegates[$__objectHash__] as $target){
-                $return = $target->$method($one,$two,$three,$four);
-                if($return === FALSE){
+        $return         = NULL;
+        if ( isset( $this->delegates[$__objectHash__] ) ) {
+            foreach ($this->delegates[$__objectHash__] as $target) {
+                $return = $target->$method($one, $two, $three, $four);
+                if ( $return === FALSE ) {
                     break;
                 }
             }
@@ -114,7 +116,7 @@ class Event implements \DHP_FW\EventInterface{
         $eventsToReturn = array();
         foreach ($eventKeys as $event) {
             if ( isset( $this->events[$event] ) ) {
-                $eventsToReturn = array_merge($eventsToReturn,$this->events[$event]);
+                $eventsToReturn = array_merge($eventsToReturn, $this->events[$event]);
             }
         }
         return $eventsToReturn;
@@ -169,7 +171,8 @@ class Event implements \DHP_FW\EventInterface{
                     break;
                 case 4:
                     if ( !isset( $callArgs ) ) {
-                        $callArgs = array(&$one, &$two, &$three, &$four);
+                        $callArgs = array(&$one, &$two, &$three,
+                                          &$four);
                     }
                     if ( is_array($event) ) {
                         $__return__ = call_user_func_array($event, $callArgs);
@@ -179,7 +182,8 @@ class Event implements \DHP_FW\EventInterface{
                     break;
                 case 5:
                     if ( !isset( $callArgs ) ) {
-                        $callArgs = array(&$one, &$two, &$three, &$four, &$five);
+                        $callArgs = array(&$one, &$two, &$three, &$four,
+                                          &$five);
                     }
                     if ( is_array($event) ) {
                         $__return__ = call_user_func_array($event, $callArgs);
@@ -189,7 +193,8 @@ class Event implements \DHP_FW\EventInterface{
                     break;
                 case 6:
                     if ( !isset( $callArgs ) ) {
-                        $callArgs = array(&$one, &$two, &$three, &$four, &$five, &$six);
+                        $callArgs = array(&$one, &$two, &$three, &$four,
+                                          &$five, &$six);
                     }
                     if ( is_array($event) ) {
                         $__return__ = call_user_func_array($event, $callArgs);
@@ -199,7 +204,8 @@ class Event implements \DHP_FW\EventInterface{
                     break;
                 case 7:
                     if ( !isset( $callArgs ) ) {
-                        $callArgs = array(&$one, &$two, &$three, &$four, &$five, &$six, &$seven);
+                        $callArgs = array(&$one, &$two, &$three, &$four,
+                                          &$five, &$six, &$seven);
                     }
                     if ( is_array($event) ) {
                         $__return__ = call_user_func_array($event, $callArgs);

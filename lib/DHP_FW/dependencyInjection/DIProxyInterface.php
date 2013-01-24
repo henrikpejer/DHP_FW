@@ -1,12 +1,12 @@
 <?php
-declare(encoding = "UTF8") ;
+declare( encoding = "UTF8" ) ;
 namespace DHP_FW\dependencyInjection;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-01 20:44
  */
 interface DIProxyInterface {
-    
+
     /**
      * Sets up the class so that it can instantiate the class
      *
@@ -27,7 +27,8 @@ interface DIProxyInterface {
      * order they where added.
      *
      * @param       $method String, name  of the method
-     * @param array $args arguments to that method
+     * @param array $args   arguments to that method
+     *
      * @return mixed
      */
     function addMethodCall($method, $args = array());
@@ -37,6 +38,7 @@ interface DIProxyInterface {
      * __construct.
      *
      * @param array $args array of args, in the order they will be called
+     *
      * @return $this
      */
     function setArguments(Array $args);

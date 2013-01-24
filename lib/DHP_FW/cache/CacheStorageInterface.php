@@ -1,5 +1,5 @@
 <?php
-declare(encoding = "UTF8") ;
+declare( encoding = "UTF8" ) ;
 namespace DHP_FW\cache;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
@@ -10,9 +10,10 @@ interface CacheStorageInterface {
     /**
      * Used to set a value in the cache.
      *
-     * @param      $key cache key for the value
+     * @param      $key   cache key for the value
      * @param      $value the value
-     * @param null $ttl optional TimeToLive
+     * @param null $ttl   optional TimeToLive
+     *
      * @return mixed
      */
     public function set($key, $value, $ttl = NULL);
@@ -25,17 +26,19 @@ interface CacheStorageInterface {
      * will be called and the return of that output will be used
      * as a value for that key, with the optional TimeToLive if set.
      *
-     * @param          $key cache key for the value to get
+     * @param          $key     cache key for the value to get
      * @param callable $closure return set when key is not present
-     * @param null     $ttl optional TTL for the key
+     * @param null     $ttl     optional TTL for the key
+     *
      * @return mixed
      */
-    public function get($key,callable $closure = NULL, $ttl = NULL);
+    public function get($key, callable $closure = NULL, $ttl = NULL);
 
     /**
      * Deletes the key, and the value
      *
      * @param $key key to remove
+     *
      * @return mixed
      */
     public function delete($key);

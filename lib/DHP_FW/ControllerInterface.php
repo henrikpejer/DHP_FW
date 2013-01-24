@@ -1,5 +1,5 @@
 <?php
-declare(encoding = "UTF8") ;
+declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
 
 /**
@@ -9,5 +9,6 @@ namespace DHP_FW;
 interface ControllerInterface {
 
     function __construct(\DHP_FW\RequestInterface $request, \DHP_FW\ResponseInterface $response, \DHP_FW\EventInterface $event);
+
     function __eventCatchall();
 }

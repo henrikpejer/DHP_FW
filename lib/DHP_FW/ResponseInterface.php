@@ -1,5 +1,5 @@
 <?php
-declare(encoding = "UTF8") ;
+declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
 
 /**
@@ -20,8 +20,9 @@ interface ResponseInterface {
     /**
      * This will send headers and echo whatever is in the $data-variable
      *
-     * @param int $dataOrStatus the status, an int, http status
-     * @param null $data Data to be sent
+     * @param int  $dataOrStatus the status, an int, http status
+     * @param null $data         Data to be sent
+     *
      * @return null
      */
     function send($dataOrStatus, $data = NULL);
@@ -30,9 +31,10 @@ interface ResponseInterface {
      * This sets a header. Since not all headers have a :, you do not need to
      * include the second parameter, '$value'.
      *
-     * @param      $name Name of the header, whatever is before :
+     * @param      $name  Name of the header, whatever is before :
      * @param null $value the value of the header, whatever is after :
      * @param bool $processHeaderName
+     *
      * @return $this
      */
     function header($name, $value = NULL, $processHeaderName = TRUE);
@@ -41,8 +43,9 @@ interface ResponseInterface {
      * This sets the status of the response. This method will
      * generate a statu-header.
      *
-     * @param int  $httpNumber the status number, an int
+     * @param int  $httpNumber  the status number, an int
      * @param null $httpMessage the message accompaning the http-status number
+     *
      * @return null
      */
     function status($httpNumber, $httpMessage = NULL);
@@ -53,10 +56,11 @@ interface ResponseInterface {
      *
      * If no mimetype is specified, finfo will be used to try to figure out the mimetype
      *
-     * @param      $filePath Path to the file that should be sent
-     * @param null $mimeType string, mimetype
-     * @param null $fileName optional filename
+     * @param      $filePath     Path to the file that should be sent
+     * @param null $mimeType     string, mimetype
+     * @param null $fileName     optional filename
      * @param bool $downLoadFile If the file should be downloaded or not
+     *
      * @return null
      * @throws \Exception
      */
@@ -68,6 +72,7 @@ interface ResponseInterface {
      * @param      $filePath Path to the file that should be sent
      * @param null $mimeType string, mimetype
      * @param null $fileName optional filename
+     *
      * @return null
      * @throws \Exception
      */
@@ -76,9 +81,10 @@ interface ResponseInterface {
     /**
      * Will send redirect headers.
      *
-     * @param      $url string, the url to redirect to, must be a complete URL
-     * @param int  $httpStatus, together with status int
+     * @param      $url         string, the url to redirect to, must be a complete URL
+     * @param int  $httpStatus  , together with status int
      * @param null $httpMessage and optional http-message to go along with the status
+     *
      * @return null
      */
     function redirect($url, $httpStatus = 301, $httpMessage = NULL);
@@ -88,6 +94,7 @@ interface ResponseInterface {
      * be sent.
      *
      * @param bool $doSurpress if headers should be surpressed or not
+     *
      * @return null
      */
     function supressHeaders($doSurpress = TRUE);

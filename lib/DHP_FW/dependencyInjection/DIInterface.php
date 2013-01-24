@@ -2,10 +2,10 @@
 declare( encoding = "UTF8" ) ;
 namespace DHP_FW\dependencyInjection;
 
-/**
- * User: Henrik Pejer mr@henrikpejer.com
- * Date: 2013-01-01 20:42
- */
+    /**
+     * User: Henrik Pejer mr@henrikpejer.com
+     * Date: 2013-01-01 20:42
+     */
 
 /**
  * Lets redo this the right way. Big job, got to be done, no other way around it.
@@ -18,7 +18,6 @@ namespace DHP_FW\dependencyInjection;
  *
  */
 interface DIInterface {
-
 
     /**
      * Starts the whole DI off.
@@ -38,11 +37,12 @@ interface DIInterface {
      *
      * These will also be used when we want to instantiate things.
      *
-     * @param $name String of key, string
+     * @param $name  String of key, string
      * @param $value String could be anything
+     *
      * @return DIProxyInterface instance, most likely a reference :)
      */
-    function set($name,$value);
+    function set($name, $value);
 
     /**
      * Here we set an alias for an key:
@@ -53,8 +53,9 @@ interface DIInterface {
      *
      * Original has to exist already, or an exception will be thrown.
      *
-     * @param $alias String alias for...
+     * @param $alias    String alias for...
      * @param $original String
+     *
      * @return $this
      */
     function alias($alias, $original);
@@ -62,12 +63,13 @@ interface DIInterface {
     /**
      * This will return whatever it is that we want. IF object has been loaded,
      * return that. If not, instantiate it and.... be happy with it!
-     * 
+     *
      * This will use the values in DIProxy to instantiate and if needed
      * call a few methods to setup whatever is needed for that object
      * to get it going
      *
      * @param $name String of object to load
+     *
      * @return mixed
      */
     function get($name);
@@ -77,13 +79,16 @@ interface DIInterface {
      *
      * @param $name
      * @param $value
+     *
      * @return mixed
      */
-    function __set($name,$value);
+    function __set($name, $value);
 
     /**
      * A short for get($name);
+     *
      * @param $name
+     *
      * @return mixed
      */
     function __get($name);
