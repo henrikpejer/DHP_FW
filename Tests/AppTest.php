@@ -44,6 +44,7 @@ class AppTest extends \PHPUnit_Framework_TestCase {
         }, $routes[App::HTTP_METHOD_GET]['/test']);
     }
 
+
     public function testHead() {
         $this->object->head('/test', function () {
             return TRUE;
@@ -263,5 +264,8 @@ class AppTest extends \PHPUnit_Framework_TestCase {
         $uri = '';
         \PHPUnit_Framework_Assert::assertEquals(array('headers'=>array('Status'=>'200 OK'),'data'=>'this is the title'),$this->DI->get('DHP_FW\EventInterface')->trigger('DHP_FW.app.cacheForRequest',$uri));
         \PHPUnit_Framework_Assert::assertTrue($this->object->start());
+        ob_start();
+        \PHPUnit_Framework_Assert::assertTrue($this->object->start());
+        ob_end_clean();
     }
 }

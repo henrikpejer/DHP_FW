@@ -120,9 +120,8 @@ class App implements \DHP_FW\AppInterface {
         $routesToProcess = isset($this->routes[$this->request->getMethod()]) ? array_merge($this->routes[self::HTTP_METHOD_ANY], $this->routes[$this->request->getMethod()]) : $this->routes[self::HTTP_METHOD_ANY];
         $uriToMatch      = trim($this->request->getUri(), '/');
         $routesMatched = array();
-        $routeKeys = $this->cache_system('routes_'.$this->request->getMethod().':'.$this->request->getUri());
+        $routeKeys = $this->cache_system('routes_'.$this->request->getMethod().':'.$uri);
         if( !empty($routeKeys) ){
-            var_dump($routeKeys);
             foreach($routeKeys as $uri => $routeMatchReturn){
                 $routesMatched[] = array('closure'=>$routesToProcess[$uri],'route'=>$routeMatchReturn);
             }
@@ -139,22 +138,16 @@ class App implements \DHP_FW\AppInterface {
         }
         $return = $this->runMatchedRoutes($routesMatched);
         # save this in cache for later use, cache routes!
-        $this->cache_system('routes_'.$this->request->getMethod().':'.$this->request->getUri(),$routeKeysToCache,300);
+        $this->cache_system('routes_'.$this->request->getMethod().':'.$uri,$routeKeysToCache,300);
         return $return;
     }
 
     public function cache($key, $value = NULL, $ttl = NULL) {
         return $this->__setCache('app',$key,$value,$ttl);
-        $return = NULL;
-        if ($this->enabled('use_cache')) {
-            if (isset($value)) {
-                $value = is_callable($value) ? $value : function () use ($value) {
-                    return $value;
-                };
-            }
-            $return = $this->cacheObject->bucket('app')->get($key, $value, $ttl);
-        }
-        return $return;
+    }
+
+    private function cache_system($key, $value = NULL, $ttl = NULL){
+        return $this->__setCache('sys',$key,$value,$ttl);
     }
 
     private function __setCache($prefix,$key,$value = NULL,$ttl = NULL){
@@ -169,10 +162,6 @@ class App implements \DHP_FW\AppInterface {
         }
         return $return;
 
-    }
-
-    private function cache_system($key, $value = NULL, $ttl = NULL){
-        return $this->__setCache('sys',$key,$value,$ttl);
     }
 
     private function runMatchedRoutes($routes){
