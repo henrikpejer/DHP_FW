@@ -30,6 +30,7 @@ class AppTest extends \PHPUnit_Framework_TestCase {
      * This method is called after a test is executed.
      */
     protected function tearDown() {
+        $this->object->cache_flush();
     }
 
     public function testGet() {
@@ -264,8 +265,23 @@ class AppTest extends \PHPUnit_Framework_TestCase {
         $uri = '';
         \PHPUnit_Framework_Assert::assertEquals(array('headers'=>array('Status'=>'200 OK'),'data'=>'this is the title'),$this->DI->get('DHP_FW\EventInterface')->trigger('DHP_FW.app.cacheForRequest',$uri));
         \PHPUnit_Framework_Assert::assertTrue($this->object->start());
-        ob_start();
-        \PHPUnit_Framework_Assert::assertTrue($this->object->start());
-        ob_end_clean();
+        $this->object->cache_flush();
     }
+
+    public function testRouteCache() {
+        $this->expectOutputString('this is the titlethis is the title');
+        \PHPUnit_Framework_Assert::assertTrue($this->object->enable('use_cache'));
+        \PHPUnit_Framework_Assert::assertTrue($this->object->enabled('use_cache'));
+        $this->object->setupCache();
+        \PHPUnit_Framework_Assert::assertTrue($this->object->enabled('use_cache'));
+        $res = $this->DI->get('DHP_FW\ResponseInterface');
+        $this->object->get('', function ($title = 'this is the title') use ($res) {
+            $res->send($title);
+        });
+        \PHPUnit_Framework_Assert::assertNull($this->object->start());
+        \PHPUnit_Framework_Assert::assertTrue($this->object->enabled('use_cache'));
+        \PHPUnit_Framework_Assert::assertNull($this->object->start());
+        $this->object->cache_flush();
+    }
+
 }

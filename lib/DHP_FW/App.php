@@ -68,9 +68,13 @@ class App implements \DHP_FW\AppInterface {
         return $this->routes;
     }
 
+    /**
+     * @param String $configToEnable
+     * @return App|AppInterface
+     */
     public function enable($configToEnable) {
         $this->configs[$configToEnable] = TRUE;
-        return $this->configs[$configToEnable];
+        return $this;
     }
 
     public function enabled($configToCheck) {
@@ -120,8 +124,9 @@ class App implements \DHP_FW\AppInterface {
         $routesToProcess = isset($this->routes[$this->request->getMethod()]) ? array_merge($this->routes[self::HTTP_METHOD_ANY], $this->routes[$this->request->getMethod()]) : $this->routes[self::HTTP_METHOD_ANY];
         $uriToMatch      = trim($this->request->getUri(), '/');
         $routesMatched = array();
-        $routeKeys = $this->cache_system('routes_'.$this->request->getMethod().':'.$uri);
-        if( !empty($routeKeys) ){
+        $cacheKey = 'routes_'.$this->request->getMethod().':'.$uriToMatch;
+        $routeKeys = $this->cache_system($cacheKey);
+        if( $routeKeys !== NULL && is_array($routeKeys)){
             foreach($routeKeys as $uri => $routeMatchReturn){
                 $routesMatched[] = array('closure'=>$routesToProcess[$uri],'route'=>$routeMatchReturn);
             }
@@ -135,15 +140,23 @@ class App implements \DHP_FW\AppInterface {
                     $routesMatched[] = array('closure'=>$closure,'route'=>$routeMatchReturn);
                 }
             }
+            # save this in cache for later use, cache routes!
+            $this->cache_system($cacheKey,$routeKeysToCache,300);
         }
         $return = $this->runMatchedRoutes($routesMatched);
-        # save this in cache for later use, cache routes!
-        $this->cache_system('routes_'.$this->request->getMethod().':'.$uri,$routeKeysToCache,300);
         return $return;
     }
 
     public function cache($key, $value = NULL, $ttl = NULL) {
         return $this->__setCache('app',$key,$value,$ttl);
+    }
+
+    public function cache_flush(){
+        if(isset($this->cacheObject) ){
+            $this->cacheObject->bucket('app')->flush();
+            $this->cacheObject->bucket('data')->flush();
+            $this->cacheObject->bucket('sys')->flush();
+        }
     }
 
     private function cache_system($key, $value = NULL, $ttl = NULL){
@@ -154,7 +167,7 @@ class App implements \DHP_FW\AppInterface {
         $return = NULL;
         if ($this->enabled('use_cache')) {
             if (isset($value)) {
-                $value = is_callable($value) ? $value : function () use ($value) {
+                $value = $value !== NULL && is_callable($value) ? $value : function () use ($value) {
                     return $value;
                 };
             }
