@@ -284,4 +284,17 @@ class AppTest extends \PHPUnit_Framework_TestCase {
         $this->object->cache_flush();
     }
 
+    public function testDeleteCache(){
+        \PHPUnit_Framework_Assert::assertTrue($this->object->enable('use_cache'));
+        \PHPUnit_Framework_Assert::assertTrue($this->object->enabled('use_cache'));
+        $this->object->setupCache();
+        \PHPUnit_Framework_Assert::assertFalse($this->object->cache('cachetest'));
+        \PHPUnit_Framework_Assert::assertEquals('henrik',$this->object->cache('cachetest','henrik'));
+        \PHPUnit_Framework_Assert::assertEquals('henrik',$this->object->cache('cachetest'));
+        \PHPUnit_Framework_Assert::assertTrue($this->object->cacheDelete('cachetest'));
+        \PHPUnit_Framework_Assert::assertFalse($this->object->cache('cachetest'));
+        \PHPUnit_Framework_Assert::assertEquals('henrik',$this->object->cache('cachetest','henrik'));
+        \PHPUnit_Framework_Assert::assertEquals('henrik',$this->object->cache('cachetest'));
+
+    }
 }

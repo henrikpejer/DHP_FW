@@ -33,8 +33,7 @@ class Apc implements CacheStorageInterface {
     }
 
     public function delete($key) {
-        apc_delete($key);
-        return $this;
+        return apc_delete($key);
     }
 
     public function flush() {

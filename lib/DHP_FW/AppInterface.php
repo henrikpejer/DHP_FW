@@ -1,5 +1,5 @@
 <?php
-declare( encoding = "UTF8" ) ;
+declare(encoding = "UTF8") ;
 namespace DHP_FW;
 
 /**
@@ -19,9 +19,9 @@ interface AppInterface {
     /**
      * Sets up the routes possible, setups the cacheObject
      *
-     * @param       $Request
-     * @param DI    $DI
-     * @param Event $event
+     * @param \DHP_FW\RequestInterface                           $Request
+     * @param \DHP_FW\dependencyInjection\DIInterface            $DI $DI
+     * @param \DHP_FW\Event|\DHP_FW\EventInterface               $event
      */
     function __construct(\DHP_FW\RequestInterface $Request, \DHP_FW\dependencyInjection\DIInterface $DI, EventInterface $event);
 

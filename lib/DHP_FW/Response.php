@@ -1,5 +1,5 @@
 <?php
-declare( encoding = "UTF8" ) ;
+declare(encoding = "UTF8") ;
 namespace DHP_FW;
 use DHP_FW\Event;
 
@@ -61,18 +61,34 @@ class Response implements ResponseInterface {
     private $supressHeader = FALSE;
     private $dataIsCache = FALSE;
 
+    /**
+     * @param EventInterface $event
+     */
     public function __construct(EventInterface $event) {
         $this->event = $event;
     }
 
+    # todo : this is most likely not necessary - refactor away please!
+    /**
+     * @return boolean if cacheObject already have been sent or not
+     */
     public function cacheSent() {
         return $this->dataIsCache;
     }
 
+    /**
+     * This will send headers and echo whatever is in the $data-variable
+     *
+     * @param int  $dataOrStatus the status, an int, http status
+     * @param null $data         Data to be sent
+     *
+     * @return null
+     */
     public function send($dataOrStatus, $data = NULL) {
-        if ( $data !== NULL ) {
+        if ($data !== NULL) {
             $this->status($dataOrStatus);
-        } else {
+        }
+        else {
             $this->status(200);
             $data = $dataOrStatus;
         }
@@ -81,7 +97,7 @@ class Response implements ResponseInterface {
             case 'object':
             case 'array':
                 $this->data =
-                  json_encode($data, \JSON_FORCE_OBJECT | \JSON_NUMERIC_CHECK);
+                        json_encode($data, \JSON_FORCE_OBJECT | \JSON_NUMERIC_CHECK);
                 break;
             case 'string':
             case 'double':
@@ -98,50 +114,102 @@ class Response implements ResponseInterface {
         $this->sendData();
     }
 
+    /**
+     * This sets a header. Since not all headers have a :, you do not need to
+     * include the second parameter, '$value'.
+     *
+     * @param      $name  Name of the header, whatever is before :
+     * @param null $value the value of the header, whatever is after :
+     * @param bool $processHeaderName
+     *
+     * @return $this
+     */
     public function header($name, $value = NULL, $processHeaderName = TRUE) {
-        if ( $processHeaderName ) {
+        if ($processHeaderName) {
             $name =
-              str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower($name))));
+                    str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower($name))));
         }
         $this->event->trigger('DHP_FW.Response.header', $name, $value);
         $this->headers[$name] = $value;
         return $this;
     }
 
+    /**
+     * This sets the status of the response. This method will
+     * generate a statu-header.
+     *
+     * @param int  $httpNumber  the status number, an int
+     * @param null $httpMessage the message accompaning the http-status number
+     *
+     * @return null
+     */
     public function status($httpNumber, $httpMessage = NULL) {
-        if ( !isset( $httpMessage ) ) {
+        if (!isset($httpMessage)) {
             $httpMessage =
-              isset( $this->headerStatus[$httpNumber] ) ? $this->headerStatus[$httpNumber] : $httpMessage;
+                    isset($this->headerStatus[$httpNumber]) ? $this->headerStatus[$httpNumber] : $httpMessage;
         }
         $statusHeader =
-          trim(sprintf('%d %s', $httpNumber, $httpMessage));
+                trim(sprintf('%d %s', $httpNumber, $httpMessage));
         $this->header('Status', $statusHeader);
     }
 
+    /**
+     * This will send a file, together with headers for mimetype, filename.
+     * Setting downloadfile to true should force the browser to download the file.
+     *
+     * If no mimetype is specified, finfo will be used to try to figure out the mimetype
+     *
+     * @param      $filePath     Path to the file that should be sent
+     * @param null $mimeType     string, mimetype
+     * @param null $fileName     optional filename
+     * @param bool $downLoadFile If the file should be downloaded or not
+     *
+     * @return null
+     * @throws \Exception
+     */
     public function sendFile($filePath, $mimeType = NULL, $fileName = NULL, $downLoadFile = FALSE) {
         $this->event->trigger('DHP_FW.Response.sendFile', $filePath, $mimeType, $fileName, $downLoadFile);
         $realPath = realpath($filePath);
-        if ( FALSE === $realPath || FALSE === file_exists(realpath($realPath)) ) {
-            throw new \Exception( "File does not exist" );
+        if (FALSE === $realPath || FALSE === file_exists(realpath($realPath))) {
+            throw new \Exception("File does not exist");
         }
-        if ( FALSE === is_readable($realPath) ) {
-            throw new \Exception( "Unable to read file" );
+        if (FALSE === is_readable($realPath)) {
+            throw new \Exception("Unable to read file");
         }
-        if ( !isset( $mimeType ) ) {
+        if (!isset($mimeType)) {
             $fh       = finfo_open(FILEINFO_MIME_TYPE);
             $mimeType = finfo_file($fh, $realPath);
             finfo_close($fh);
         }
-        if ( !isset( $fileName ) ) {
+        if (!isset($fileName)) {
             $fileName = basename($realPath);
         }
         $this->sendFileData($realPath, $fileName, $mimeType, $downLoadFile);
     }
 
+    /**
+     * A wrapper function for sendFile, with $downloadFile set to true
+     *
+     * @param      $filePath Path to the file that should be sent
+     * @param null $mimeType string, mimetype
+     * @param null $fileName optional filename
+     *
+     * @return null
+     * @throws \Exception
+     */
     public function downloadFile($filePath, $mimeType = NULL, $fileName = NULL) {
         $this->sendFile($filePath, $mimeType, $fileName, TRUE);
     }
 
+    /**
+     * Will send redirect headers.
+     *
+     * @param      $url         string, the url to redirect to, must be a complete URL
+     * @param int  $httpStatus  , together with status int
+     * @param null $httpMessage and optional http-message to go along with the status
+     *
+     * @return null
+     */
     public function redirect($url, $httpStatus = 301, $httpMessage = NULL) {
         $this->event->trigger('DHP_FW.Response.redirect', $url, $httpStatus, $httpMessage);
         $this->resetHeaders();
@@ -150,18 +218,32 @@ class Response implements ResponseInterface {
         $this->sendHeaders();
     }
 
+    /**
+     * If we should skip sending the headers. IF set to true, no headers will
+     * be sent.
+     *
+     * @param bool $doSurpress if headers should be surpressed or not
+     *
+     * @return null
+     */
     public function supressHeaders($doSurpress = TRUE) {
         $this->supressHeader = $doSurpress === TRUE ? TRUE : FALSE;
     }
 
+    /**
+     * This method will check if a cacheObject of the response exists in cacheObject
+     * and will send that immediately.
+     *
+     * @return boolean true if cacheObject was used, false if not
+     */
     public function checkCache() {
         $request = \app\DI()->get('DHP_FW\\Request');
-        if ( $request->getMethod() == \DHP_FW\App::HTTP_METHOD_GET ) {
+        if ($request->getMethod() == \DHP_FW\App::HTTP_METHOD_GET) {
             $uri       = $request->getUri();
             $__cache__ =
-              \app\DI()->get('DHP_FW\\cache\\Cache')->bucket('app')
-                ->get("uri_{$uri}_data");
-            if ( isset( $__cache__ ) && is_array($__cache__) ) {
+                    \app\DI()->get('DHP_FW\\cache\\Cache')->bucket('app')
+                            ->get("uri_{$uri}_data");
+            if (isset($__cache__) && is_array($__cache__)) {
                 $this->dataIsCache = TRUE;
                 foreach ($__cache__['headers'] as $header) {
                     $this->sendHeaderData($header);
@@ -176,18 +258,19 @@ class Response implements ResponseInterface {
     }
 
     private function sendHeaders() {
-        if ( FALSE == $this->headersSent && \headers_sent() == FALSE ) {
+        if (FALSE == $this->headersSent && \headers_sent() == FALSE) {
             foreach ($this->headers as $header => $value) {
                 switch ($header) {
                     case 'Status':
                         $this->sendHeaderData("HTTP/1.1 {$value}");
                         break;
                 }
-                if ( !isset( $value ) ) {
+                if (!isset($value)) {
                     $completeHeader = $header;
-                } else {
+                }
+                else {
                     $completeHeader =
-                      sprintf('%s: %s', $header, $value);
+                            sprintf('%s: %s', $header, $value);
                 }
                 $this->sendHeaderData($completeHeader);
             }
@@ -197,10 +280,10 @@ class Response implements ResponseInterface {
 
     private function sendFileData($filePath, $fileName, $mimeType, $downloadHeaders = FALSE) {
         $this->resetHeaders()->header('Content-Type', $mimeType)
-          ->header('Content-Transfer-Encoding', 'binary')->status(200);
-        if ( $downloadHeaders == TRUE ) {
+                ->header('Content-Transfer-Encoding', 'binary')->status(200);
+        if ($downloadHeaders == TRUE) {
             $this->header('Content-Description', 'File Transfer')
-              ->header('Content-Disposition', "attachment; filename=\"{$fileName}\"");
+                    ->header('Content-Disposition', "attachment; filename=\"{$fileName}\"");
         }
         $this->sendHeaders();
         $this->dataSendStatus = self::DATASENDSTATUS_STARTED;
@@ -210,20 +293,20 @@ class Response implements ResponseInterface {
     }
 
     private function sendData() {
-        if ( $this->dataIsCache == FALSE ) {
+        if ($this->dataIsCache == FALSE) {
             $this->event->trigger('DHP_FW.Response.sendData', $this->data);
-            $this->event->trigger('DHP_FW.Response.afterSendData',$this->data);
+            $this->event->trigger('DHP_FW.Response.afterSendData', $this->data);
         }
         $this->dataSendStatus = self::DATASENDSTATUS_STARTED;
         echo $this->data;
         $this->dataSendStatus = self::DATASENDSTATUS_COMPLETE;
-        if ( $this->dataIsCache == FALSE ) {
+        if ($this->dataIsCache == FALSE) {
             # lets cacheObject this, ok?
             # todo : this should go through app directly, me thinks and not through DI...
             \app\DI()->get('DHP_FW\\cache\\Cache')->bucket('app')
-              ->set("uri_" . \app\DI()->get('DHP_FW\\Request')
-              ->getUri() . "_data", array('headers' => $this->headerDataSent,
-                                          'data'    => $this->data), 600);
+                    ->set("uri_" . \app\DI()->get('DHP_FW\\Request')
+                    ->getUri() . "_data", array('headers' => $this->headerDataSent,
+                                                'data'    => $this->data), 600);
         }
     }
 
@@ -239,10 +322,10 @@ class Response implements ResponseInterface {
      * @param $headerData : String
      */
     private function sendHeaderData($headerData) {
-        if ( FALSE === $this->supressHeader ) {
+        if (FALSE === $this->supressHeader) {
             \header($headerData);
         }
-        if ( $this->dataIsCache == FALSE ) {
+        if ($this->dataIsCache == FALSE) {
             $this->headerDataSent[] = $headerData;
         }
     }

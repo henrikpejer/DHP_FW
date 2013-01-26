@@ -9,9 +9,12 @@ namespace DHP_FW;
 
 interface ResponseInterface {
 
+    /**
+     * @param EventInterface $event
+     */
     function __construct(\DHP_FW\EventInterface $event);
 
-    # todo : this is most likely not necessary - refactor away please!
+
     /**
      * @return boolean if cacheObject already have been sent or not
      */

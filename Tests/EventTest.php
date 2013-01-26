@@ -32,8 +32,11 @@ class EventTest extends \PHPUnit_Framework_TestCase {
     protected function tearDown() {
     }
 
+    /**
+     * @expectedException \Exception
+     */
     public function testTriggerError() {
-        \PHPUnit_Framework_Assert::assertFalse($this->object->register('PHPUnit_test', 'notPossible'));
+        $this->object->register('PHPUnit_test', 'notPossible');
     }
 
     public function testTriggerNoArgument() {
