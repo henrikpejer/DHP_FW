@@ -20,7 +20,8 @@ require_once __DIR__.DIRECTORY_SEPARATOR.'bootstrap.php';
 $app->middleware('Benchmark');
 $app->middleware('Cookie');
 $app->middleware('Session');
-$app->enable('use_cache')->setupCache();
+$app->enable('use_cache');
+$app->setupCache();
 
 $app->get('testing/hesting/flecking',function(){
     echo "Fake controller run!\n";
