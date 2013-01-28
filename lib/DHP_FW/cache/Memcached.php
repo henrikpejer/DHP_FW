@@ -1,5 +1,5 @@
 <?php
-declare( encoding = "UTF8" ) ;
+declare(encoding = "UTF8") ;
 namespace DHP_FW\cache;
 
 /**
@@ -10,7 +10,8 @@ namespace DHP_FW\cache;
  */
 class Memcached extends CacheStorage {
 
-    private $defaultTtl, $store;
+    protected $defaultTtl;
+    private $store;
 
     public function __construct(array $servers, $defaultTtl = 2592000) { #30 days in seconds
         $this->defaultTtl = $defaultTtl;
@@ -47,7 +48,7 @@ class Memcached extends CacheStorage {
      */
     protected function _get($key, callable $closure = NULL, $ttl = NULL) {
         $return      = $this->store->get($key);
-        $__success__ = ($this->store->getResultCode() == \Memcached::RES_NOTFOUND)?FALSE:TRUE;
+        $__success__ = ($this->store->getResultCode() == \Memcached::RES_NOTFOUND) ? FALSE : TRUE;
         return array($return, $__success__);
     }
 

@@ -7,9 +7,12 @@ namespace DHP_FW\cache;
  */
 abstract class CacheStorage {
 
+    protected $defaultTtl;
+
     public function __construct($defaultTtl = 2592000) { #30 days in seconds
-            $this->defaultTtl = $defaultTtl;
-        }
+        $this->defaultTtl = $defaultTtl;
+    }
+
     /**
      * Used to set a value in the cacheObject.
      *
@@ -71,5 +74,55 @@ abstract class CacheStorage {
     public function flush() {
         $this->_flush();
         return $this;
+    }
+
+    /**
+     * This sets the value.
+     *
+     * Internal method, should be overridden in sub class.
+     *
+     * @param String        $key
+     * @param Mixed         $value
+     * @param Integer       $ttl
+     */
+    protected function _set($key, $value, $ttl) {
+    }
+
+    /**
+     * This gets a value for a key and returns it.
+     *
+     * The return is special since it should be an array with two values
+     * first is the value of the key
+     * the second is TRUE / FALSE stating if the get was successful or not
+     * true is successful, false is unsuccesful.
+     *
+     * Internal method, should be overridden in sub class.
+     *
+     * @param String $key
+     *
+     * @return array
+     */
+    protected function _get($key) {
+    }
+
+    /**
+     * Deletes the key in the cache store
+     *
+     * Internal method, should be overridden in sub class.
+     *
+     * @param $key
+     * @return bool|\string[]
+     */
+    protected function _delete($key) {
+    }
+
+    /**
+     * Flushes the cache
+     *
+     * Internal method, should be overridden in sub class.
+     *
+     * @return bool
+     */
+    protected function _flush() {
     }
 }
