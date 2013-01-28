@@ -7,7 +7,7 @@ namespace DHP_FW\middleware;
  */
 class Cache implements MiddlewareInterface {
 
-    private $request, $response, $app, $currentResponse = array('headers' => array(), 'data' => array());
+    protected $request, $response, $app, $currentResponse = array('headers' => array(), 'data' => array());
 
     /**
      * Inits cacheObject middleware
@@ -44,7 +44,7 @@ class Cache implements MiddlewareInterface {
         return $this->app->cache($this->generateCacheKey($this->request->getUri()));
     }
 
-    private function generateCacheKey($cacheKey) {
+    protected function generateCacheKey($cacheKey) {
         return '_cacheMiddleware_' . md5($cacheKey);
     }
 }

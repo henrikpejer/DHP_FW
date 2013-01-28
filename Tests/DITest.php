@@ -78,4 +78,22 @@ class DITest extends \PHPUnit_Framework_TestCase {
         \PHPUnit_Framework_Assert::assertEquals($ref,spl_object_hash($this->object->get('DHP_FW\Event')));
         \PHPUnit_Framework_Assert::assertEquals($ref,spl_object_hash($this->object->get('masta')));
     }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testAliasNotPresent(){
+        $this->object->alias('new_alias','nonexisting_alias');
+    }
+
+    public function testLoadingClass(){
+        eval('class henrik{}');
+        $o = $this->object->get('henrik');
+        \PHPUnit_Framework_Assert::assertInstanceOf('henrik', $o);
+    }
+
+    public function testGenericSetGetMethods(){
+        $this->object->DI = $this->object;
+        \PHPUnit_Framework_Assert::assertEquals($this->object,$this->object->{'DI'});
+    }
 }

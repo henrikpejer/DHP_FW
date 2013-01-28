@@ -13,7 +13,7 @@ class Memcached extends CacheStorage {
     protected $defaultTtl;
     private $store;
 
-    public function __construct(array $servers, $defaultTtl = 2592000) { #30 days in seconds
+    public function __construct(array $servers = array(array('localhost',11211)), $defaultTtl = 2592000) { #30 days in seconds
         $this->defaultTtl = $defaultTtl;
         $this->store      = new \Memcached();
         $this->store->addServers($servers);

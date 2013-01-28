@@ -10,11 +10,15 @@ class Apc extends CacheStorage {
     protected $defaultTtl = NULL;
 
     protected function _set($key,$value,$ttl){
-        apc_store($key,$value,$ttl);
+        # echo "SET : ";
+        # var_dump(func_get_args());
+        return apc_store($key,$value,$ttl);
     }
 
     protected function _get($key){
         $return      = apc_fetch($key, $__success__);
+        # echo "GET : ";
+        # var_dump(array($key,$return));
         return array($return,$__success__);
     }
 

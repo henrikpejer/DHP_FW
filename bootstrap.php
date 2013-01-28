@@ -6,8 +6,8 @@ namespace {
     $classLoader->register();
 
     $DI = new DHP_FW\dependencyInjection\DI();
-    $DI->set('DHP_FW\cache\Memcached','DHP_FW\cache\Memcached')->setArguments(array(array(array('localhost',11211))));
-    $storage     = $DI->get('DHP_FW\cache\Memcached');
+    # $DI->set('DHP_FW\cache\Memcached','DHP_FW\cache\Memcached')->setArguments(array(array(array('localhost',11211))));
+    $storage     = $DI->get('DHP_FW\cache\Apc');
     $DI
       ->set('DHP_FW\cache\Cache', 'DHP_FW\cache\Cache')
       ->setArguments(array($storage));
