@@ -9,7 +9,7 @@ class CacheBucketProxy implements CacheBucketProxyInterface {
     private $prefix  = NULL;
     private $storage = NULL;
 
-    public function __construct($prefix, CacheStorageInterface $storage) {
+    public function __construct($prefix, CacheStorage $storage) {
         $this->prefix  = $prefix;
         $this->storage = $storage;
     }

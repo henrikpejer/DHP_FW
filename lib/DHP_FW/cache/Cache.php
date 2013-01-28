@@ -9,7 +9,7 @@ class Cache {
 
     private $buckets = array();
 
-    public function __construct(CacheStorageInterface $storage) {
+    public function __construct(CacheStorage $storage) {
         $this->storage = $storage;
     }
 

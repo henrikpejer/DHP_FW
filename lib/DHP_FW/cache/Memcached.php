@@ -8,7 +8,7 @@ namespace DHP_FW\cache;
  * Date: 2013-01-28 16:16
  *
  */
-class Memcached implements CacheStorageInterface {
+class Memcached extends CacheStorage {
 
     private $defaultTtl, $store;
 
@@ -27,9 +27,8 @@ class Memcached implements CacheStorageInterface {
      *
      * @return mixed
      */
-    public function set($key, $value, $ttl = NULL) {
-        $ttl = $ttl == NULL ? $ttl : $this->defaultTtl;
-        $this->store->set($key, $value, $ttl);
+    protected function _set($key, $value, $ttl) {
+        return $this->store->set($key, $value, $ttl);
     }
 
     /**
@@ -46,28 +45,20 @@ class Memcached implements CacheStorageInterface {
      *
      * @return mixed
      */
-    public function get($key, callable $closure = NULL, $ttl = NULL) {
-        $__success__ = NULL;
+    protected function _get($key, callable $closure = NULL, $ttl = NULL) {
         $return      = $this->store->get($key);
-        if ( $this->store->getResultCode() == \Memcached::RES_NOTFOUND && $closure !== NULL && is_callable($closure) ) { # something went bad, right?
-            ob_start();
-            $__return__ = $closure();
-            $__echo__   = ob_get_clean();
-            $return     =
-              empty( $__return__ ) ? $__echo__ : $__return__;
-            $this->set($key, $return, $ttl);
-        }
-        return $return;
+        $__success__ = ($this->store->getResultCode() == \Memcached::RES_NOTFOUND)?FALSE:TRUE;
+        return array($return, $__success__);
     }
 
     /**
      * Deletes the key, and the value
      *
-     * @param $key key to remove
+     * @param string $key key to remove
      *
      * @return mixed
      */
-    public function delete($key) {
+    public function _delete($key) {
         $this->store->delete(key);
     }
 
@@ -77,7 +68,7 @@ class Memcached implements CacheStorageInterface {
      *
      * @return mixed
      */
-    public function flush() {
+    public function _flush() {
         $this->store->flush();
     }
 }

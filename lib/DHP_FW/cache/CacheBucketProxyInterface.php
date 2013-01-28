@@ -9,7 +9,7 @@ namespace DHP_FW\cache;
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-16 22:08
  */
-interface CacheBucketProxyInterface extends CacheStorageInterface {
+interface CacheBucketProxyInterface{
 
     /**
      * Supply the storage this proxy will use. Prefix is the prefix or the
@@ -21,7 +21,7 @@ interface CacheBucketProxyInterface extends CacheStorageInterface {
      * @param String                      $prefix
      * @param CacheStorageInterface $storage
      */
-    function __construct($prefix, CacheStorageInterface $storage);
+    function __construct($prefix, CacheStorage $storage);
 
     /**
      * Sets a value in the bucket
