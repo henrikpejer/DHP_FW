@@ -7,6 +7,9 @@ namespace DHP_FW\cache;
  */
 abstract class CacheStorage {
 
+    public function __construct($defaultTtl = 2592000) { #30 days in seconds
+            $this->defaultTtl = $defaultTtl;
+        }
     /**
      * Used to set a value in the cacheObject.
      *
