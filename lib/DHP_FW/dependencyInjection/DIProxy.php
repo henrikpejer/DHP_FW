@@ -22,8 +22,7 @@ class DIProxy implements DIProxyInterface {
 
     public function addMethodCall($method, $args = array()) {
         $args                = !is_array($args) ? array($args) : $args;
-        $this->methodCalls[] =
-          (object) array('method' => $method, 'args' => $args);
+        $this->methodCalls[] = (object) array('method' => $method, 'args' => $args);
         return $this;
     }
 

@@ -23,8 +23,8 @@ interface DIProxyInterface {
 
     /**
      * If we, for some reason, need to call a method on the object once it has been
-     * instantiated, we add that method and arguments here. They will be called in the
-     * order they where added.
+     * instantiated, we add that method and arguments here. They will be called in
+     * the order they where added.
      *
      * @param       $method String, name  of the method
      * @param array $args   arguments to that method
@@ -34,9 +34,9 @@ interface DIProxyInterface {
     function addMethodCall($method, $args = array());
 
     /**
-     * This will set arguments needed when instantiating the object, ie arguments needed for
-     * __construct.
-     *
+     * This will set arguments needed when instantiating the object, ie 
+     * arguments needed for __construct.
+     * 
      * @param array $args array of args, in the order they will be called
      *
      * @return $this
