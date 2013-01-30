@@ -1,5 +1,5 @@
 <?php
-declare(encoding = "UTF8") ;
+declare( encoding = "UTF8" ) ;
 namespace DHP_FW\cache;
 
 /**
@@ -17,6 +17,21 @@ class Memcached extends CacheStorage {
         $this->defaultTtl = $defaultTtl;
         $this->store      = new \Memcached();
         $this->store->addServers($servers);
+    }
+
+    public function getVersion() {
+        return $this->store->getVersion();
+    }
+
+    public function checkIsUp() {
+        $return = FALSE;
+        foreach ($this->getVersion() as $host => $version) {
+            if ( $version != '255.255.255' ) {
+                $return = TRUE;
+                break;
+            }
+        }
+        return $return;
     }
 
     /**
@@ -48,7 +63,7 @@ class Memcached extends CacheStorage {
      */
     protected function _get($key, callable $closure = NULL, $ttl = NULL) {
         $return      = $this->store->get($key);
-        $__success__ = ($this->store->getResultCode() == \Memcached::RES_NOTFOUND) ? FALSE : TRUE;
+        $__success__ = ( $this->store->getResultCode() == \Memcached::RES_NOTFOUND ) ? FALSE : TRUE;
         return array($return, $__success__);
     }
 
@@ -59,8 +74,8 @@ class Memcached extends CacheStorage {
      *
      * @return mixed
      */
-    public function _delete($key) {
-        $this->store->delete(key);
+    protected function _delete($key) {
+        $this->store->delete($key);
     }
 
     /**
@@ -69,7 +84,7 @@ class Memcached extends CacheStorage {
      *
      * @return mixed
      */
-    public function _flush() {
+    protected function _flush() {
         $this->store->flush();
     }
 }
