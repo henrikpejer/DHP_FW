@@ -17,7 +17,7 @@ class App implements \DHP_FW\AppInterface {
     private $customParamTypes = array();
     private $CONTINUEROUTE = FALSE;
 
-    public function __construct(\DHP_FW\RequestInterface $Request, \DHP_FW\dependencyInjection\DIInterface $DI, \DHP_FW\EventInterface $event) {
+    public function __construct(\DHP_FW\RequestInterface $Request, \DHP_FW\dependencyInjection\DIInterface $DependencyInjector, \DHP_FW\EventInterface $event) {
         $this->routes  =
                 array(self::HTTP_METHOD_GET    => array(),
                       self::HTTP_METHOD_POST   => array(),
@@ -25,7 +25,7 @@ class App implements \DHP_FW\AppInterface {
                       self::HTTP_METHOD_PUT    => array(),
                       self::HTTP_METHOD_ANY    => array());
         $this->request = $Request;
-        $this->DI      = $DI;
+        $this->DI      = $DependencyInjector;
         $this->event   = $event;
         $this->setupCache();
     }
@@ -484,9 +484,9 @@ class App implements \DHP_FW\AppInterface {
     /*
      * This will parse a route, looking like this,
      * blog/:title
-     * 
+     *
      * into
-     * 
+     *
      * array('title'=>'value_in_url')
      */
     private function parseUriForParameters($uri, $routeUri) {

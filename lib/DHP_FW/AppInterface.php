@@ -23,7 +23,7 @@ interface AppInterface {
      * @param \DHP_FW\dependencyInjection\DIInterface            $DI $DI
      * @param \DHP_FW\Event|\DHP_FW\EventInterface               $event
      */
-    function __construct(\DHP_FW\RequestInterface $Request, \DHP_FW\dependencyInjection\DIInterface $DI, EventInterface $event);
+    function __construct(\DHP_FW\RequestInterface $Request, \DHP_FW\dependencyInjection\DIInterface $DependencyInjector, EventInterface $event);
 
     /**
      * Sets routes for GET-requests
