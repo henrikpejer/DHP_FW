@@ -19,13 +19,27 @@ class Memcached extends CacheStorage {
         $this->store->addServers($servers);
     }
 
+    /**
+     * Returns Memcached::getVersion
+     *
+     * @return array
+     */
     public function getVersion() {
         return $this->store->getVersion();
     }
 
+    /**
+     * Checks if there are any memache-servers that we can use or not
+     *
+     * @return bool
+     */
     public function checkIsUp() {
         $return = FALSE;
-        foreach ($this->getVersion() as $host => $version) {
+        foreach ($this->getVersion() as $version) {
+            /*
+             * 255.255.255 seems to be the version when no memcached server
+             * can be found on that host,port, combination
+             */
             if ( $version != '255.255.255' ) {
                 $return = TRUE;
                 break;
