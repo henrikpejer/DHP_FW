@@ -6,7 +6,7 @@
 ini_set('error_reporting',E_ALL);
 ini_set('display_errors','1');
 require_once __DIR__.DIRECTORY_SEPARATOR.'bootstrap.php';
-trigger_error('Hey ho and a bottle of rum!');
+
 #$e = $DI->get('DHP_FW\EventInterface');
 #$e->register('test',function(){
 #    echo 'done';
@@ -25,26 +25,26 @@ $app->middleware('Cookie');
 $app->middleware('Session');
 $app->enable('use_cache');
 $app->setupCache();
-
-$app->get('testing/hesting/flecking',function(){
+$routes = $DI->get('DHP_FW\RoutingInterface');
+$routes->get('testing/hesting/flecking',function(){
     echo "Fake controller run!\n";
 });
 
-$app->any('blog',function(){
+$routes->any('blog',function(){
    return array('controller'=>'Blog','method'=>'index');
 });
 
 
-$app->any('blog/page/:title',function(){
+$routes->any('blog/page/:title',function(){
    return array('controller'=>'Blog','method'=>'page');
 });
 
-$app->get('blog/img',function(){
+$routes->get('blog/img',function(){
    return array('controller'=>'Blog','method'=>'img');
 });
 
 
-$app->get('blog/downloadimg',function(){
+$routes->get('blog/downloadimg',function(){
    return array('controller'=>'Blog','method'=>'downloadImg');
 });
 $app->start();

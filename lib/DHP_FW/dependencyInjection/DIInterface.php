@@ -92,4 +92,11 @@ interface DIInterface {
      * @return mixed
      */
     function __get($name);
+
+    /**
+     * Tries to instantiate the class
+     * @param string $class
+     * @return mixed
+     */
+    public function instantiateObject($class);
 }

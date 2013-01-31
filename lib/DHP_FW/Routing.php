@@ -15,7 +15,8 @@ class Routing implements RoutingInterface {
      *
      * Event is not necessary, but preferable.
      *
-     * @param EventInterface $Event
+     * @param dependencyInjection\DIInterface $DependencyInjector
+     * @param EventInterface                  $Event
      */
     public function __construct(\DHP_FW\dependencyInjection\DIInterface $DependencyInjector, EventInterface $Event = NULL) {
         $this->event              = $Event;
@@ -395,6 +396,7 @@ class Routing implements RoutingInterface {
      * and run with it...?
      *
      * @param $controllerToLoad
+     * @return mixed
      */
     private function loadController($controllerToLoad) {
         return $this->DependencyInjector->instantiateObject('\\app\\controllers\\' . $controllerToLoad['controller']);

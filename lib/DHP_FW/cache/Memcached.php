@@ -1,5 +1,5 @@
 <?php
-declare( encoding = "UTF8" ) ;
+declare(encoding = "UTF8") ;
 namespace DHP_FW\cache;
 
 /**
@@ -13,7 +13,7 @@ class Memcached extends CacheStorage {
     protected $defaultTtl;
     private $store;
 
-    public function __construct(array $servers = array(array('localhost',11211)), $defaultTtl = 2592000) { #30 days in seconds
+    public function __construct(array $servers = array(array('localhost', 11211)), $defaultTtl = 2592000) { #30 days in seconds
         $this->defaultTtl = $defaultTtl;
         $this->store      = new \Memcached();
         $this->store->addServers($servers);
@@ -40,7 +40,7 @@ class Memcached extends CacheStorage {
              * 255.255.255 seems to be the version when no memcached server
              * can be found on that host,port, combination
              */
-            if ( $version != '255.255.255' ) {
+            if ($version != '255.255.255') {
                 $return = TRUE;
                 break;
             }
@@ -77,7 +77,7 @@ class Memcached extends CacheStorage {
      */
     protected function _get($key, callable $closure = NULL, $ttl = NULL) {
         $return      = $this->store->get($key);
-        $__success__ = ( $this->store->getResultCode() == \Memcached::RES_NOTFOUND ) ? FALSE : TRUE;
+        $__success__ = ($this->store->getResultCode() == \Memcached::RES_NOTFOUND) ? FALSE : TRUE;
         return array($return, $__success__);
     }
 
