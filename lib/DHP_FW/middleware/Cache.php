@@ -30,7 +30,7 @@ class Cache implements MiddlewareInterface {
     }
 
     public function eventResponseSendData(&$data) {
-        if ($this->event->trigger('app.shouldCacheUriData') !== FALSE && $this->request->getMethod() == \DHP_FW\App::HTTP_METHOD_GET) {
+        if ($this->event->trigger('app.shouldCacheUriData') !== FALSE && $this->request->getMethod() == 'GET') {
             $this->currentResponse['data'] = $data;
             $this->app->cache($this->generateCacheKey($this->request->getUri()), $this->currentResponse, 300);
         }

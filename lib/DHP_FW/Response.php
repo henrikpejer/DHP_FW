@@ -233,7 +233,7 @@ class Response implements ResponseInterface {
      */
     public function checkCache() {
         $request = \app\DI()->get('DHP_FW\\Request');
-        if ( $request->getMethod() == \DHP_FW\App::HTTP_METHOD_GET ) {
+        if ( $request->getMethod() == 'GET' ) {
             $uri       = $request->getUri();
             $__cache__ = \app\DI()->get('DHP_FW\\cache\\Cache')
               ->bucket('app')->get("uri_{$uri}_data");
