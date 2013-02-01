@@ -36,15 +36,16 @@ class UtilsTest extends \PHPUnit_Framework_TestCase {
     /**
      */
     public function testClassConstructorArguments() {
-        $args = Utils::classConstructorArguments('DHP_FW\dependencyInjection\DIProxy');
-        \PHPUnit_Framework_Assert::assertEquals(1, sizeof($args));
+        $args =
+          Utils::classConstructorArguments('DHP_FW\dependencyInjection\DIProxy');
+        \PHPUnit_Framework_Assert::assertEquals(1, count($args));
         \PHPUnit_Framework_Assert::assertEquals(array(
             'name'     => 'class',
             'required' => TRUE,
             'class'    => NULL
         ), $args[0]);
         $args = Utils::classConstructorArguments('testUtilsClass');
-        \PHPUnit_Framework_Assert::assertEquals(2, sizeof($args));
+        \PHPUnit_Framework_Assert::assertEquals(2, count($args));
         \PHPUnit_Framework_Assert::assertEquals(array(
             array(
                 'name'     => 'something',
@@ -64,6 +65,7 @@ class UtilsTest extends \PHPUnit_Framework_TestCase {
      * @expectedException \Exception
      */
     public function testLoadNonexistingClass() {
-        \PHPUnit_Framework_Assert::assertNull(Utils::classConstructorArguments('\\DHP_FWW\\dependencyInjection\\DIflex'));
+        \PHPUnit_Framework_Assert::assertNull(
+         Utils::classConstructorArguments('\\DHP_FWW\\dependencyInjection\\DIflex'));
     }
 }

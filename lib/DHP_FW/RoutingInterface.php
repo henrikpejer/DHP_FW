@@ -19,15 +19,17 @@ interface RoutingInterface {
      *
      * Event is not necessary, but preferable.
      *
-     * @param EventInterface $Event
+     * @param dependencyInjection\DIInterface $DependencyInjector
+     * @param EventInterface                  $Event
      */
 
-    public function __construct(\DHP_FW\dependencyInjection\DIInterface $DependencyInjector, EventInterface $Event = NULL);
-
+    public function __construct(
+        \DHP_FW\dependencyInjection\DIInterface $DependencyInjector,
+        EventInterface $Event = NULL);
 
     /**
-     * This will set up routing for a GET request. $closure will be called when a route
-     * is matched.
+     * This will set up routing for a GET request. $closure will be called when a
+     * route is matched.
      *
      * Also, values in the URI will be sent as parameters to the method, if there are
      * parameters in the uri.
@@ -36,17 +38,18 @@ interface RoutingInterface {
      * route: get('blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in closure above to "hello world blog post"
      *
      * @param string   $uri
      * @param callable $closure
+     *
      * @return mixed
      */
     public function get($uri, callable $closure);
 
     /**
-     * This will set up routing for a POST request. $closure will be called when a route
-     * is matched.
+     * This will set up routing for a POST request. $closure will be called when a
+     * route is matched.
      *
      * Also, values in the URI will be sent as parameters to the method, if there are
      * parameters in the uri.
@@ -55,7 +58,7 @@ interface RoutingInterface {
      * route: post('blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in closure above to "hello world blog post"
      * @param string   $uri
      * @param callable $closure
      * @return mixed
@@ -63,8 +66,8 @@ interface RoutingInterface {
     public function post($uri, callable $closure);
 
     /**
-     * This will set up routing for a DELETE request. $closure will be called when a route
-     * is matched.
+     * This will set up routing for a DELETE request. $closure will be called when a
+     * route is matched.
      *
      * Also, values in the URI will be sent as parameters to the method, if there are
      * parameters in the uri.
@@ -73,7 +76,7 @@ interface RoutingInterface {
      * route: delete('blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in closure above to "hello world blog post"
      * @param string   $uri
      * @param callable $closure
      * @return mixed
@@ -81,8 +84,8 @@ interface RoutingInterface {
     public function delete($uri, callable $closure);
 
     /**
-     * This will set up routing for a PUT request. $closure will be called when a route
-     * is matched.
+     * This will set up routing for a PUT request. $closure will be called when a
+     * route is matched.
      *
      * Also, values in the URI will be sent as parameters to the method, if there are
      * parameters in the uri.
@@ -91,7 +94,7 @@ interface RoutingInterface {
      * route: put('blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in closure above to "hello world blog post"
      * @param string   $uri
      * @param callable $closure
      * @return mixed
@@ -99,8 +102,8 @@ interface RoutingInterface {
     public function put($uri, callable $closure);
 
     /**
-     * This will set up routing for a HEAD request. $closure will be called when a route
-     * is matched.
+     * This will set up routing for a HEAD request. $closure will be called when a
+     * route is matched.
      *
      * Also, values in the URI will be sent as parameters to the method, if there are
      * parameters in the uri.
@@ -109,7 +112,7 @@ interface RoutingInterface {
      * route: head('blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in closure above to "hello world blog post"
      * @param string   $uri
      * @param callable $closure
      * @return mixed
@@ -117,8 +120,8 @@ interface RoutingInterface {
     public function head($uri, callable $closure);
 
     /**
-     * This will set up routing for any type of request. $closure will be called when a route
-     * is matched.
+     * This will set up routing for any type of request. $closure will be called when
+     * a route is matched.
      *
      * Also, values in the URI will be sent as parameters to the method, if there are
      * parameters in the uri.
@@ -127,7 +130,7 @@ interface RoutingInterface {
      * route: any('blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in closure above to "hello world blog post"
      *
      * @param string   $uri
      * @param callable $closure
@@ -137,9 +140,10 @@ interface RoutingInterface {
 
 
     /**
-     * This will set up routing for several types of requests at once. So if you want the same
-     * route to get triggered for GET and POST-requests, the $methods parameter is an array
-     * with POST and GET as values.
+     * This will set up routing for several types of requests at once. So if you want
+     * the same route to get triggered for GET and POST-requests, the $methods
+     * parameter is an array with POST and GET as values.
+     *
      * $closure will be called when a route
      * is matched.
      *
@@ -150,7 +154,7 @@ interface RoutingInterface {
      * route: verb(array('POST','GET'),'blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in closure above to "hello world blog post"
      *
      * @param array $methods
      * @param       $uri
@@ -209,7 +213,7 @@ interface RoutingInterface {
      *
      * @param String $method the http-method used, ie GET, POST etc
      * @param String $uri the uri of the request
-     * @return array|FALSE
+     * @return array||FALSE
      */
     public function match($method,$uri);
 }

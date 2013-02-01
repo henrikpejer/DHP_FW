@@ -7,13 +7,12 @@ namespace DHP_FW;
  */
 interface EventInterface {
     /**
-     * This triggers an event. All registered events are looped through in the order they
-     * were registered. All parameters are called by reference so the registered event
-     * methods can change the values, if necessary.
+     * This triggers an event. All registered events are looped through in the order
+     * they were registered. All parameters are called by reference so the registered
+     * event methods can change the values, if necessary.
      *
-     * If a registered method returns FALSE, the loop will break and further events will not
-     * be processed.
-     *
+     * If a registered method returns FALSE, the loop will break and further events
+     * will not be processed.
      *
      * @param String     $eventName
      * @param null       $one
@@ -25,7 +24,14 @@ interface EventInterface {
      * @param null       $seven
      * @return mixed
      */
-    function trigger($eventName, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL, &$five = NULL, &$six = NULL, &$seven = NULL);
+    function trigger($eventName,
+        &$one = NULL,
+        &$two = NULL,
+        &$three = NULL,
+        &$four = NULL,
+        &$five = NULL,
+        &$six = NULL,
+        &$seven = NULL);
 
     /**
      * This is used to register a callable with a certain event.
@@ -43,8 +49,8 @@ interface EventInterface {
      * This way an object can tell it's observer when a certain event happened and
      * delegate some of its functionality to the observer.
      *
-     * @param $objectToSubscribeTo the object that the observer wants to subscribe to
-     * @param $subscriber observer
+     * @param mixed $objectToSubscribeTo object to subscribe to
+     * @param mixed $subscriber observer
      * @return mixed
      */
     function subscribe($objectToSubscribeTo, &$subscriber);
@@ -63,6 +69,11 @@ interface EventInterface {
      * @param null $four
      * @return mixed
      */
-    function triggerSubscribe($delegate, $method, &$one = NULL, &$two = NULL, &$three = NULL, &$four = NULL);
+    function triggerSubscribe($delegate,
+        $method,
+        &$one = NULL,
+        &$two = NULL,
+        &$three = NULL,
+        &$four = NULL);
 
 }

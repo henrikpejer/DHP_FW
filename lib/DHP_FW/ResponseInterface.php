@@ -34,9 +34,9 @@ interface ResponseInterface {
      * This sets a header. Since not all headers have a :, you do not need to
      * include the second parameter, '$value'.
      *
-     * @param      $name  Name of the header, whatever is before :
-     * @param null $value the value of the header, whatever is after :
-     * @param bool $processHeaderName
+     * @param string     $name  Name of the header, whatever is before :
+     * @param null       $value the value of the header, whatever is after :
+     * @param bool       $processHeaderName
      *
      * @return $this
      */
@@ -57,24 +57,26 @@ interface ResponseInterface {
      * This will send a file, together with headers for mimetype, filename.
      * Setting downloadfile to true should force the browser to download the file.
      *
-     * If no mimetype is specified, finfo will be used to try to figure out the mimetype
+     * If no mimetype is specified, finfo will be used to try to figure out the
+     * mimetype
      *
-     * @param      $filePath     Path to the file that should be sent
-     * @param null $mimeType     string, mimetype
-     * @param null $fileName     optional filename
-     * @param bool $downLoadFile If the file should be downloaded or not
+     * @param String     $filePath     Path to the file that should be sent
+     * @param null       $mimeType     string, mimetype
+     * @param null       $fileName     optional filename
+     * @param bool       $downLoadFile If the file should be downloaded or not
      *
      * @return null
      * @throws \Exception
      */
-    function sendFile($filePath, $mimeType = NULL, $fileName = NULL, $downLoadFile = FALSE);
+    function sendFile($filePath, $mimeType = NULL, $fileName = NULL,
+        $downLoadFile = FALSE);
 
     /**
      * A wrapper function for sendFile, with $downloadFile set to true
      *
-     * @param      $filePath Path to the file that should be sent
-     * @param null $mimeType string, mimetype
-     * @param null $fileName optional filename
+     * @param string     $filePath Path to the file that should be sent
+     * @param null       $mimeType string, mimetype
+     * @param null       $fileName optional filename
      *
      * @return null
      * @throws \Exception
@@ -84,9 +86,9 @@ interface ResponseInterface {
     /**
      * Will send redirect headers.
      *
-     * @param      $url         string, the url to redirect to, must be a complete URL
-     * @param int  $httpStatus  , together with status int
-     * @param null $httpMessage and optional http-message to go along with the status
+     * @param  string    $url          the url to redirect to, must be a complete URL
+     * @param int        $httpStatus   , together with status int
+     * @param null       $httpMessage  optional http-status message
      *
      * @return null
      */

@@ -8,7 +8,8 @@ namespace DHP_FW\middleware;
 class Cookie implements MiddlewareInterface {
     private $req = NULL;
 
-    function __construct(\DHP_FW\RequestInterface $req, \DHP_FW\EventInterface $event) {
+    function __construct(\DHP_FW\RequestInterface $req,
+        \DHP_FW\EventInterface $event) {
         $this->req = $req;
 
         # todo : refactor away this... DARN IT! ;)

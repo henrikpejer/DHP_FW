@@ -6,7 +6,14 @@ namespace DHP_FW;
  * Date: 2013-01-01 21:23
  */
 class Utils {
-    # returns NULL when unable to load/find class
+
+    /**
+     * Returns constructor arguments. Returns NULL when unable to load/find class
+     * @param $class
+     *
+     * @return NULL|array
+     * @throws \Exception
+     */
     static public function classConstructorArguments($class) {
         $args = array();
         try {

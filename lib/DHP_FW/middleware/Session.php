@@ -11,10 +11,11 @@ class Session implements MiddlewareInterface {
 
     private $sessionData = NULL;
     private $dataChanged = FALSE;
-    private $event = NULL;
-    public $flash = NULL;
+    private $event       = NULL;
+    public $flash        = NULL;
 
-    public function __construct(\DHP_FW\RequestInterface $req, \DHP_FW\EventInterface $event) {
+    public function __construct(\DHP_FW\RequestInterface $req,
+        \DHP_FW\EventInterface $event) {
         $this->load();
         $this->event = $event;
         $this->setupFlashData();

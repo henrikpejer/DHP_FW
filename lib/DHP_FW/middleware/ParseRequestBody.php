@@ -18,8 +18,8 @@ class ParseRequestBody {
      *
      * @param \DHP_FW\RequestInterface $request
      */
-    public function __construct(\DHP_FW\RequestInterface $request){
-        $this->request = $request;
+    public function __construct(\DHP_FW\RequestInterface $request) {
+        $this->request       = $request;
         $this->request->body = $this->parseBodyData($this->request->body);
     }
 
