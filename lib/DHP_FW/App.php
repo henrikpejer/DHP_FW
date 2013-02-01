@@ -1,5 +1,5 @@
 <?php
-declare(encoding = "UTF8") ;
+declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
 
 /**
@@ -10,14 +10,20 @@ namespace DHP_FW;
  */
 class App implements \DHP_FW\AppInterface {
 
-    public $routes = NULL;
-    protected $configs = array('use_cache' => FALSE);
+    public $routes         = NULL;
+    protected $configs     = array('use_cache' => FALSE);
     protected $cacheObject = NULL;
 
-    private $customParamTypes = array();
-    private $CONTINUEROUTE = FALSE;
-
-    public function __construct(\DHP_FW\RequestInterface $Request, \DHP_FW\dependencyInjection\DIInterface $DependencyInjector, \DHP_FW\EventInterface $event, \DHP_FW\RoutingInterface $routes) {
+    /**
+     * @param RequestInterface                $Request
+     * @param dependencyInjection\DIInterface $DependencyInjector
+     * @param EventInterface                  $event
+     * @param RoutingInterface                $routes
+     */
+    public function __construct(\DHP_FW\RequestInterface $Request,
+        \DHP_FW\dependencyInjection\DIInterface $DependencyInjector,
+        \DHP_FW\EventInterface $event,
+        \DHP_FW\RoutingInterface $routes) {
         $this->request = $Request;
         $this->DI      = $DependencyInjector;
         $this->event   = $event;
@@ -27,6 +33,7 @@ class App implements \DHP_FW\AppInterface {
 
     /**
      * @param String $configToEnable
+     *
      * @return App|AppInterface
      */
     public function enable($configToEnable) {
@@ -37,10 +44,17 @@ class App implements \DHP_FW\AppInterface {
      * Enable a config value. Sets that config to TRUE
      *
      * @param $configToCheck
+     *
      * @return bool
      */
     public function enabled($configToCheck) {
-        $return = isset($this->configs[$configToCheck]) && $this->configs[$configToCheck] === TRUE ? TRUE : FALSE;
+        if ( isset( $this->configs[$configToCheck] )
+          && $this->configs[$configToCheck]
+        ) {
+            $return = TRUE;
+        } else {
+            $return = FALSE;
+        }
         return $return;
     }
 
@@ -48,13 +62,13 @@ class App implements \DHP_FW\AppInterface {
      * Sets a config value to FALSE
      *
      * @param config $configToDisable
+     *
      * @return App|AppInterface
      */
     public function disable($configToDisable) {
         $this->configs[$configToDisable] = FALSE;
         return $this;
     }
-
 
     /**
      * Loads middleware.
@@ -74,15 +88,15 @@ class App implements \DHP_FW\AppInterface {
      * Providing with the correct class, with namespace, will be the best option
      *
      * @param String $middleware class name that will get loaded with DI
+     *
      * @return App|AppInterface
      */
     # todo : figure out dependencies... or not?
     public function middleware($middleware) {
-        if (!class_exists($middleware, TRUE)) {
-            if (class_exists('DHP_FW\middleware\\' . $middleware, TRUE)) {
+        if ( !class_exists($middleware, TRUE) ) {
+            if ( class_exists('DHP_FW\middleware\\' . $middleware, TRUE) ) {
                 $middleware = 'DHP_FW\middleware\\' . $middleware;
-            }
-            elseif (class_exists('app\middleware\\' . $middleware, TRUE)) {
+            } elseif ( class_exists('app\middleware\\' . $middleware, TRUE) ) {
                 $middleware = 'app\middleware\\' . $middleware;
             }
         }
@@ -101,8 +115,9 @@ class App implements \DHP_FW\AppInterface {
     public function start() {
         $uri = $this->request->getUri();
         # do we have a cache, of the data, for this request?
-        $cacheForUri = $this->event->trigger('DHP_FW.app.cacheForRequest', $uri);
-        if (isset($cacheForUri) && $cacheForUri != FALSE) {
+        $cacheForUri = $this->event->trigger('DHP_FW.app.cacheForRequest',
+                                             $uri);
+        if ( isset( $cacheForUri ) && $cacheForUri != FALSE ) {
             $this->response = $this->DI->get('DHP_FW\ResponseInterface');
             foreach ($cacheForUri['headers'] as $name => $value) {
                 $this->response->header($name, $value);
@@ -110,7 +125,8 @@ class App implements \DHP_FW\AppInterface {
             $this->response->send($cacheForUri['data']);
             return TRUE;
         }
-        $return = $this->routes->match($this->request->getMethod(),$this->request->getUri());
+        $return = $this->routes->match($this->request->getMethod(),
+                                       $this->request->getUri());
 
         #$return = $this->runMatchedRoutes($routesMatches);
         return $return;
@@ -122,7 +138,8 @@ class App implements \DHP_FW\AppInterface {
      *
      * @param String     $key
      * @param null       $value Use for cache write-through
-     * @param null       $ttl TTL for this cache key
+     * @param null       $ttl   TTL for this cache key
+     *
      * @return null
      */
     public function cache($key, $value = NULL, $ttl = NULL) {
@@ -133,6 +150,7 @@ class App implements \DHP_FW\AppInterface {
      * The key to delete from cache
      *
      * @param $key
+     *
      * @return mixed
      */
     public function cacheDelete($key) {
@@ -143,7 +161,7 @@ class App implements \DHP_FW\AppInterface {
      * This will flush all the cache
      */
     public function cache_flush() {
-        if (isset($this->cacheObject)) {
+        if ( isset( $this->cacheObject ) ) {
             $this->cacheObject->bucket('app')->flush();
             $this->cacheObject->bucket('data')->flush();
             $this->cacheObject->bucket('sys')->flush();
@@ -156,6 +174,7 @@ class App implements \DHP_FW\AppInterface {
      * @param String     $key
      * @param null       $value
      * @param null       $ttl
+     *
      * @return null
      */
     private function cache_system($key, $value = NULL, $ttl = NULL) {
@@ -170,17 +189,19 @@ class App implements \DHP_FW\AppInterface {
      * @param  String    $key
      * @param null       $value
      * @param null       $ttl
+     *
      * @return null|mixed
      */
     private function __setCache($prefix, $key, $value = NULL, $ttl = NULL) {
         $return = NULL;
-        if ($this->enabled('use_cache')) {
-            if (isset($value)) {
+        if ( $this->enabled('use_cache') ) {
+            if ( isset( $value ) ) {
                 $value = $value !== NULL && is_callable($value) ? $value : function () use ($value) {
                     return $value;
                 };
             }
-            $return = $this->cacheObject->bucket($prefix)->get($key, $value, $ttl);
+            $return = $this->cacheObject->bucket($prefix)
+              ->get($key, $value, $ttl);
         }
         return $return;
     }
@@ -190,19 +211,18 @@ class App implements \DHP_FW\AppInterface {
      *
      * @param String $prefix
      * @param String $key
+     *
      * @return mixed
      */
     private function __deleteCache($prefix, $key) {
         return $this->cacheObject->bucket($prefix)->delete($key);
     }
 
-
-
     /**
      * Gets cacheStorage, inits it and sets the cacheObject of!
      */
     public function setupCache() {
-        if ($this->enabled('use_cache')) {
+        if ( $this->enabled('use_cache') ) {
             $this->cacheObject = $this->DI->get('DHP_FW\cache\Cache');
             $this->cacheObject->bucket('app');
             $this->cacheObject->bucket('data');

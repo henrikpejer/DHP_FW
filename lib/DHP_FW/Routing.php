@@ -1,5 +1,5 @@
 <?php
-declare(encoding = "UTF8") ;
+declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
@@ -18,7 +18,9 @@ class Routing implements RoutingInterface {
      * @param dependencyInjection\DIInterface $DependencyInjector
      * @param EventInterface                  $Event
      */
-    public function __construct(\DHP_FW\dependencyInjection\DIInterface $DependencyInjector, EventInterface $Event = NULL) {
+    public function __construct(
+        \DHP_FW\dependencyInjection\DIInterface $DependencyInjector,
+        EventInterface $Event = NULL) {
         $this->event              = $Event;
         $this->DependencyInjector = $DependencyInjector;
         $this->routes             = array(self::HTTP_METHOD_GET    => array(),
@@ -30,8 +32,8 @@ class Routing implements RoutingInterface {
     }
 
     /**
-     * This will set up routing for a GET request. $closure will be called when a route
-     * is matched.
+     * This will set up routing for a GET request. $closure will be called when a
+     * route is matched.
      *
      * Also, values in the URI will be sent as parameters to the method, if there are
      * parameters in the uri.
@@ -40,10 +42,12 @@ class Routing implements RoutingInterface {
      * route: get('blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in the closure above to
+     * "hello world blog post"
      *
      * @param string   $uri
      * @param callable $closure
+     *
      * @return mixed
      */
     public function get($uri, callable $closure) {
@@ -51,8 +55,8 @@ class Routing implements RoutingInterface {
     }
 
     /**
-     * This will set up routing for a POST request. $closure will be called when a route
-     * is matched.
+     * This will set up routing for a POST request. $closure will be called when a
+     * route is matched.
      *
      * Also, values in the URI will be sent as parameters to the method, if there are
      * parameters in the uri.
@@ -61,9 +65,12 @@ class Routing implements RoutingInterface {
      * route: post('blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in the closure above to
+     * "hello world blog post"
+     *
      * @param string   $uri
      * @param callable $closure
+     *
      * @return mixed
      */
     public function post($uri, callable $closure) {
@@ -71,8 +78,8 @@ class Routing implements RoutingInterface {
     }
 
     /**
-     * This will set up routing for a DELETE request. $closure will be called when a route
-     * is matched.
+     * This will set up routing for a DELETE request. $closure will be called when a
+     * route is matched.
      *
      * Also, values in the URI will be sent as parameters to the method, if there are
      * parameters in the uri.
@@ -81,9 +88,12 @@ class Routing implements RoutingInterface {
      * route: delete('blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in the closure above to
+     * "hello world blog post"
+     *
      * @param string   $uri
      * @param callable $closure
+     *
      * @return mixed
      */
     public function delete($uri, callable $closure) {
@@ -91,8 +101,8 @@ class Routing implements RoutingInterface {
     }
 
     /**
-     * This will set up routing for a PUT request. $closure will be called when a route
-     * is matched.
+     * This will set up routing for a PUT request. $closure will be called when a
+     * route is matched.
      *
      * Also, values in the URI will be sent as parameters to the method, if there are
      * parameters in the uri.
@@ -101,9 +111,12 @@ class Routing implements RoutingInterface {
      * route: put('blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in the closure above to
+     * "hello world blog post"
+     *
      * @param string   $uri
      * @param callable $closure
+     *
      * @return mixed
      */
     public function put($uri, callable $closure) {
@@ -111,8 +124,8 @@ class Routing implements RoutingInterface {
     }
 
     /**
-     * This will set up routing for a HEAD request. $closure will be called when a route
-     * is matched.
+     * This will set up routing for a HEAD request. $closure will be called when a
+     * route is matched.
      *
      * Also, values in the URI will be sent as parameters to the method, if there are
      * parameters in the uri.
@@ -121,9 +134,12 @@ class Routing implements RoutingInterface {
      * route: head('blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in the closure above to
+     * "hello world blog post"
+     *
      * @param string   $uri
      * @param callable $closure
+     *
      * @return mixed
      */
     public function head($uri, callable $closure) {
@@ -131,8 +147,8 @@ class Routing implements RoutingInterface {
     }
 
     /**
-     * This will set up routing for any type of request. $closure will be called when a route
-     * is matched.
+     * This will set up routing for any type of request. $closure will be called
+     * when a route is matched.
      *
      * Also, values in the URI will be sent as parameters to the method, if there are
      * parameters in the uri.
@@ -141,10 +157,12 @@ class Routing implements RoutingInterface {
      * route: any('blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in the closure above to
+     * "hello world blog post"
      *
      * @param string   $uri
      * @param callable $closure
+     *
      * @return mixed
      */
     public function any($uri, callable $closure) {
@@ -152,9 +170,9 @@ class Routing implements RoutingInterface {
     }
 
     /**
-     * This will set up routing for several types of requests at once. So if you want the same
-     * route to get triggered for GET and POST-requests, the $methods parameter is an array
-     * with POST and GET as values.
+     * This will set up routing for several types of requests at once. So if you
+     * want the same route to get triggered for GET and POST-requests, the $methods
+     * parameter is an array with POST and GET as values.
      * $closure will be called when a route
      * is matched.
      *
@@ -165,11 +183,13 @@ class Routing implements RoutingInterface {
      * route: verb(array('POST','GET'),'blog/:title',function($title){})
      * uri: blog/hello-world-blog-post
      *
-     * This will set the $title-prameter in the closure above to "hello world blog post"
+     * This will set the $title-prameter in the closure above to
+     * "hello world blog post"
      *
      * @param array $methods
      * @param       $uri
      * @param       $closure
+     *
      * @return mixed
      */
     public function verb(array $methods, $uri, callable $closure) {
@@ -178,6 +198,7 @@ class Routing implements RoutingInterface {
 
     /**
      * Returns the current set routes
+     *
      * @return array
      */
     public function routes() {
@@ -200,8 +221,10 @@ class Routing implements RoutingInterface {
      *
      * The above code will execute the route code and whatever :userId was
      * will be switched for the value that the loadUserWithID-returns
+     *
      * @param string      $paramName
      * @param callable    $closure
+     *
      * @return mixed
      */
     public function param($paramName, callable $closure) {
@@ -229,17 +252,19 @@ class Routing implements RoutingInterface {
     /**
      * Generic internal method to register the routes.
      *
-     * @param String   $httpMethod Should be one of the self::HTTP_METHOD_* constants, really
+     * @param String   $httpMethod Should be one of the const self::HTTP_METHOD_*
      * @param String   $uri
      * @param          $closure
      * @param Callable $closure
+     *
      * @return \DHP_FW\Routing
      */
     private function registerRoute($httpMethod, $uri, callable $closure) {
-        if (isset($this->event)) {
-            $this->event->trigger('DHP_FW.App.registerRoute', $httpMethod, $uri, $closure);
+        if ( isset( $this->event ) ) {
+            $this->event->trigger('DHP_FW.App.registerRoute', $httpMethod, $uri,
+                                  $closure);
         }
-        if (!is_array($httpMethod)) {
+        if ( !is_array($httpMethod) ) {
             $httpMethod = array($httpMethod);
         }
         foreach ($httpMethod as $method) {
@@ -253,14 +278,19 @@ class Routing implements RoutingInterface {
      *
      * @param $__uri__
      * @param $routeUri
+     *
      * @return array|bool
      */
     private function matchUriToRoute($__uri__, $routeUri) {
         $__haveParams__ = strpos($routeUri, ':');
-        if ($__haveParams__ === FALSE && ($routeUri == $__uri__ || preg_match('#^' . str_replace('*', '.*', $routeUri) . '$#', $__uri__))) {
+        if ( $__haveParams__ === FALSE &&
+          ( $routeUri == $__uri__ ||
+            preg_match('#^' . str_replace('*', '.*', $routeUri) . '$#', $__uri__)
+          )
+        ) {
             return TRUE;
         }
-        if (TRUE == $__haveParams__) {
+        if ( TRUE == $__haveParams__ ) {
             return $this->parseUriForParameters($__uri__, $routeUri);
         }
         return FALSE;
@@ -276,19 +306,20 @@ class Routing implements RoutingInterface {
      *
      * @param $uri
      * @param $routeUri
+     *
      * @return array|bool
      */
     private function parseUriForParameters($uri, $routeUri) {
         # get parts of uri & routeUri, that is, split by /
         $routeUriParts = explode('/', trim($routeUri, '/'));
         $uriParts      = explode('/', trim($uri, '/'));
-        if (sizeof($uriParts) != sizeof($routeUriParts)) {
+        if ( count($uriParts) != count($routeUriParts) ) {
             return FALSE;
         }
         $return = array();
         foreach ($routeUriParts as $index => $part) {
-            if ($part != $uriParts[$index]) {
-                if ($part{0} != ':') { #wrong route after all!
+            if ( $part != $uriParts[$index] ) {
+                if ( $part{0} != ':' ) { #wrong route after all!
                     return FALSE;
                 }
                 $realValue = $this->cleanUriPartForParam($uriParts[$index]);
@@ -304,6 +335,7 @@ class Routing implements RoutingInterface {
      * - are treated as spaces ' '
      *
      * @param String $param
+     *
      * @return string
      */
     private function cleanUriPartForParam($param) {
@@ -320,13 +352,15 @@ class Routing implements RoutingInterface {
      *
      * @param String $parameterType
      * @param String $paramValue
+     *
      * @return mixed
      */
     private function checkParameterType($parameterType, $paramValue) {
         $parameterType = str_replace(':', '', $parameterType);
         $return        = $paramValue;
-        if (isset($this->customParamTypes[$parameterType])) {
-            $return = call_user_func_array($this->customParamTypes[$parameterType], array($paramValue));
+        if ( isset( $this->customParamTypes[$parameterType] ) ) {
+            $return = call_user_func_array($this->customParamTypes[$parameterType],
+                                           array($paramValue));
         }
         return $return;
     }
@@ -336,26 +370,35 @@ class Routing implements RoutingInterface {
      *
      * @param String $method
      * @param String $uri
+     *
      * @return array
      */
     function match($method, $uri) {
-        $routesToProcess = isset($this->routes[$method]) ? array_merge($this->routes[self::HTTP_METHOD_ANY], $this->routes[$method]) : $this->routes[self::HTTP_METHOD_ANY];
-        $uriToMatch      = trim($uri, '/');
-        $routesMatched   = array();
+        if ( isset( $this->routes[$method] ) ) {
+            $routesToProcess = array_merge($this->routes[self::HTTP_METHOD_ANY],
+                                           $this->routes[$method]);
+        } else {
+            $routesToProcess = $this->routes[self::HTTP_METHOD_ANY];
+        }
+        $uriToMatch    = trim($uri, '/');
+        $routesMatched = array();
         foreach ($routesToProcess as $uri => $closure) {
             $this->CONTINUEROUTE = FALSE;
-            if (FALSE !== ($routeMatchReturn = $this->matchUriToRoute($uriToMatch, $uri))) {
-                $routesMatched[] = array('closure' => $closure, 'route' => $routeMatchReturn);
+            if ( FALSE !==
+              ( $routeMatchReturn = $this->matchUriToRoute($uriToMatch, $uri) )
+            ) {
+                $routesMatched[] = array('closure' => $closure,
+                                         'route'   => $routeMatchReturn);
             }
         }
         return $this->runMatchedRoutes($routesMatched);
     }
 
-
     /**
      * Once we have found the routes that match, we run them here
      *
      * @param $routes
+     *
      * @return array|mixed|null
      */
     private function runMatchedRoutes($routes) {
@@ -363,19 +406,21 @@ class Routing implements RoutingInterface {
         foreach ($routes as $route) {
             $closure          = $route['closure'];
             $routeMatchReturn = $route['route'];
-            if (is_array($routeMatchReturn)) {
+            if ( is_array($routeMatchReturn) ) {
                 $closureResult = call_user_func_array($closure, $routeMatchReturn);
-            }
-            else {
+            } else {
                 $closureResult = $closure();
             }
             switch (TRUE) {
-                case is_array($closureResult) && isset($closureResult['controller']) && isset($closureResult['method']):
+                case is_array($closureResult) &&
+                  isset( $closureResult['controller'] ) &&
+                  isset( $closureResult['method'] ):
                     $controller = $this->loadController($closureResult);
-                    if (is_array($routeMatchReturn)) {
-                        $return = call_user_func_array(array($controller, $closureResult['method']), $routeMatchReturn);
-                    }
-                    else {
+                    if ( is_array($routeMatchReturn) ) {
+                        $return = call_user_func_array(
+                            array($controller, $closureResult['method']),
+                            $routeMatchReturn);
+                    } else {
                         $return = $controller->$closureResult['method']();
                     }
                     break;
@@ -383,7 +428,7 @@ class Routing implements RoutingInterface {
                     $return = $closureResult;
                     break;
             }
-            if (self::ROUTE_CONTINUE !== $this->CONTINUEROUTE) {
+            if ( self::ROUTE_CONTINUE !== $this->CONTINUEROUTE ) {
                 break;
             }
 
@@ -396,9 +441,11 @@ class Routing implements RoutingInterface {
      * and run with it...?
      *
      * @param $controllerToLoad
+     *
      * @return mixed
      */
     private function loadController($controllerToLoad) {
-        return $this->DependencyInjector->instantiateObject('\\app\\controllers\\' . $controllerToLoad['controller']);
+        $instantiate = '\\app\\controllers\\' . $controllerToLoad['controller'];
+        return $this->DependencyInjector->instantiateObject($instantiate);
     }
 }
