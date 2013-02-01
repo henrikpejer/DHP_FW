@@ -77,9 +77,8 @@ class RequestTest extends \PHPUnit_Framework_TestCase {
         \PHPUnit_Framework_Assert::assertEquals('someGetValue', $this->object->query->someGet);
         \PHPUnit_Framework_Assert::assertEquals('somePostValue', $this->object->param->somePost);
         \PHPUnit_Framework_Assert::assertEquals('post value', $this->object->params->some);
-    }
-
-    public function testBodyData(){
-        \PHPUnit_Framework_Assert::assertEquals((object) array('something'=>'else'),$this->object->body);
+        \PHPUnit_Framework_Assert::assertNull( $this->object->doesNotExist);
+        $this->object->somePost = 'somePostValue';
+        \PHPUnit_Framework_Assert::assertEquals('somePostValue', $this->object->somePost);
     }
 }

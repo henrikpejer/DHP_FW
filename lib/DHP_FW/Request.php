@@ -27,7 +27,7 @@ class Request implements \DHP_FW\RequestInterface {
         \DHP_FW\EventInterface $event = NULL) {
         $this->method = $method === NULL ? $this->generateMethod() : $method;
         $this->uri    = $uri === NULL ? $this->generateUri() : ltrim($uri, '/');
-        $this->_body  = $body;
+        $this->_body  = $body === NULL ? file_get_contents('php://input') : $body;
         $this->event  = $event;
         $this->parseRequestHeaders();
         $this->parseInputData();
@@ -98,10 +98,8 @@ class Request implements \DHP_FW\RequestInterface {
                 'param'  => new ParameterBagReadOnly( $_POST, $this->event ),
                 'files'  => new ParameterBagReadOnly( $_FILES, $this->event ),
                 'params' => new ParameterBagReadOnly(
-                                    array_merge($_GET, $_POST), $this->event ));
-        $body               = $this->parseBodyData();
-        $values['body']     =
-          is_array($body) ? new ParameterBagReadOnly( $body, $this->event ) : $body;
+                    array_merge($_GET, $_POST), $this->event ));
+        $values['body'] = $this->_body;
         $this->publicValues = $values;
     }
 
@@ -134,32 +132,6 @@ class Request implements \DHP_FW\RequestInterface {
      */
     public function __set($name, $value) {
         return $this->publicValues[$name] = $value;
-    }
-
-    /**
-     * This will parse request body. For the moment only used
-     * when requests content-type is json, will json_decode
-     * the body.
-     *
-     * @return mixed|null
-     */
-    protected function parseBodyData() {
-        if ( !isset( $this->_body ) ) {
-            $this->_body = file_get_contents('php://input');
-        }
-        $__body__ = NULL;
-        switch (TRUE) {
-            case $this->header('Content-Type') !== NULL:
-                if ( strpos($this->header('Content-Type'), 'json') !== FALSE ) {
-                    # most likely, it IS json
-                    $__body__ = json_decode($this->_body);
-                }
-                break;
-            default:
-                $__body__ = NULL;
-                break;
-        }
-        return $__body__;
     }
 
     /**
