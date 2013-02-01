@@ -1,5 +1,5 @@
 <?php
-declare(encoding = "UTF8") ;
+declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
 /**
  * User: Henrik Pejer mr@henrikpejer.com
@@ -7,25 +7,26 @@ namespace DHP_FW;
  */
 class Request implements \DHP_FW\RequestInterface {
     private $event;
-    private $uri = NULL;
-    private $method = NULL;
-    private $headers = NULL;
-    private $_body = NULL;
+    private $uri          = NULL;
+    private $method       = NULL;
+    private $headers      = NULL;
+    private $_body        = NULL;
     private $publicValues = NULL;
 
     /**
      * This will set the basic values of a request.
      *
-     * @param String           $method The method of the request (usually GET, POST etc..)
-     * @param String           $uri The uri of the request
-     * @param null             $body The body of the request
+     * @param String           $method The method of the request (GET, POST...)
+     * @param String           $uri    The uri of the request
+     * @param null             $body   The body of the request
      * @param EventInterface   $event
      */
-    public function __construct($method = NULL, $uri = NULL, $body = NULL, \DHP_FW\EventInterface $event) {
-        $this->method =
-                $method === NULL ? $this->generateMethod() : $method;
-        $this->uri    =
-                $uri === NULL ? $this->generateUri() : ltrim($uri, '/');
+    public function __construct($method = NULL,
+        $uri = NULL,
+        $body = NULL,
+        \DHP_FW\EventInterface $event = NULL) {
+        $this->method = $method === NULL ? $this->generateMethod() : $method;
+        $this->uri    = $uri === NULL ? $this->generateUri() : ltrim($uri, '/');
         $this->_body  = $body;
         $this->event  = $event;
         $this->parseRequestHeaders();
@@ -34,6 +35,7 @@ class Request implements \DHP_FW\RequestInterface {
 
     /**
      * Returns the method of the request
+     *
      * @return null|string
      */
     public function getMethod() {
@@ -42,6 +44,7 @@ class Request implements \DHP_FW\RequestInterface {
 
     /**
      * Sets the methods of the request
+     *
      * @param $method
      */
     public function setMethod($method) {
@@ -50,6 +53,7 @@ class Request implements \DHP_FW\RequestInterface {
 
     /**
      * Sets the uri of the request
+     *
      * @param $uri
      */
     public function setUri($uri) {
@@ -58,6 +62,7 @@ class Request implements \DHP_FW\RequestInterface {
 
     /**
      * Returns the current uri
+     *
      * @return null|string
      */
     public function getUri() {
@@ -66,15 +71,18 @@ class Request implements \DHP_FW\RequestInterface {
 
     /**
      * Returns the value of the header, null if not set.
+     *
      * @param $name
+     *
      * @return String|null
      */
     public function header($name) {
-        return isset($this->headers[$name]) ? $this->headers[$name] : NULL;
+        return isset( $this->headers[$name] ) ? $this->headers[$name] : NULL;
     }
 
     /**
      * Returns all the headers in the request
+     *
      * @return null
      */
     public function getHeaders() {
@@ -86,13 +94,14 @@ class Request implements \DHP_FW\RequestInterface {
      */
     private function parseInputData() {
         $values             =
-                array('query'  => new ParameterBagReadOnly($_GET, $this->event),
-                      'param'  => new ParameterBagReadOnly($_POST, $this->event),
-                      'files'  => new ParameterBagReadOnly($_FILES, $this->event),
-                      'params' => new ParameterBagReadOnly(array_merge($_GET, $_POST), $this->event));
+          array('query'  => new ParameterBagReadOnly( $_GET, $this->event ),
+                'param'  => new ParameterBagReadOnly( $_POST, $this->event ),
+                'files'  => new ParameterBagReadOnly( $_FILES, $this->event ),
+                'params' => new ParameterBagReadOnly(
+                                    array_merge($_GET, $_POST), $this->event ));
         $body               = $this->parseBodyData();
         $values['body']     =
-                is_array($body) ? new ParameterBagReadOnly($body, $this->event) : $body;
+          is_array($body) ? new ParameterBagReadOnly( $body, $this->event ) : $body;
         $this->publicValues = $values;
     }
 
@@ -100,19 +109,27 @@ class Request implements \DHP_FW\RequestInterface {
      * Able to get public values on the request object.
      *
      * Usually used for middleware or custom parameter types
+     *
      * @param String $name
+     *
      * @return mixed | null
      */
     public function __get($name) {
-        return isset($this->publicValues[$name]) ? $this->publicValues[$name] : NULL;
+        if(isset( $this->publicValues[$name] )){
+            return  $this->publicValues[$name];
+        }else{
+            return NULL;
+        }
     }
 
     /**
      * Able to set public values on the request object.
      *
      * Usually used for middleware or custom parameter types
+     *
      * @param String $name
      * @param mixed  $value
+     *
      * @return mixed | null
      */
     public function __set($name, $value) {
@@ -127,13 +144,13 @@ class Request implements \DHP_FW\RequestInterface {
      * @return mixed|null
      */
     protected function parseBodyData() {
-        if (!isset($this->_body)) {
+        if ( !isset( $this->_body ) ) {
             $this->_body = file_get_contents('php://input');
         }
         $__body__ = NULL;
         switch (TRUE) {
             case $this->header('Content-Type') !== NULL:
-                if (strpos($this->header('Content-Type'), 'json') !== FALSE) {
+                if ( strpos($this->header('Content-Type'), 'json') !== FALSE ) {
                     # most likely, it IS json
                     $__body__ = json_decode($this->_body);
                 }
@@ -147,11 +164,12 @@ class Request implements \DHP_FW\RequestInterface {
 
     /**
      * If no method is present, tries to figure out the method
+     *
      * @return string
      */
     protected function generateMethod() {
         $method = 'GET';
-        if (isset($_SERVER['REQUEST_METHOD'])) {
+        if ( isset( $_SERVER['REQUEST_METHOD'] ) ) {
             $method = $_SERVER['REQUEST_METHOD'];
         }
         return $method;
@@ -159,11 +177,12 @@ class Request implements \DHP_FW\RequestInterface {
 
     /**
      * If no uri is present, tries to figure out the uri
+     *
      * @return string
      */
     protected function generateUri() {
         $uri = NULL;
-        if (isset($_SERVER['REQUEST_URI'])) {
+        if ( isset( $_SERVER['REQUEST_URI'] ) ) {
             $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         }
         $uri = ltrim($uri, '/');
@@ -176,8 +195,12 @@ class Request implements \DHP_FW\RequestInterface {
     protected function parseRequestHeaders() {
         $this->headers = array();
         foreach ($_SERVER as $key => $value) {
-            if (substr($key, 0, 5) === 'HTTP_') {
-                $header                 = str_replace(' ', '-', ucwords(str_replace('_', ' ', strtolower(substr($key, 5)))));
+            if ( substr($key, 0, 5) === 'HTTP_' ) {
+                $key                    = substr($key, 5);
+                $key                    = strtolower($key);
+                $key                    = str_replace('_', ' ', $key);
+                $key                    = str_replace(' ', '-', ucwords($key));
+                $header                 = $key;
                 $this->headers[$header] = $value;
             }
         }

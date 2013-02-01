@@ -11,12 +11,13 @@ interface RequestInterface {
     /**
      * This will set the basic values of a request.
      *
-     * @param String           $method The method of the request (usually GET, POST etc..)
+     * @param String           $method The method of the request (GET, POST...)
      * @param String           $uri The uri of the request
      * @param null             $body The body of the request
      * @param EventInterface   $event
      */
-    function __construct($method = NULL, $uri = NULL, $body = NULL, \DHP_FW\EventInterface $event);
+    function __construct($method = NULL, $uri = NULL, $body = NULL,
+                         \DHP_FW\EventInterface $event = NULL);
 
     /**
      * Returns the method of the request
