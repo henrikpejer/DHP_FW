@@ -10,7 +10,7 @@ namespace DHP_FW\middleware;
  * Date: 2013-02-01 14:58
  *
  */
-class ParseRequestBody {
+class BodyParser {
     private $request = NULL;
 
     /**
