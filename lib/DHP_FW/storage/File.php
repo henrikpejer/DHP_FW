@@ -1,7 +1,6 @@
 <?php
 declare( encoding = "UTF8" ) ;
-namespace undertow\storage;
-use \undertow\event\Event;
+namespace DHP_FW\storage;
 /**
  *
  * Created by: Henrik Pejer, mr@henrikpejer.com
@@ -13,25 +12,27 @@ const OPEN_READONLY  = 'rb';
 const OPEN_OVERWRITE = 'w+b';
 const OPEN_AMEND     = 'a+b';
 class File {
-    protected $_fileHandle = NULL;
-    protected $path = NULL;
-    protected $_readable = NULL;
-    protected $_writable = NULL;
-    protected $exists = NULL;
-    protected $isTemp = NULL;
-    protected $chunkSize = 10;
+    protected $_fileHandle    = NULL;
+    protected $path           = NULL;
+    protected $_readable      = NULL;
+    protected $_writable      = NULL;
+    protected $exists         = NULL;
+    protected $isTemp         = NULL;
+    protected $chunkSize      = 10;
     protected $openForWriting = FALSE;
-    protected $writePosition = NULL;
-    protected $readPosition = NULL;
+    protected $writePosition  = NULL;
+    protected $readPosition   = NULL;
 
-    function __construct($fileToOpen = NULL, Event $Event = NULL) {
+    function __construct($fileToOpen = NULL, \DHP_FW\EventInterface $Event = NULL) {
         if ( isset( $fileToOpen ) ) {
             $this->exists = file_exists($fileToOpen);
             if ( !file_exists($fileToOpen) ) {
                 $this->path = $fileToOpen;
             } else {
                 $path = realpath($fileToOpen);
-                if ( is_file($path) && is_readable($path) && @stat($path) !== FALSE ) { # checks to make sure file really is a file
+                 # checks to make sure file really is a file
+                if ( is_file($path) && is_readable($path)
+                     && @stat($path) !== FALSE ) {
                     $this->path      = $path;
                     $this->_readable = is_readable($this->path);
                     $this->_writable = is_writable($this->path);
@@ -57,9 +58,10 @@ class File {
         }
         $pos = ftell($this->_fileHandle);
         while ($pos < $end) {
-            $len = ( $pos + $this->chunkSize ) > $end ? ( $end - $pos ) : $this->chunkSize;
+            $len     = ( $pos + $this->chunkSize ) > $end ?
+              ( $end - $pos ) : $this->chunkSize;
             $return .= fread($this->_fileHandle, $len);
-            $pos = ftell($this->_fileHandle);
+            $pos     = ftell($this->_fileHandle);
         }
         fseek($this->_fileHandle, $this->readPosition);
         return $return;
@@ -87,8 +89,8 @@ class File {
         fseek($this->_fileHandle, $this->readPosition);
         try {
             while ($len > 0) {
-                $return .= fread($this->_fileHandle, $this->chunkSize);
-                $len -= $this->chunkSize;
+                $return            .= fread($this->_fileHandle, $this->chunkSize);
+                $len               -= $this->chunkSize;
                 $this->readPosition = ftell($this->_fileHandle);
             }
         } catch (\Exception $e) {
@@ -112,7 +114,9 @@ class File {
     }
 
     protected function openFile($fileAccessType) {
-        # actually lets reopen the file, if, we want to write to it and it is only in read mode
+        /* actually lets reopen the file, if, we want to write to it and it is only
+         * in read mode
+         */
         if ( $fileAccessType != OPEN_READONLY && $this->openForWriting == FALSE ) {
             $this->close();
         }
@@ -128,19 +132,35 @@ class File {
                     $this->_readable = is_readable($this->path);
                     $this->_writable = is_writable($this->path);
                 }
-                # check if fileAccessType will work considering if we want to read/write to the file and if the file is read/writable
+                /* check if fileAccessType will work considering if we want to
+                 * read/write to the file and if the file is read/writable
+                 */
                 if ( $fileAccessType == OPEN_READONLY && !$this->_readable
-                  || ( $fileAccessType == OPEN_AMEND || $fileAccessType == OPEN_OVERWRITE ) && !$this->_writable
+                  || ( $fileAccessType == OPEN_AMEND
+                  || $fileAccessType == OPEN_OVERWRITE ) && !$this->_writable
                 ) {
-                    $message = $fileAccessType == OPEN_READONLY && !$this->_readable ? 'File is not readable' : 'File is not read and/or writable';
+                    if($fileAccessType == OPEN_READONLY && !$this->_readable){
+                        $message = 'File is not readable';
+                    }else{
+                        $message = 'File is not read and/or writable';
+                    }
                     throw new \RuntimeException( $message );
                 }
                 $this->_fileHandle = fopen($this->path, $fileAccessType);
                 $this->isTemp      = FALSE;
             }
-            $this->readPosition   = $this->readPosition = ftell($this->_fileHandle);
-            $this->openForWriting = $fileAccessType == OPEN_READONLY ? FALSE : TRUE;
-            $lockType             = $fileAccessType == OPEN_READONLY ? \LOCK_SH : \LOCK_EX;
+            $this->readPosition = $this->readPosition = ftell($this->_fileHandle);
+
+            if($fileAccessType == OPEN_READONLY){
+                $this->openForWriting = FALSE;
+            }else{
+                $this->openForWriting = TRUE;
+            }
+            if($fileAccessType == OPEN_READONLY){
+                $lockType = \LOCK_SH;
+            }else{
+                $lockType = \LOCK_EX;
+            }
             flock($this->_fileHandle, $lockType);
         }
     }
