@@ -47,7 +47,12 @@ class File {
         }
     }
 
+    public function __destruct(){
+        $this->close();
+    }
+
     public function readPart($start, $length) {
+        $this->openFile(OPEN_READONLY);
         # lets position the pointer at the start
         fseek($this->_fileHandle, $start);
         $return = NULL;
@@ -69,7 +74,12 @@ class File {
 
     public function truncate() {
         $this->openFile(OPEN_OVERWRITE);
-        $this->readPosition = $this->writePosition = ftell($this->_fileHandle);
+        if (ftruncate($this->_fileHandle, 0)) {
+            rewind($this->_fileHandle);
+            $this->readPosition = $this->writePosition = ftell($this->_fileHandle);
+        }else{
+            throw new \RuntimeException('Unable to truncate file');
+        }
     }
 
     public function amend($data) {
@@ -99,11 +109,13 @@ class File {
     }
 
     public function close() {
-        $this->closeFile();
+        return $this->closeFile();
     }
 
     public function rewind() {
-        $this->readPosition = 0;
+        $this->openFile(OPEN_READONLY);
+        rewind($this->_fileHandle);
+        $this->readPosition = $this->writePosition = ftell($this->_fileHandle);
     }
 
     public function delete() {
@@ -111,6 +123,14 @@ class File {
         if ( isset( $this->path ) ) {
             unlink($this->path);
         }
+    }
+
+    public function getPath(){
+        return $this->path;
+    }
+
+    public function isTempFile(){
+        return $this->isTemp;
     }
 
     protected function openFile($fileAccessType) {
@@ -121,44 +141,47 @@ class File {
             $this->close();
         }
         if ( empty( $this->_fileHandle ) ) {
+            $this->isTemp      = FALSE;
             if ( !isset( $this->path ) ) {
-                $this->_fileHandle = tmpfile();
-                $this->_readable   = TRUE;
-                $this->_writable   = TRUE;
+                $this->path = tempnam(sys_get_temp_dir(),'DHP_FW_');
+                #$this->_fileHandle = tmpfile();
+                #$this->_readable   = TRUE;
+                #$this->_writable   = TRUE;
                 $this->isTemp      = TRUE;
-            } else {
-                if ( !file_exists($this->path) ) { # could we create the file...?
-                    touch($this->path);
-                    $this->_readable = is_readable($this->path);
-                    $this->_writable = is_writable($this->path);
-                }
-                /* check if fileAccessType will work considering if we want to
-                 * read/write to the file and if the file is read/writable
-                 */
-                if ( $fileAccessType == OPEN_READONLY && !$this->_readable
-                  || ( $fileAccessType == OPEN_AMEND
-                  || $fileAccessType == OPEN_OVERWRITE ) && !$this->_writable
-                ) {
-                    if($fileAccessType == OPEN_READONLY && !$this->_readable){
-                        $message = 'File is not readable';
-                    }else{
-                        $message = 'File is not read and/or writable';
-                    }
-                    throw new \RuntimeException( $message );
-                }
-                $this->_fileHandle = fopen($this->path, $fileAccessType);
-                $this->isTemp      = FALSE;
             }
+            if (!file_exists($this->path)) { # could we create the file...?
+                touch($this->path);
+            }
+            $this->_readable = is_readable($this->path);
+            $this->_writable = is_writable($this->path);
+            /* check if fileAccessType will work considering if we want to
+             * read/write to the file and if the file is read/writable
+             */
+            if ($fileAccessType == OPEN_READONLY && !$this->_readable
+                || ($fileAccessType == OPEN_AMEND
+                || $fileAccessType == OPEN_OVERWRITE) && !$this->_writable
+            ) {
+                if ($fileAccessType == OPEN_READONLY && !$this->_readable) {
+                    $message = 'File is not readable';
+                }
+                else {
+                    $message = 'File is not read and/or writable';
+                }
+                throw new \RuntimeException($message);
+            }
+            $this->_fileHandle = fopen($this->path, $fileAccessType);
             $this->readPosition = $this->readPosition = ftell($this->_fileHandle);
 
-            if($fileAccessType == OPEN_READONLY){
+            if ($fileAccessType == OPEN_READONLY) {
                 $this->openForWriting = FALSE;
-            }else{
+            }
+            else {
                 $this->openForWriting = TRUE;
             }
-            if($fileAccessType == OPEN_READONLY){
+            if ($fileAccessType == OPEN_READONLY) {
                 $lockType = \LOCK_SH;
-            }else{
+            }
+            else {
                 $lockType = \LOCK_EX;
             }
             flock($this->_fileHandle, $lockType);
@@ -170,7 +193,8 @@ class File {
             flock($this->_fileHandle, \LOCK_UN);
             fclose($this->_fileHandle);
             $this->_fileHandle = NULL;
-            echo "Closing file...<br>";
+            return TRUE;
         }
+        return NULL;
     }
 }
