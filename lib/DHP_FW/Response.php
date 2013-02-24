@@ -2,6 +2,9 @@
 declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
 use DHP_FW\Event;
+use DHP_FW\cache\CacheBucketProxyInterface;
+use DHP_FW\Request;
+
 
 /**
  * User: Henrik Pejer mr@henrikpejer.com
@@ -61,11 +64,17 @@ class Response implements ResponseInterface {
     private $supressHeader  = FALSE;
     private $dataIsCache    = FALSE;
 
+
+    private $request, $cacheObject;
+
     /**
      * @param EventInterface $event
      */
-    public function __construct(EventInterface $event) {
-        $this->event = $event;
+    # public function __construct(EventInterface $event = NULL) {
+    public function __construct(EventInterface $event = NULL, Request $Request = NULL, CacheBucketProxyInterface $cache = NULL) {
+        $this->event       = $event;
+        $this->request     = NULL;
+        $this->cacheObject = NULL;
     }
 
     # todo : this is most likely not necessary - refactor away please!
@@ -74,6 +83,18 @@ class Response implements ResponseInterface {
      */
     public function cacheSent() {
         return $this->dataIsCache;
+    }
+
+    /**
+     * Declares weather cache is available or not
+     *
+     * @return bool
+     */
+    public function cacheAvailable() {
+        if (!isset($this->request) || !isset($this->cacheObject)) {
+            return FALSE;
+        }
+        return TRUE;
     }
 
     /**
@@ -238,20 +259,24 @@ class Response implements ResponseInterface {
      * @return boolean true if cacheObject was used, false if not
      */
     public function checkCache() {
-        $request = \app\DI()->get('DHP_FW\\Request');
-        if ( $request->getMethod() == 'GET' ) {
-            $uri       = $request->getUri();
-            $__cache__ = \app\DI()->get('DHP_FW\\cache\\Cache')
-              ->bucket('app')->get("uri_{$uri}_data");
-            if ( isset( $__cache__ ) && is_array($__cache__) ) {
-                $this->dataIsCache = TRUE;
-                foreach ($__cache__['headers'] as $header) {
-                    $this->sendHeaderData($header);
+        if( !isset($this->request) || !isset($this->cacheObject) ){
+            return TRUE;
+        }else{  # todo : update to use di injected cache and request instead
+            $request = \app\DI()->get('DHP_FW\\Request');
+            if ( $request->getMethod() == 'GET' ) {
+                $uri       = $request->getUri();
+                $__cache__ = \app\DI()->get('DHP_FW\\cache\\Cache')
+                  ->bucket('app')->get("uri_{$uri}_data");
+                if ( isset( $__cache__ ) && is_array($__cache__) ) {
+                    $this->dataIsCache = TRUE;
+                    foreach ($__cache__['headers'] as $header) {
+                        $this->sendHeaderData($header);
+                    }
+                    $this->sendHeaderData('DHP_FW_CACHE: YES!');
+                    $this->data = $__cache__['data'];
+                    $this->sendData();
+                    return TRUE;
                 }
-                $this->sendHeaderData('DHP_FW_CACHE: YES!');
-                $this->data = $__cache__['data'];
-                $this->sendData();
-                return TRUE;
             }
         }
         return FALSE;
@@ -313,12 +338,21 @@ class Response implements ResponseInterface {
         echo $this->data;
         $this->dataSendStatus = self::DATASENDSTATUS_COMPLETE;
         if ( $this->dataIsCache == FALSE ) {
+            if(isset($this->cacheObject) && isset($this->request)){
+                $cacheData = array(
+                    'headers' => $this->headerDataSent,
+                    'data'    => $this->data
+                );
+                $this->cacheObject->set('uri_'.$this->request->getUri().'_data',$cacheData,600);
+            }
             # lets cacheObject this, ok?
-            # todo : this should go through app directly, me thinks and not through DI...
+            # todo : Cache should be provided in constructor, stoopid!
+/*
             \app\DI()->get('DHP_FW\\cache\\Cache')->bucket('app')
               ->set("uri_" . \app\DI()->get('DHP_FW\\Request')
               ->getUri() . "_data", array('headers' => $this->headerDataSent,
                                           'data'    => $this->data), 600);
+*/
         }
     }
 

@@ -10,12 +10,17 @@ class BenchmarkTest extends \PHPUnit_Framework_TestCase {
      */
     protected $object;
 
+
+    public function __construct(){
+        $this->event = new \DHP_FW\Event();
+    }
+
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
     protected function setUp() {
-        $this->object = new Benchmark(\app\DI()->get('DHP_FW\Event'));
+        $this->object = new Benchmark($this->event);
     }
 
     /**
@@ -28,7 +33,7 @@ class BenchmarkTest extends \PHPUnit_Framework_TestCase {
     public function testOutput(){
         $data = '';
         $status = 200;
-        \app\DI()->get('DHP_FW\Event')->trigger('DHP_FW.Response.send',$status,$data);
+        $this->event->trigger('DHP_FW.Response.send',$status,$data);
         \PHPUnit_Framework_Assert::assertRegExp("#.*time: [0-9]+\.[0-9]{0,4} s, memory: [0-9]+\.[0-9]{0,4} MB.*#",$data);
     }
 }

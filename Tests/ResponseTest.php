@@ -27,10 +27,14 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
     }
 
     /**
+     *
      */
     public function testSend() {
-        \PHPUnit_Framework_Assert::assertFalse($this->object->checkCache());
-        \PHPUnit_Framework_Assert::assertFalse($this->object->cacheSent());
+        // $this->markTestSkipped('must be revisited.');
+        if($this->object->cacheAvailable()){
+            \PHPUnit_Framework_Assert::assertFalse($this->object->checkCache());
+            \PHPUnit_Framework_Assert::assertFalse($this->object->cacheSent());
+        }
         $output    = 'this worked';
         $arrayData = array(1, 2, 3);
         $output .= json_encode($arrayData, \JSON_FORCE_OBJECT | \JSON_NUMERIC_CHECK);
@@ -44,18 +48,24 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
         $object            = new \stdClass();
         $object->something = 'something';
         $output .= json_encode($object, \JSON_FORCE_OBJECT | \JSON_NUMERIC_CHECK);
-        $output .= "array(2) {
-  'headers' =>
-  array(2) {
-    [0] =>
-    string(15) \"HTTP/1.1 200 OK\"
-    [1] =>
-    string(14) \"Status: 200 OK\"
-  }
-  'data' =>
-  string(0) \"\"
-}
-";
+        if($this->object->cacheAvailable()){
+            $output .= "array(2) {
+      'headers' =>
+      array(2) {
+        [0] =>
+        string(15) \"HTTP/1.1 200 OK\"
+        [1] =>
+        string(14) \"Status: 200 OK\"
+      }
+      'data' =>
+      string(0) \"\"
+    }
+    ";
+
+        }else{
+            $output .= 'bool(false)
+';
+        }
 
         $this->expectOutputString($output);
 
@@ -66,7 +76,10 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
         $this->object->send($object);
         $this->object->send(fopen(__FILE__, 'r'));
         var_dump(\app\DI()->get('DHP_FW\\cache\\Cache')->bucket('app')->get('uri__data'));
-        \PHPUnit_Framework_Assert::assertTrue($this->object->checkCache());
+        if($this->object->cacheAvailable()){
+            \PHPUnit_Framework_Assert::assertTrue($this->object->checkCache());
+        }
+
     }
 
     public function testHeader() {

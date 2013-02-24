@@ -1,6 +1,8 @@
 <?php
 declare( encoding = "UTF8" ) ;
 namespace DHP_FW;
+use DHP_FW\Request;
+use DHP_FW\cache\CacheBucketProxyInterface;
 
 /**
  * User: Henrik Pejer mr@henrikpejer.com
@@ -12,7 +14,8 @@ interface ResponseInterface {
     /**
      * @param EventInterface $event
      */
-    function __construct(\DHP_FW\EventInterface $event);
+    function __construct(\DHP_FW\EventInterface $event = NULL, Request $Request = NULL, CacheBucketProxyInterface $cache = NULL);
+    # function __construct(\DHP_FW\EventInterface $event = NULL);
 
 
     /**

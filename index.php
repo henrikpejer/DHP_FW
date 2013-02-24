@@ -47,4 +47,10 @@ $routes->get('blog/img',function(){
 $routes->get('blog/downloadimg',function(){
    return array('controller'=>'Blog','method'=>'downloadImg');
 });
-$app->start();
+try{
+    $app->start();
+}catch(\Exception $e){
+    echo '<pre>';
+    var_export($e->getTrace());
+    echo '</pre>';
+}
