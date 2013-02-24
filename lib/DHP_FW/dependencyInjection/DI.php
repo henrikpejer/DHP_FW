@@ -139,31 +139,40 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
         # $this->event->trigger('DHP_FW.DI.instantiate', $class, $__args__);
         $constructorArguments = Utils::classConstructorArguments($class);
         $classReflector       = new \ReflectionClass( $class );
-        if ( $classReflector->isInterface() ) {
+        if ( $classReflector->isInterface() || $classReflector->isAbstract() ) {
             return NULL;
         }
         $args = array();
-        foreach ($constructorArguments as $key => $constructorArgument) {
-            # get a value, if possible...
-            switch (TRUE) {
-                case isset( $__args__[$key] ):
-                    $args[] = $__args__[$key];
-                    break;
-                case ( !empty( $constructorArgument['class'] ) && ( $__arg__ = $this->get($constructorArgument['class']) ) !== NULL ):
-                case ( !empty( $constructorArgument['name'] ) && ( $__arg__ = $this->get($constructorArgument['name']) ) !== NULL ):
-                    $args[] = $__arg__;
-                    break;
-                case isset( $__args__[$constructorArgument['name']] ):
-                    $args[] = $__args__[$constructorArgument['name']];
-                    break;
-                case isset( $constructorArgument['default'] ):
-                    $args[] = $constructorArgument['default'];
-                    break;
-                default:
-                    $args[] = NULL;
+        try{
+            foreach ($constructorArguments as $key => $constructorArgument) {
+                # get a value, if possible...
+                switch (TRUE) {
+                    case isset($__args__[$key]):
+                        $args[] = $__args__[$key];
+                        break;
+                    case (!empty($constructorArgument['class']) && ($__arg__ = $this->get($constructorArgument['class'])) !== NULL):
+                    case (!empty($constructorArgument['name']) && ($__arg__ = $this->get($constructorArgument['name'])) !== NULL):
+                        $args[] = $__arg__;
+                        break;
+                    case isset($__args__[$constructorArgument['name']]):
+                        $args[] = $__args__[$constructorArgument['name']];
+                        break;
+                    case isset($constructorArgument['default']):
+                        $args[] = $constructorArgument['default'];
+                        break;
+                    default:
+                        $args[] = NULL;
+                }
+            }
+            $return = sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
+        }
+        catch (\Exception $e) {
+            try{
+                $return = sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
+            }catch(\Exception $e){
+                $return = NULL;
             }
         }
-        $return = sizeof($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
         return $return;
     }
 
