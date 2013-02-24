@@ -136,9 +136,19 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
     public function testSendFileWithNotReadable() {
         $fileToTest = __DIR__.'/NotReadable.txt';
         touch($fileToTest);
-        chmod($fileToTest,0377);
-        $this->object->sendFile(__DIR__ . '/NotReadable.txt');
-        unlink(realpath($fileToTest));
+        chmod($fileToTest,0000);
+        \PHPUnit_Framework_Assert::assertFalse(is_readable($fileToTest));
+        $this->object->sendFile($fileToTest);
+    }
+
+    /**
+     * @depends testSendFileWithNotReadable
+     */
+    public function testDeleteFileAfterSend(){
+        $fileToTest = __DIR__.'/NotReadable.txt';
+        chmod($fileToTest,0777);
+        unlink($fileToTest);
+        \PHPUnit_Framework_Assert::assertFileNotExists($fileToTest);
     }
     
     public function testSurpressHeaders() {

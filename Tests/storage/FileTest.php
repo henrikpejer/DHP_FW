@@ -13,16 +13,29 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     protected $fileContents = "This is a test file that we read";
 
+    public function __destruct(){
+        if(file_exists($this->filePath)){
+            chmod($this->filePath,0777);
+            unlink($this->filePath);
+        }
+    }
+
+    public function __construct(){
+        $this->filePath = __DIR__.DIRECTORY_SEPARATOR.'test.txt';
+        touch($this->filePath);
+    }
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
     protected function setUp(){
-        $this->filePath = __DIR__.DIRECTORY_SEPARATOR.'test.txt';
+        touch($this->filePath);
+        chmod($this->filePath,0777);
         $fh = fopen($this->filePath, 'w+b');
         fwrite($fh,$this->fileContents);
         fclose($fh);
-        $this->object = new File($this->filePath);
+        $this->event =  new \DHP_FW\Event();
+        $this->object = new File($this->filePath, $this->event);
 
     }
 
@@ -31,11 +44,13 @@ class FileTest extends \PHPUnit_Framework_TestCase
      * This method is called after a test is executed.
      */
     protected function tearDown(){
-        # $this->object->close();
+        $this->event->trigger('system.end');
+        $this->object->close();
         unset($this->object);
     }
 
     public function testReadPart() {
+        \PHPUnit_Framework_Assert::assertEquals($this->fileContents,$this->object->readPart(0,100));
         \PHPUnit_Framework_Assert::assertEquals('This is a ',$this->object->readPart(0,10));
     }
 
@@ -94,9 +109,8 @@ class FileTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @dddepends testReadOnlyFile
      * @expectedException \RuntimeException
-     * @expectedExceptionMessage File is not read and/or writable
+     * @expectedExceptionMessage File is not writable
      */
     public function testWriteOnReadOnlyFile(){
         $filePath = $this->filePath . '_ro';
@@ -108,11 +122,39 @@ class FileTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @depends testWriteOnReadOnlyFile
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage File is not readable
+     */
+    public function testReadOnUnreadableFile(){
+        $filePath = $this->filePath . '_ro';
+        $this->object = new File($filePath);
+        chmod($filePath,0344);
+        \PHPUnit_Framework_Assert::assertFalse(is_readable($filePath));
+        $this->object->read();
+    }
+
+    /**
+     * @depends testReadOnUnreadableFile
+     * @expectedException \RuntimeException
+     * @expectedExceptionMessage File is not writable
+     */
+    function testTrunctingReadonlyFile(){
+        $filePath = $this->filePath . '_ro';
+        touch($filePath);
+        chmod($filePath,0444);
+        $this->object = new File($filePath);
+        $this->object->truncate();
+    }
+
+
+
+    /**
+     * @depends testTrunctingReadonlyFile
      */
     public function testDeleteFile(){
         $filePath = $this->filePath . '_ro';
+        chmod($filePath,0755);
         $this->object = new File($filePath);
-        chmod($filePath,0777);
         $this->object->delete();
         \PHPUnit_Framework_Assert::assertFileNotExists($filePath);
     }

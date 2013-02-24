@@ -31,8 +31,7 @@ class File {
             } else {
                 $path = realpath($fileToOpen);
                  # checks to make sure file really is a file
-                if ( is_file($path) && is_readable($path)
-                     && @stat($path) !== FALSE ) {
+                if (is_file($path) && is_readable($path) && stat($path) !== FALSE) {
                     $this->path      = $path;
                     $this->_readable = is_readable($this->path);
                     $this->_writable = is_writable($this->path);
@@ -157,17 +156,14 @@ class File {
             /* check if fileAccessType will work considering if we want to
              * read/write to the file and if the file is read/writable
              */
-            if ($fileAccessType == OPEN_READONLY && !$this->_readable
-                || ($fileAccessType == OPEN_AMEND
-                || $fileAccessType == OPEN_OVERWRITE) && !$this->_writable
-            ) {
-                if ($fileAccessType == OPEN_READONLY && !$this->_readable) {
-                    $message = 'File is not readable';
-                }
-                else {
-                    $message = 'File is not read and/or writable';
-                }
-                throw new \RuntimeException($message);
+            if ($fileAccessType == OPEN_READONLY && !$this->_readable){
+                throw new \RuntimeException("File is not readable");
+            }
+            if( $fileAccessType == OPEN_AMEND && !$this->_writable){
+                throw new \RuntimeException("File is not writable");
+            }
+            if( $fileAccessType == OPEN_OVERWRITE && !$this->_writable){
+                throw new \RuntimeException("File is not writable");
             }
             $this->_fileHandle = fopen($this->path, $fileAccessType);
             $this->readPosition = $this->readPosition = ftell($this->_fileHandle);
