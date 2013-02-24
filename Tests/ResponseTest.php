@@ -76,10 +76,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
         $this->object->send($object);
         $this->object->send(fopen(__FILE__, 'r'));
         var_dump(\app\DI()->get('DHP_FW\\cache\\Cache')->bucket('app')->get('uri__data'));
-        if($this->object->cacheAvailable()){
-            \PHPUnit_Framework_Assert::assertTrue($this->object->checkCache());
-        }
-
+         \PHPUnit_Framework_Assert::assertTrue($this->object->checkCache());
     }
 
     public function testHeader() {
@@ -97,6 +94,24 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
         \PHPUnit_Framework_Assert::assertAttributeEquals(array('Status' => '200 OK'), 'headers', $this->object);
     }
 
+    public function testWithCache(){
+        $this->expectOutputString('This is the outputThis is the output');
+        $cache = new \DHP_FW\cache\Cache(new \DHP_FW\cache\Apc());
+        $response = new Response(new Event(),new Request(),$cache->bucket('app'));
+        \PHPUnit_Framework_Assert::assertTrue($response->cacheAvailable());
+        $response->send('This is the output');
+        $cacheData = $cache->bucket('app')->get('uri__data');
+        $checkCacheData = array(
+            'headers' => array(
+                'HTTP/1.1 200 OK',
+                'Status: 200 OK'
+            ),
+            'data' => 'This is the output'
+        );
+        \PHPUnit_Framework_Assert::assertEquals($cacheData,$checkCacheData);
+        $response->checkCache();
+        \PHPUnit_Framework_Assert::assertTrue($response->cacheSent());
+    }
     /**
      */
     public function testSendFile() {

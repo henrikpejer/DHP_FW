@@ -73,8 +73,8 @@ class Response implements ResponseInterface {
     # public function __construct(EventInterface $event = NULL) {
     public function __construct(EventInterface $event = NULL, Request $Request = NULL, CacheBucketProxyInterface $cache = NULL) {
         $this->event       = $event;
-        $this->request     = NULL;
-        $this->cacheObject = NULL;
+        $this->request     = $Request;
+        $this->cacheObject = $cache;
     }
 
     # todo : this is most likely not necessary - refactor away please!
@@ -277,7 +277,6 @@ class Response implements ResponseInterface {
                 }
             }
         }
-        return FALSE;
     }
 
     /**
