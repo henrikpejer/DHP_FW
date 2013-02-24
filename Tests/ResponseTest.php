@@ -71,7 +71,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
 
         $this->object->send('this worked');
         $this->object->send(123,$arrayData);
-        \PHPUnit_Framework_Assert::assertAttributeEquals(array('Status'=>'123'),'headers',$this->object);
+        \PHPUnit_Framework_Assert::assertAttributeEquals(array('Status'=>'123','Content-Length'=>'19'),'headers',$this->object);
         $this->object->send($arrayWithNamedKeys);
         $this->object->send($object);
         $this->object->send(fopen(__FILE__, 'r'));
@@ -83,7 +83,7 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
         $this->object->header('Henrik', 'Pejer')->header('Something kind of usefull');
         $this->object->supressHeaders(TRUE);
         $this->object->send(200);
-        \PHPUnit_Framework_Assert::assertAttributeEquals(array('Henrik' => 'Pejer','Something-Kind-Of-Usefull'=> NULL,'Status'=>'200 OK'), 'headers', $this->object);
+        \PHPUnit_Framework_Assert::assertAttributeEquals(array('Henrik' => 'Pejer','Something-Kind-Of-Usefull'=> NULL,'Status'=>'200 OK','Content-Length'=>0), 'headers', $this->object);
         
     }
 
@@ -104,7 +104,8 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
         $checkCacheData = array(
             'headers' => array(
                 'HTTP/1.1 200 OK',
-                'Status: 200 OK'
+                'Status: 200 OK',
+                'Content-Length: 18'
             ),
             'data' => 'This is the output'
         );
@@ -120,9 +121,9 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
         $this->object->sendFile(__FILE__, 'text/x-c++', 'downloadFileName.php');
         $headers_list_test = array(
             #"Content-description: File Transfer",
-            "Content-type: text/x-c++",
+            "Content-Type: text/x-c++",
             #"Content-disposition: attachment; filename=\"downloadFileName.php\"",
-            "Content-transfer-encoding: binary",
+            "Content-Transfer-Encoding: binary",
             "HTTP/1.1 200 OK",
             "Status: 200 OK"
         );
@@ -138,12 +139,12 @@ class ResponseTest extends \PHPUnit_Framework_TestCase {
         $this->expectOutputString($fileToTest);
         $this->object->downloadFile(__FILE__, 'text/x-c++', 'downloadFileName.php');
         $headers_list_test = array(
-            "Content-type: text/x-c++",
-            "Content-transfer-encoding: binary",
+            "Content-Type: text/x-c++",
+            "Content-Transfer-Encoding: binary",
             "HTTP/1.1 200 OK",
             "Status: 200 OK",
-            "Content-description: File Transfer",
-          "Content-disposition: attachment; filename=\"downloadFileName.php\""
+            "Content-Description: File Transfer",
+          "Content-Disposition: attachment; filename=\"downloadFileName.php\""
 
         );
         \PHPUnit_Framework_Assert::assertAttributeEquals($headers_list_test, 'headerDataSent', $this->object);

@@ -10,8 +10,9 @@ namespace {
     $storage = $DI->get('DHP_FW\cache\Apc');
     $DI->set('DHP_FW\cache\Cache', 'DHP_FW\cache\Cache')
             ->setArguments(array($storage));
-    $DI->set('DHP_FW\ErrorHandler','DHP_FW\ErrorHandler');
-    $e = $DI->get('DHP_FW\ErrorHandler');
+    $DI->set('DHP_FW\ErrorHandler', 'DHP_FW\ErrorHandler');
+    $DI->set('DHP_FW\cache\CacheBucketProxyInterface', $DI->get('DHP_FW\cache\Cache')->bucket('app'));
+    $e                   = $DI->get('DHP_FW\ErrorHandler');
     $app                 = $DI->get('DHP_FW\AppInterface');
     $appControllerLoader = new SplClassLoader('app', dirname($_SERVER['SCRIPT_FILENAME']));
     $appControllerLoader->register();

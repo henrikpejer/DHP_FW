@@ -61,7 +61,6 @@ class DI implements \DHP_FW\dependencyInjection\DIInterface {
      * @param $original String,
      *
      * @throws \InvalidArgumentException
-     * @return $this
      */
     public function alias($alias, $original) {
         if ( !isset( $this->store->{$original} ) ) {

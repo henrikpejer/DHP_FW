@@ -130,8 +130,27 @@ class Response implements ResponseInterface {
                 $this->data = '';
                 break;
         }
+        # lets get the size of the data
+        try{
+            ob_start();
+            $this->sendData();
+            $this->header('Content-Length',ob_get_length());
+            $data = ob_get_clean();
+        }catch(\Exception $e){
+            // being unable to figure out the length of the data, we do... what? Nothing?
+        }
+
         $this->sendHeaders();
-        $this->sendData();
+        echo $data;
+        if ( $this->dataIsCache == FALSE ) {
+            if(isset($this->cacheObject) && isset($this->request)){
+                $cacheData = array(
+                    'headers' => $this->headerDataSent,
+                    'data'    => $data
+                );
+                $this->cacheObject->set('uri_'.$this->request->getUri().'_data',$cacheData,600);
+            }
+        }
     }
 
     /**
@@ -146,7 +165,7 @@ class Response implements ResponseInterface {
      */
     public function header($name, $value = NULL, $processHeaderName = TRUE) {
         if ( $processHeaderName ) {
-            $name = str_replace(' ', '-', ucwords(str_replace('_', ' ',
+            $name = str_replace(' ', '-', ucwords(str_replace(array('_','-'), ' ',
                                                               strtolower($name))));
         }
         $this->event->trigger('DHP_FW.Response.header', $name, $value);
@@ -334,15 +353,6 @@ class Response implements ResponseInterface {
         $this->dataSendStatus = self::DATASENDSTATUS_STARTED;
         echo $this->data;
         $this->dataSendStatus = self::DATASENDSTATUS_COMPLETE;
-        if ( $this->dataIsCache == FALSE ) {
-            if(isset($this->cacheObject) && isset($this->request)){
-                $cacheData = array(
-                    'headers' => $this->headerDataSent,
-                    'data'    => $this->data
-                );
-                $this->cacheObject->set('uri_'.$this->request->getUri().'_data',$cacheData,600);
-            }
-        }
     }
 
     /**
