@@ -262,11 +262,9 @@ class Response implements ResponseInterface {
         if( !isset($this->request) || !isset($this->cacheObject) ){
             return TRUE;
         }else{  # todo : update to use di injected cache and request instead
-            $request = \app\DI()->get('DHP_FW\\Request');
-            if ( $request->getMethod() == 'GET' ) {
-                $uri       = $request->getUri();
-                $__cache__ = \app\DI()->get('DHP_FW\\cache\\Cache')
-                  ->bucket('app')->get("uri_{$uri}_data");
+            if ( $this->request->getMethod() == 'GET' ) {
+                $uri       = $this->request->getUri();
+                $__cache__ = $this->cacheObject->get("uri_{$uri}_data");
                 if ( isset( $__cache__ ) && is_array($__cache__) ) {
                     $this->dataIsCache = TRUE;
                     foreach ($__cache__['headers'] as $header) {
@@ -345,14 +343,6 @@ class Response implements ResponseInterface {
                 );
                 $this->cacheObject->set('uri_'.$this->request->getUri().'_data',$cacheData,600);
             }
-            # lets cacheObject this, ok?
-            # todo : Cache should be provided in constructor, stoopid!
-/*
-            \app\DI()->get('DHP_FW\\cache\\Cache')->bucket('app')
-              ->set("uri_" . \app\DI()->get('DHP_FW\\Request')
-              ->getUri() . "_data", array('headers' => $this->headerDataSent,
-                                          'data'    => $this->data), 600);
-*/
         }
     }
 
