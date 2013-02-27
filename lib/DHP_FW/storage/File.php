@@ -17,12 +17,18 @@ class File {
     protected $_readable      = NULL;
     protected $_writable      = NULL;
     protected $exists         = NULL;
-    protected $isTemp         = NULL;
+    protected $isTemp         = FALSE;
     protected $chunkSize      = 10;
     protected $openForWriting = FALSE;
-    protected $writePosition  = NULL;
-    protected $readPosition   = NULL;
+    protected $writePosition  = 0;
+    protected $readPosition   = 0;
 
+    /**
+     * Sets up the object, if file is provided, checks that.
+     *
+     * @param null                   $fileToOpen
+     * @param \DHP_FW\EventInterface $Event
+     */
     function __construct($fileToOpen = NULL, \DHP_FW\EventInterface $Event = NULL) {
         if ( isset( $fileToOpen ) ) {
             $this->exists = file_exists($fileToOpen);
@@ -46,10 +52,21 @@ class File {
         }
     }
 
-    public function __destruct(){
+    /**
+     * Will close open files, upon destruction
+     */
+    public function __destruct() {
         $this->close();
     }
 
+    /**
+     * Reads part of the file and returns that data
+     *
+     * @param $start
+     * @param $length
+     *
+     * @return null|string
+     */
     public function readPart($start, $length) {
         $this->openFile(OPEN_READONLY);
         # lets position the pointer at the start
@@ -71,6 +88,10 @@ class File {
         return $return;
     }
 
+    /**
+     * Will truncate a file, erasing all the content, set the pointer to 0
+     * @throws \RuntimeException
+     */
     public function truncate() {
         $this->openFile(OPEN_OVERWRITE);
         if (ftruncate($this->_fileHandle, 0)) {
@@ -81,6 +102,11 @@ class File {
         }
     }
 
+    /**
+     * Adds data to the file. Amend will *always* add data to the end of file, not
+     * the current cursor positon.
+     * @param $data
+     */
     public function amend($data) {
         $this->openFile(OPEN_AMEND);
         if ( isset( $this->readPosition ) ) {
@@ -91,6 +117,15 @@ class File {
         $this->writePosition = ftell($this->_fileHandle);
     }
 
+    /**
+     * Reads the file and returns
+     *
+     * @param null $len
+     *
+     * @return null|string
+     */
+    # todo : perhaps file_get_contents or equivalen is better...?
+    # todo : fix empty catch statement
     public function read($len = NULL) {
         $this->openFile(OPEN_READONLY);
         $len    = $len == NULL ? $this->chunkSize : $len;
@@ -102,21 +137,30 @@ class File {
                 $len               -= $this->chunkSize;
                 $this->readPosition = ftell($this->_fileHandle);
             }
-        } catch (\Exception $e) {
-        }
+        } catch (\Exception $e) {}
         return $return;
     }
 
+    /**
+     * Closes the file
+     * @return bool|null
+     */
     public function close() {
         return $this->closeFile();
     }
 
+    /**
+     * Rewinds the file and puts the current file pointer at position 0
+     */
     public function rewind() {
         $this->openFile(OPEN_READONLY);
         rewind($this->_fileHandle);
         $this->readPosition = $this->writePosition = ftell($this->_fileHandle);
     }
 
+    /**
+     * Will delete, unlink , the file
+     */
     public function delete() {
         $this->close();
         if ( isset( $this->path ) ) {
@@ -124,14 +168,31 @@ class File {
         }
     }
 
-    public function getPath(){
+    /**
+     * Returns the path of the file
+     * @return null|string
+     */
+    public function getPath() {
         return $this->path;
     }
 
-    public function isTempFile(){
+    /**
+     * true/false if the file is a temp file... or not
+     * @return bool
+     */
+    public function isTempFile() {
         return $this->isTemp;
     }
 
+    /**
+     * This will open a file. It will reopen a file if it's already open but without
+     * enough permissions, so if we have opened the file for reading, we can reopen
+     * it for writing if that is what we want.
+     *
+     * @param $fileAccessType
+     *
+     * @throws \RuntimeException
+     */
     protected function openFile($fileAccessType) {
         /* actually lets reopen the file, if, we want to write to it and it is only
          * in read mode
@@ -140,13 +201,13 @@ class File {
             $this->close();
         }
         if ( empty( $this->_fileHandle ) ) {
-            $this->isTemp      = FALSE;
+            $this->isTemp = FALSE;
             if ( !isset( $this->path ) ) {
-                $this->path = tempnam(sys_get_temp_dir(),'DHP_FW_');
+                $this->path = tempnam(sys_get_temp_dir(), 'DHP_FW_');
                 #$this->_fileHandle = tmpfile();
                 #$this->_readable   = TRUE;
                 #$this->_writable   = TRUE;
-                $this->isTemp      = TRUE;
+                $this->isTemp = TRUE;
             }
             if (!file_exists($this->path)) { # could we create the file...?
                 touch($this->path);
@@ -165,7 +226,7 @@ class File {
             if( $fileAccessType == OPEN_OVERWRITE && !$this->_writable){
                 throw new \RuntimeException("File is not writable");
             }
-            $this->_fileHandle = fopen($this->path, $fileAccessType);
+            $this->_fileHandle  = fopen($this->path, $fileAccessType);
             $this->readPosition = $this->readPosition = ftell($this->_fileHandle);
 
             if ($fileAccessType == OPEN_READONLY) {
@@ -184,6 +245,10 @@ class File {
         }
     }
 
+    /**
+     * Closes the file, releases any file locks that may be on the file.
+     * @return bool|null
+     */
     protected function closeFile() {
         if ( isset( $this->_fileHandle ) ) {
             flock($this->_fileHandle, \LOCK_UN);

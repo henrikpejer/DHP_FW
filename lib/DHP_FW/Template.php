@@ -94,13 +94,14 @@ class Template implements TemplateInterface{
     /**
      * This will remove all variables that are optional, ie {?<variableName>}
      */
-    protected function removeOptionalVariables(){
-        $this->templateString = preg_replace("#".$this->lDelimiter.
-                                             "(\?[^".$this->rDelimiter."]+)".$this->rDelimiter.
-                                             "#s", '', $this->templateString);
+    protected function removeOptionalVariables() {
+        $this->templateString =
+          preg_replace("#" . $this->lDelimiter .
+                       "(\?[^" . $this->rDelimiter . "]+)" . $this->rDelimiter .
+                       "#s",
+                       '',
+                       $this->templateString);
     }
-
-
 
     /**
      * @param $file path to the file to load
@@ -129,8 +130,16 @@ class Template implements TemplateInterface{
                 case 'array':
                     break;
                 default:
-                    $this->templateString = str_replace($this->lDelimiter . $variableName . $this->rDelimiter, $variableValue, $this->templateString);
-                    $this->templateString = str_replace($this->lDelimiter.'?' . $variableName . $this->rDelimiter, $variableValue, $this->templateString);
+                    $this->templateString = str_replace($this->lDelimiter .
+                                                          $variableName .
+                                                          $this->rDelimiter,
+                                                        $variableValue,
+                                                        $this->templateString);
+                    $this->templateString = str_replace($this->lDelimiter.'?'.
+                                                          $variableName .
+                                                          $this->rDelimiter,
+                                                        $variableValue,
+                                                        $this->templateString);
                     break;
             }
         }
@@ -155,10 +164,13 @@ class Template implements TemplateInterface{
                 if (isset($data[$variableName])) {
                     $newString = '';
                     foreach($data[$variableName] as $row){
-                        $newString .= str_replace($template, $this->findAndReplace($template, $row), $template);
-                        $newString = $this->repeats($newString,$row);
+                        $newString .=
+                          str_replace($template,
+                                      $this->findAndReplace($template, $row),
+                                      $template);
+                        $newString = $this->repeats($newString, $row);
                     }
-                    $string = str_replace($match,$newString,$string);
+                    $string = str_replace($match, $newString, $string);
                 }
             }
         }
@@ -176,8 +188,18 @@ class Template implements TemplateInterface{
         if(is_array($variables)){
             foreach ($variables as $variableName => $variableValue) {
                 if(!is_array($variableValue)){
-                    $string = str_replace($this->lDelimiter . '?' . $variableName . $this->rDelimiter, $variableValue, $string);
-                    $string = str_replace($this->lDelimiter . $variableName . $this->rDelimiter, $variableValue, $string);
+                    $string =
+                      str_replace($this->lDelimiter . '?' .
+                                    $variableName .
+                                    $this->rDelimiter,
+                                  $variableValue,
+                                  $string);
+                    $string =
+                      str_replace($this->lDelimiter .
+                                    $variableName .
+                                    $this->rDelimiter,
+                                  $variableValue,
+                                  $string);
                 }
             }
         }
