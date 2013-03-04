@@ -42,9 +42,10 @@ class ParameterBag implements ParameterBagInterface {
      */
     public function __set($name, $value) {
         # run delegation, if any, to notice that we DO have changed data
+        $return = $this->_values[$name] = $value;
         if(isset($this->event)){
-            $this->event->triggerSubscribe($this, 'dataChanged', $name, $value);
+            $return = $this->event->triggerSubscribe($this, 'dataChanged', $name, $value);
         }
-        return $this->_values[$name] = $value;
+        return $return;
     }
 }
