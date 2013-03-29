@@ -9,7 +9,7 @@
     </php>
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory>./lib/DHP_FW</directory>
+            <directory>./lib/DHP</directory>
         </whitelist>
     </filter>
     <logging>
