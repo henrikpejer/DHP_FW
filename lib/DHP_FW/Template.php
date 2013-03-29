@@ -161,9 +161,14 @@ class Template implements TemplateInterface{
                 $template     = $matches[2][$key];
                 $variableName = $matches[1][$key];
                 # replace the values
-                if (isset($data[$variableName])) {
+                $nestedData = NULL;
+                $nestedData = is_array($data) && isset($data[$variableName])?
+                        $data[$variableName]:$nestedData;
+                $nestedData = is_object($data) && isset($data->{$variableName})?
+                        $data->{$variableName}:$nestedData;
+                if (isset($nestedData)) {
                     $newString = '';
-                    foreach($data[$variableName] as $row){
+                    foreach($nestedData as $row){
                         $newString .=
                           str_replace($template,
                                       $this->findAndReplace($template, $row),
@@ -185,8 +190,11 @@ class Template implements TemplateInterface{
      * @return mixed
      */
     private function findAndReplace($string, $variables) {
-        if(is_array($variables)){
+        if(is_array((array)$variables)){
             foreach ($variables as $variableName => $variableValue) {
+                if(is_object($variableValue)){
+                    $variableValue = (array) $variableValue;
+                }
                 if(!is_array($variableValue)){
                     $string =
                       str_replace($this->lDelimiter . '?' .

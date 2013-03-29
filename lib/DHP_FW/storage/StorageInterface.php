@@ -1,5 +1,5 @@
 <?php
-declare(encoding="UTF8");
+declare(encoding = "UTF8") ;
 namespace DHP_FW\storage;
 
 /**
@@ -8,58 +8,15 @@ namespace DHP_FW\storage;
  */
 interface StorageInterface {
 
-    /**
-     * Opens storage
-     *
-     * @return bool
-     */
-    function open();
+    public function truncate();
 
-    /**
-     * Saves data to storage
-     *
-     * @param mixed $data
-     *
-     * @return bool
-     */
-    function save($data);
+    public function amend($data);
 
-    /**
-     * Reads data from storage. Optionally with an offset and length
-     *
-     * @param int $offset
-     * @param int $length
-     *
-     * @return mixed
-     */
-    function read($offset = NULL, $length = NULL);
+    public function read($len = NULL);
 
-    /**
-     * Truncates to zero
-     *
-     * @return bool
-     */
-    function truncate();
+    public function close();
 
-    /**
-     * Removes the data and the storage
-     *
-     * @return bool
-     */
-    function delete();
+    public function rewind();
 
-    /**
-     * Sets read-only: not possible to alter NOR save,truncate, delete or save the
-     * object
-     *
-     * @return bool
-     */
-    function setReadOnly();
-
-    /**
-     * Sets read-and-write : simply making it possible to update and save the object
-     *
-     * @return bool
-     */
-    function setReadAndWrite();
+    public function delete();
 }

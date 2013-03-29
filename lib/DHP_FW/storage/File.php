@@ -11,7 +11,7 @@ namespace DHP_FW\storage;
 const OPEN_READONLY  = 'rb';
 const OPEN_OVERWRITE = 'w+b';
 const OPEN_AMEND     = 'a+b';
-class File {
+class File implements StorageInterface{
     protected $_fileHandle    = NULL;
     protected $path           = NULL;
     protected $_readable      = NULL;

@@ -58,6 +58,30 @@ class TemplateTest extends \PHPUnit_Framework_TestCase {
         \PHPUnit_Framework_Assert::assertEquals($matchAgainst,$this->object->render());
     }
 
+    public function testRepeatsWithObjectData(){
+        $this->object->setString('<ul>{books}
+        <li>{author} => {title} {sub}{something}{/sub}</li>
+{/books}</ul>');
+        $books = array('books' => array(
+            (object)array('author' => 'Henrik', 'title' => 'First book', 'sub' => (object)array(
+                (object)array('something' => 'one')
+
+            )),
+            (object)array('author' => 'Henrik Pejer', 'title' => 'Second book', 'sub' => (object)array(
+                (object)array('something' => 'two'),
+                (object)array('something' => 'three')
+
+            )))
+        );
+        $this->object->setData($books);
+
+        $matchAgainst = '<ul>
+        <li>Henrik => First book one</li>
+
+        <li>Henrik Pejer => Second book twothree</li>
+</ul>';
+        \PHPUnit_Framework_Assert::assertEquals($matchAgainst,$this->object->render());
+    }
     public function testSetFile(){
         $templateFile = __DIR__.'/template.tpl';
         touch($templateFile);
