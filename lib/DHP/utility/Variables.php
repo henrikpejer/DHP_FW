@@ -1,6 +1,7 @@
 <?php
 declare(encoding = "UTF8");
 namespace DHP\utility;
+
 /**
  * Used to automatically set properties on an instantiated class
  *
@@ -8,7 +9,8 @@ namespace DHP\utility;
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-03-29 22:44
  */
-class Variables extends Constants {
+class Variables extends Constants
+{
 
     /**
      * Used to set a public property on an object
@@ -16,8 +18,9 @@ class Variables extends Constants {
      * @param $value
      * @return $this
      */
-    public function __set($name, $value) {
-        $this->values[$this->globalEnvironment][$name] = $value;
+    public function __set($name, $value)
+    {
+        $this->values[self::DEFAULT_ENVIRONMENT][$name] = $value;
         return $this;
     }
 
@@ -26,16 +29,17 @@ class Variables extends Constants {
      * @param $name
      * @return null
      */
-    public function __get($name) {
-        switch (TRUE) {
+    public function __get($name)
+    {
+        switch (true) {
             case isset($this->values[$this->environment][$name]):
                 $return = $this->values[$this->environment][$name];
                 break;
-            case isset($this->values[$this->globalEnvironment][$name]):
-                $return = $this->values[$this->globalEnvironment][$name];
+            case isset($this->values[self::DEFAULT_ENVIRONMENT][$name]):
+                $return = $this->values[self::DEFAULT_ENVIRONMENT][$name];
                 break;
             default:
-                $return = NULL;
+                $return = null;
         }
         return $return;
     }

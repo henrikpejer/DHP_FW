@@ -20,7 +20,7 @@ class VariablesTest extends PHPUnit_Framework_TestCase {
         $this->object->thirdRock = 'fromTheSun';
         $this->object->henrik('test', 'pejer test value');
         $this->assertEquals('pejer', $this->object->henrik);
-        $this->object->__setEnvironment('test');
+        $this->object->setEnvironment('test');
         $this->assertEquals('pejer test value', $this->object->henrik);
         $this->assertEquals('fromTheSun', $this->object->thirdRock);
         $this->assertNull($this->object->notSetYet);

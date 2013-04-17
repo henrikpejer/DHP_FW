@@ -1,6 +1,7 @@
 <?php
 declare(encoding = "UTF8");
 namespace DHP\utility;
+
 /**
  * Sets constant properties on an object. Once set, you cannot change them.
  *
@@ -27,16 +28,40 @@ namespace DHP\utility;
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-03-29 23:08
  */
-class Constants {
-    protected $values            = array();
-    protected $environment       = 'GLOBAL';
-    protected $globalEnvironment = 'GLOBAL';
+class Constants
+{
+
+    const DEFAULT_ENVIRONMENT = 'GLOBAL';
+
+    protected $values = array();
+    protected $environment = self::DEFAULT_ENVIRONMENT;
+
+    /**
+     * Sets up object and if supplied with settings and defaultEnvironment,
+     * that will be set too.
+     *
+     * @param array $values
+     * @param null  $defaultEnvironment
+     * @internal param array $settings
+     */
+    public function __construct(array $values = null, $defaultEnvironment = null)
+    {
+        if ($defaultEnvironment !== null) {
+            $this->environment = $defaultEnvironment;
+        }
+        if ($values !== null) {
+            $this->values                            = $values;
+            $this->values[self::DEFAULT_ENVIRONMENT] = $this->values['values'];
+            unset($this->values['values']);
+        }
+    }
 
     /**
      * Sets environment, this is for separating different settings depending on environment.
      * @param $environment
      */
-    public function __setEnvironment($environment) {
+    public function setEnvironment($environment)
+    {
         $this->environment = $environment;
     }
 
@@ -47,11 +72,12 @@ class Constants {
      * @throws \RuntimeException
      * @return $this
      */
-    public function __set($name, $value) {
-        if (isset($this->values[$this->globalEnvironment][$name])) {
+    public function __set($name, $value)
+    {
+        if (isset($this->values[self::DEFAULT_ENVIRONMENT][$name])) {
             throw new \RuntimeException("Can not update value of existing constant");
         }
-        $this->values[$this->globalEnvironment][$name] = $value;
+        $this->values[self::DEFAULT_ENVIRONMENT][$name] = $value;
         return $this;
     }
 
@@ -60,16 +86,17 @@ class Constants {
      * @param $name
      * @return null
      */
-    public function __get($name) {
-        switch (TRUE) {
+    public function __get($name)
+    {
+        switch (true) {
             case isset($this->values[$this->environment][$name]):
                 $return = $this->values[$this->environment][$name];
                 break;
-            case isset($this->values[$this->globalEnvironment][$name]):
-                $return = $this->values[$this->globalEnvironment][$name];
+            case isset($this->values[self::DEFAULT_ENVIRONMENT][$name]):
+                $return = $this->values[self::DEFAULT_ENVIRONMENT][$name];
                 break;
             default:
-                $return = NULL;
+                $return = null;
         }
         return $return;
     }
@@ -82,7 +109,8 @@ class Constants {
      * @return $this
      * @throws \RuntimeException
      */
-    public function __call($name, $arguments) {
+    public function __call($name, $arguments)
+    {
         list($environment, $value) = $arguments;
         if (isset($this->values[$environment][$name])) {
             throw new \RuntimeException("Can not update value of existing constant");

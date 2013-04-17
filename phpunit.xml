@@ -8,7 +8,7 @@
         <includePath>/usr/local/share/pear</includePath>
     </php>
     <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
+        <whitelist processUncoveredFilesFromWhitelist="false" addUncoveredFilesFromWhitelist="true">
             <directory>./lib/DHP</directory>
         </whitelist>
     </filter>

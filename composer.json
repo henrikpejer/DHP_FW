@@ -1,0 +1,14 @@
+{
+    "name": "henrikpejer/dhp_fw",
+    "description": "A little framework, hopefully.",
+    "authors": [
+        {
+            "name": "Henrik Pejer",
+            "email": "mr@henrikpejer.com"
+        }
+    ],
+    "require": {
+ 	"propel/propel1": "~1.6",
+	"mksav/propel": "dev-master"
+    }
+}

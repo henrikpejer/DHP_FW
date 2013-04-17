@@ -31,10 +31,27 @@ class ConstantsTest extends PHPUnit_Framework_TestCase {
         $this->object->thirdRock = 'fromTheSun';
         $this->object->henrik('test', 'pejer test value');
         $this->assertEquals('pejer', $this->object->henrik);
-        $this->object->__setEnvironment('test');
+        $this->object->setEnvironment('test');
         $this->assertEquals('pejer test value', $this->object->henrik);
         $this->assertEquals('fromTheSun', $this->object->thirdRock);
         $this->assertNull($this->object->notSetYet);
         $this->object->henrik('test','shouldThrowException');
+    }
+
+    public function testSetup() {
+        $initialValues = array(
+            'values' => array(
+                'henrik' => 'pejer',
+                'db'     => '192.168.0.1'
+            ),
+            'dev' => array(
+                'db' => '127.0.0.1'
+            )
+        );
+        $environment = 'dev';
+        $this->object = new \DHP\utility\Constants($initialValues,$environment);
+        $this->assertEquals('pejer',$this->object->henrik);
+        $this->assertEquals('127.0.0.1',$this->object->db);
+
     }
 }
