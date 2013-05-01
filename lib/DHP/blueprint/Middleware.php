@@ -8,10 +8,10 @@ namespace DHP\blueprint;
  */
 class Middleware
 {
-
+    // @codeCoverageIgnoreStart
     public function run()
     {
         throw new \RuntimeException("Run-method in middleware must be implemented");
     }
-
+    // @codeCoverageIgnoreEnd
 }

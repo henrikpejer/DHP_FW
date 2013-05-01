@@ -80,17 +80,8 @@ class Routing
     private function matchUriToRoute($uri, $routeUri)
     {
         $__haveParams__ = strpos($routeUri, ':');
-        if ($__haveParams__ === false &&
-                ($routeUri == $uri ||
-                        preg_match(
-                            '#^' . str_replace(
-                                '*',
-                                '.*',
-                                $routeUri
-                            ) . '$#',
-                            $uri
-                        )
-                )
+        if ($__haveParams__ === false && ($routeUri == $uri
+                || preg_match('#^' . str_replace('*', '.*', $routeUri) . '$#', $uri))
         ) {
             return array();
         }
@@ -175,6 +166,10 @@ class Routing
         return $return;
     }
 
+    /**
+     * @param      $controllerClass
+     * @param null $uriNamespace
+     */
     public function makeRoutesForClass($controllerClass, $uriNamespace = null)
     {
         $controller = new \ReflectionClass($controllerClass);
@@ -194,11 +189,6 @@ class Routing
                 $this->registerRoute($method, $uri, $routeCall);
             }
         }
-    }
-
-    public function getRoutes()
-    {
-        return $this->routes;
     }
 
     /**
@@ -221,5 +211,26 @@ class Routing
                 $this->routes[$method][$uri] = $routeCall;
             }
         }
+    }
+
+    /**
+     * Loads routes from a file
+     *
+     * @param String $routesFile path to routes file
+     */
+    public function loadRoutes($routesFile)
+    {
+        $routes = require_once($routesFile);
+        foreach($routes as $route){
+            $this->registerRoute($route[0], $route[1],$route[2]);
+        }
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoutes()
+    {
+        return $this->routes;
     }
 }

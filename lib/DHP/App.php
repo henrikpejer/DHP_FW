@@ -1,5 +1,4 @@
 <?php
-declare(encoding = "UTF8");
 namespace DHP;
 
 use DHP\Routing;
@@ -40,38 +39,25 @@ class App extends Module
     # todo : inject the router the app is currently using....?
 
     /**
-     * Adds a controller file to the application.
-     * @param String $controller
-     * @param String $uriNamespace a namespace for the controller
-     */
-    public function addController($controller, $uriNamespace = null)
-    {
-        $this->routing->makeRoutesForClass($controller, $uriNamespace);
-    }
-
-    /**
-     * This method lets us apply a module, component or middleware to the application
-     */
-    public function apply($whatToApply, $namespace = '')
-    {
-        if (is_a($whatToApply, '\DHP\blueprint\Middleware')) {
-            $whatToApply->run();
-        }
-    }
-
-    /**
      * Starts the app, find matching routes and invokes them
      */
     public function start()
     {
-        $routes      = $this->routing->match(
+        # if APP_DIR/Routes.php, load it
+        $this->loadRoutes();
+        # if APP_DIR/AppConfig.php, load it
+        $this->loadAppConfig();
+        $routes = $this->routing->match(
             $this->request->getMethod(),
             $this->request->getUri()
         );
-        $that        = $this;
+
+        $that = $this;
+
         $nextClosure = function () use ($that) {
             $that->stopRunningRoutes = false;
         };
+
         foreach ($routes as $route) {
             $this->stopRunningRoutes = true;
 
@@ -90,6 +76,61 @@ class App extends Module
             if ($this->stopRunningRoutes) {
                 break;
             }
+        }
+    }
+
+    /**
+     * Load routes from routes file, automatically set to routes.php in app root
+     */
+    private function loadRoutes()
+    {
+        $routesFile = APP_DIR . DIRECTORY_SEPARATOR . 'routes.php';
+        if (file_exists($routesFile) && is_readable($routesFile)) {
+            $this->routing->loadRoutes($routesFile);
+        }
+    }
+
+    /**
+     * Load configs for app, automatically set to appConfig.php in app root
+     */
+    private function loadAppConfig()
+    {
+        $appConfigFile = APP_DIR . DIRECTORY_SEPARATOR . 'appConfig.php';
+        if (file_exists($appConfigFile) && is_readable($appConfigFile)) {
+            /** @noinspection PhpIncludeInspection */
+            $configs = require_once $appConfigFile;
+            foreach ($configs['controllers'] as $controller) {
+                $controller[1] = isset($controller[1]) ? $controller[1] : null;
+                $this->addController($controller[0], $controller[1]);
+            }
+            foreach ($configs['middleware'] as $middleware) {
+                $middleware[1] = isset($middleware[1]) ? $middleware[1] : '';
+                $this->apply($middleware[0], $middleware[1]);
+            }
+        }
+    }
+
+    /**
+     * Adds a controller file to the application.
+     * @param String $controller
+     * @param String $uriNamespace a namespace for the controller
+     */
+    public function addController($controller, $uriNamespace = null)
+    {
+        $this->routing->makeRoutesForClass($controller, $uriNamespace);
+    }
+
+    /**
+     * This method lets us apply a module, component or middleware to the application
+     * @param mixed $whatToApply an object or name of class (string) to apply
+     */
+    public function apply($whatToApply)
+    {
+        if (is_string($whatToApply)) {
+            $whatToApply = $this->DependencyInjector->get($whatToApply);
+        }
+        if (is_a($whatToApply, '\DHP\blueprint\Middleware')) {
+            $whatToApply->run();
         }
     }
 }

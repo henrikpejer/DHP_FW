@@ -1,5 +1,4 @@
 <?php
-declare(encoding = "UTF8");
 namespace DHP\blueprint;
 
 use DHP\Request;
@@ -12,8 +11,13 @@ use DHP\Response;
 class Controller
 {
 
-    protected $request, $response;
+    protected $request;
+    protected $response;
 
+    /**
+     * @param Request  $request
+     * @param Response $response
+     */
     public function __construct(Request $request, Response $response)
     {
         $this->request  = $request;
