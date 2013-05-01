@@ -41,19 +41,20 @@ class App extends Module
     /**
      * Starts the app, find matching routes and invokes them
      */
-    public function start()
+    public function start($routesFile = null, $appConfig = null)
     {
-        # if APP_DIR/Routes.php, load it
-        $this->loadRoutes();
-        # if APP_DIR/AppConfig.php, load it
-        $this->loadAppConfig();
+        if (isset($routesFile)) {
+            $this->loadRoutes($routesFile);
+        }
+        if (isset($appConfig)) {
+            $this->loadAppConfig($appConfig);
+        }
         $routes = $this->routing->match(
             $this->request->getMethod(),
             $this->request->getUri()
         );
 
-        $that = $this;
-
+        $that        = $this;
         $nextClosure = function () use ($that) {
             $that->stopRunningRoutes = false;
         };
@@ -82,31 +83,25 @@ class App extends Module
     /**
      * Load routes from routes file, automatically set to routes.php in app root
      */
-    private function loadRoutes()
+    private function loadRoutes($routesFile)
     {
-        $routesFile = APP_DIR . DIRECTORY_SEPARATOR . 'routes.php';
-        if (file_exists($routesFile) && is_readable($routesFile)) {
-            $this->routing->loadRoutes($routesFile);
-        }
+        $this->routing->loadRoutes($routesFile);
     }
 
     /**
      * Load configs for app, automatically set to appConfig.php in app root
      */
-    private function loadAppConfig()
+    private function loadAppConfig($appConfigFile)
     {
-        $appConfigFile = APP_DIR . DIRECTORY_SEPARATOR . 'appConfig.php';
-        if (file_exists($appConfigFile) && is_readable($appConfigFile)) {
-            /** @noinspection PhpIncludeInspection */
-            $configs = require_once $appConfigFile;
-            foreach ($configs['controllers'] as $controller) {
-                $controller[1] = isset($controller[1]) ? $controller[1] : null;
-                $this->addController($controller[0], $controller[1]);
-            }
-            foreach ($configs['middleware'] as $middleware) {
-                $middleware[1] = isset($middleware[1]) ? $middleware[1] : '';
-                $this->apply($middleware[0], $middleware[1]);
-            }
+        /** @noinspection PhpIncludeInspection */
+        $configs = require_once $appConfigFile;
+        foreach ($configs['controllers'] as $controller) {
+            $controller[1] = isset($controller[1]) ? $controller[1] : null;
+            $this->addController($controller[0], $controller[1]);
+        }
+        foreach ($configs['middleware'] as $middleware) {
+            $middleware[1] = isset($middleware[1]) ? $middleware[1] : '';
+            $this->apply($middleware[0], $middleware[1]);
         }
     }
 

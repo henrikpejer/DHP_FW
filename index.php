@@ -6,18 +6,15 @@
 ini_set('DISPLAY_ERRORS', 1);
 error_reporting(E_ALL);
 require_once 'bootstrap.php';
-define('APP_DIR',__DIR__.DIRECTORY_SEPARATOR.'app');
 $loader = new SplClassLoader('app', __DIR__);
 $loader->register();
 $di = new DHP\dependencyInjection\DI();
 $di->set('DHP\Request')->addMethodCall('setupWithEnvironment');
-#$app = $di->get('app\App');
 $app = $di->get('DHP\App');
-/*$app->configure->henrik = 'pejer';
-$app->configure->henrik('test', 'pejers');
-$app->configure->setEnvironment('test');
-*/
-$app->start();
+$app->start(
+    __DIR__ . DIRECTORY_SEPARATOR . 'app/routes.php',
+    __DIR__ . DIRECTORY_SEPARATOR . 'app/appConfig.php'
+);
 
 echo sprintf(
     "%0.3f Mb",

@@ -42,7 +42,7 @@ public function title($title){
     {
         $this->expectOutputString('Generic Method, only on /blog/*this is the title : title of blog post');
         eval("class App extends \\DHP\\App{
-            function start(){
+            function start(\$routesFile = null, \$appConfig = null){
                 \$this->routing->registerRoute(array('GET'), 'blog/*',
                     function (callable \$next) {
                         echo \"Generic Method, only on /blog/*\";
@@ -51,7 +51,7 @@ public function title($title){
                 \$this->addController('AppController','blog');
 
                 \$this->apply(\$this->DependencyInjector->get('DHP\\middleware\\BodyParser'));
-                parent::start();
+                parent::start(\$routesFile, \$appConfig);
             }
         }");
 

@@ -8,7 +8,6 @@
         }
     ],
     "require": {
- 	"propel/propel1": "~1.6",
-	"mksav/propel": "dev-master"
+ 	"propel/propel1": "~1.6"
     }
 }

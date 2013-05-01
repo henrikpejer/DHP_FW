@@ -3,5 +3,5 @@ build/
 Tests/NotReadable.txt
 .DS_Store
 app
-
+composer.lock
 /vendor/
