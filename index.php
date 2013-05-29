@@ -12,8 +12,8 @@ $di = new DHP\dependencyInjection\DI();
 $di->set('DHP\Request')->addMethodCall('setupWithEnvironment');
 $app = $di->get('DHP\App');
 $app->start(
-    __DIR__ . DIRECTORY_SEPARATOR . 'app/routes.php',
-    __DIR__ . DIRECTORY_SEPARATOR . 'app/appConfig.php'
+    __DIR__ . DIRECTORY_SEPARATOR . 'app/config/routes.php',
+    __DIR__ . DIRECTORY_SEPARATOR . 'app/config/app.php'
 );
 
 echo sprintf(

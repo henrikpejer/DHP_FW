@@ -5,3 +5,4 @@ Tests/NotReadable.txt
 app
 composer.lock
 /vendor/
+docs
