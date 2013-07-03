@@ -19,9 +19,10 @@ class Request
      * @param String $method http-method
      * @param String $uri uri of the request
      * @param String $body if a body was sent with the request, this is it contents
-     * @param Array  $post the post-data from the request
-     * @param Array  $get the get-data from the request
-     * @param Array  $files the files sent with the request
+     * @param Array $post the post-data from the request
+     * @param Array $get the get-data from the request
+     * @param Array $files the files sent with the request
+     * @param array $headers the headers sent with the request
      */
     public function __construct(
         $method = "HEADER",
@@ -29,7 +30,8 @@ class Request
         $body = null,
         $post = array(),
         $get = array(),
-        $files = array()
+        $files = array(),
+        $headers = array()
     ) {
         $this->method = $method;
         $this->uri    = $uri;
@@ -37,6 +39,7 @@ class Request
         $this->post   = $post;
         $this->get    = $get;
         $this->files  = $files;
+        $this->headers = $headers;
     }
 
     /**
@@ -47,6 +50,16 @@ class Request
     public function getMethod()
     {
         return $this->method;
+    }
+
+    /**
+     * Returns the headers in the request
+     *
+     * @return array
+     */
+    public function getHeaders()
+    {
+        return $this->headers;
     }
 
     /**
@@ -80,7 +93,17 @@ class Request
         $this->post  = $_POST;
         $this->get   = $_GET;
         $this->files = $_FILES;
+        $this->headers = array();
+        foreach ($_SERVER as $name => $value)
+        {
+            if (substr($name, 0, 5) == 'HTTP_')
+            {
+                $this->headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+            }
+        }
     }
+
+
 
     /**
      * Gets uri from $_SERVER and uses that for uri.

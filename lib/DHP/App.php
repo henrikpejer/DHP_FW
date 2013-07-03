@@ -27,13 +27,15 @@ class App extends Module
         DI $dependencyInjector,
         Routing $routing,
         Request $request,
-        Response $response
+        Response $response,
+        Event $event
     ) {
         $this->configure          = new utility\Variables();
         $this->DependencyInjector = $dependencyInjector;
         $this->routing            = $routing;
         $this->request            = $request;
         $this->response           = $response;
+        $this->event              = $event;
     }
 
     # todo : inject the router the app is currently using....?

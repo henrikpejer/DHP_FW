@@ -23,4 +23,4 @@ echo sprintf(
 $t     = microtime(true) - DHP_BENCHMARK_START;
 $micro = sprintf("%06d", ($t - floor($t)) * 1000000);
 $d     = new DateTime(date('Y-m-d H:i:s.' . $micro, $t));
-echo sprintf("%0.5f seconds", $d->format('s.u'));
+echo sprintf("%0.5f seconds", $d->format('s.u'))."\n";
