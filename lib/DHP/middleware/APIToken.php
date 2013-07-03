@@ -19,9 +19,6 @@ class APIToken extends Middleware
     {
         $this->request = $request;
         $this->event = $event;
-        $this->event->register('APIToken.XAuthToken', function($user,$pass){
-            return 'This is the new token';
-        });
     }
 
     public function run()
@@ -39,7 +36,6 @@ class APIToken extends Middleware
                 }
                 break;
             case isset($headers['X-Auth-User']) && isset($headers['X-Auth-Password']):
-                # todo: send a auth request event and either continue or stop
                 $XAuthUserEventReturn = $this->event->trigger('APIToken.XAuthToken', $headers['X-Auth-User'],$headers['X-Auth-Password']);
                 switch(true){
                     case $XAuthUserEventReturn === FALSE:
@@ -47,7 +43,7 @@ class APIToken extends Middleware
                         throw new \RuntimeException("Not allowed");
                         break;
                     default:
-                        # todo : this will otherwise return the token, right?
+                        # todo : make it so that we convey a meaningful message stating what the new token is, right?
                         echo "Token is: ".$XAuthUserEventReturn;
                 }
                 break;
