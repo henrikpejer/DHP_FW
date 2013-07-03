@@ -15,22 +15,19 @@ class APIToken extends Middleware
 
     private $request, $event;
 
-    public function __construct(Request $request,Event $event)
+    public function __construct(Request $request, Event $event)
     {
         $this->request = $request;
         $this->event = $event;
-        $this->event->register('APIToken.XAuthToken', function($token){
-            return $token == 123?TRUE:FALSE;
-        });
     }
 
     public function run()
     {
         $headers = $this->request->getHeaders();
-        switch(true){
+        switch (true) {
             case isset($headers['X-Auth-Token']):
-                # todo: Send a auth-token event and either run a not allowed or continue
-                if ($this->event->trigger('APIToken.XAuthToken',$headers['X-Auth-Token']) == FALSE){
+                if ($this->event->trigger('APIToken.XAuthToken', $headers['X-Auth-Token']) === FALSE) {
+                    # todo : perhaps we should have response be the last catcher of exceptions... right?
                     throw new \RuntimeException("Not allowed");
                 }
                 break;
