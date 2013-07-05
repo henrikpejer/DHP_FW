@@ -16,11 +16,14 @@ $app->start(
     __DIR__ . DIRECTORY_SEPARATOR . 'app/config/app.php'
 );
 
-echo sprintf(
-    "%0.3f Mb",
-        ((memory_get_peak_usage() - DHP_BENCHMARK_MEMORY) / 1024) / 1024
-) . ' ';
 $t     = microtime(true) - DHP_BENCHMARK_START;
 $micro = sprintf("%06d", ($t - floor($t)) * 1000000);
 $d     = new DateTime(date('Y-m-d H:i:s.' . $micro, $t));
-echo sprintf("%0.5f seconds", $d->format('s.u'))."\n";
+$response = $di->get('DHP\Response');
+$response->addHeader('Generated-By','DHP FW');
+$response->AddHeader('RAM-Usage',sprintf(
+    "%0.3f Mb",
+    ((memory_get_peak_usage() - DHP_BENCHMARK_MEMORY) / 1024) / 1024
+) );
+$response->addHeader('Page Time',sprintf("%0.3f seconds", $d->format('s.u'))."\n");
+$response->send();

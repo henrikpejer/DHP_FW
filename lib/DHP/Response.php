@@ -1,9 +1,7 @@
 <?php
 declare(encoding = "UTF8");
 namespace DHP;
-
 use DHP\Request;
-
 
 /**
  * User: Henrik Pejer mr@henrikpejer.com
@@ -12,6 +10,8 @@ use DHP\Request;
 
 class Response
 {
+    private $headerStatus = array('statusCode' => '200',
+        'headerData' => NULL);
     private $headerStatusCodes = array(
         200 => 'OK',
         201 => 'Created',
@@ -24,9 +24,10 @@ class Response
         500 => 'Internal Server Error'
     );
 
-    private $headers = array('status' => array('200', NULL));
+    private $headers = array();
     private $body = NULL;
     private $request = NULL;
+    private $headersSent = FALSE;
 
     /**
      * Sets up the request
@@ -35,16 +36,19 @@ class Response
     public function __construct(Request $request)
     {
         $this->request = $request;
+        ob_start(array($this, 'outputBufferCollector'),1);
     }
 
-    /**
-     * This will send headers and data
-     */
-    public function __toString()
-    {
-        $this->sendHeaders();
-        $this->sendBody();
-        return '';
+    public function __destruct(){
+    }
+
+    public function outputBufferCollector($buffer, $phase){
+        try{
+            $this->appendContent($buffer);
+        }catch(\BadMethodCallException $e){
+
+        }
+        return true;
     }
 
     /**
@@ -53,20 +57,71 @@ class Response
      *
      * @param mixed $bodyData set the data to be sent via the request
      */
-    public function setBody($bodyData)
+    public function setContent($bodyData)
     {
         $this->body = $bodyData;
+    }
+
+    /**
+     * This will append data to the body of the response.
+     *
+     * Should only be used with strings
+     *
+     * @param String $dataToAppend since appending to already set content, we only support String values
+     * @throws \InvalidArgumentException
+     * @throws \BadMethodCallException
+     */
+    public function appendContent($dataToAppend)
+    {
+        # make sure we append with string values only
+        if (!is_string($dataToAppend)) {
+            throw new \InvalidArgumentException("When appending, append with string data");
+        }
+        if (isset($this->body) && !is_string($this->body)) {
+            throw new \BadMethodCallException("Cannot append string to content, the content is of type " . gettype($this->body));
+        }
+        $this->body .= $dataToAppend;
     }
 
     /**
      * A simply way of setting a status header
      *
      * @param $int
-     * @param null $headerData extra, string to use in conjuction with header, such as 201 location: xxxx
+     * @param array|null $headerData extra, header name and data to be used in conjuction with status header, 201-created for instance
      */
-    public function setStatus($int, $headerData = NULL)
+    public function setStatus($int, Array $headerData = NULL)
     {
-        $this->headers['status'] = array($int, $headerData);
+        #$this->headerStatus = array('statusCode' => $int, 'headerData' => $headerData);
+        $this->addHeader('status', sprintf('HTTP/1.1 %d %s', $int, $this->headerStatusCodes[$int]), $int);
+    }
+
+    /**
+     * Adds a header to be sent later on.
+     * The header name and value will be reformated with
+     *
+     * @param String $headerName name of the header
+     * @param String $headerValue Optional, value of header, if needed
+     * @param null $statusCode
+     * @internal param Int $statusValue a int value for status
+     */
+    public function addHeader($headerName, $headerValue = NULL, $statusCode = NULL)
+    {
+        $headerKeyName = $headerName;
+        switch ($headerName) {
+            case 'status':
+                $headerName = '';
+                break;
+        }
+        $this->headers[$headerKeyName] = array('value' => trim(sprintf("%s: %s", $this->formatHeaderName($headerName), $headerValue), ' :'), 'statusCode' => $statusCode);
+    }
+
+    /**
+     * This will send the headers and the data
+     */
+    public function send()
+    {
+        $this->sendHeaders();
+        $this->sendBody();
     }
 
     /**
@@ -76,11 +131,33 @@ class Response
      */
     private function sendHeaders()
     {
-        if (headers_sent() === TRUE) {
+        if (php_sapi_name() == 'cli' or PHP_SAPI == 'cli') {
+            return true;
+        }
+        if (headers_sent() === TRUE && $this->headersSent === FALSE) {
             throw new \RuntimeException("Headers already sent");
         }
-        # todo : walk through headers, send them of one after another
+        foreach ($this->headers as $headerType => $headerDataArray) {
+
+            if (isset($headerDataArray['statusCode'])) {
+                \header($headerDataArray['value'], true, $headerDataArray['statusCode']);
+            } else {
+                \header($headerDataArray['value'], true);
+            }
+        }
+        $this->headersSent = TRUE;
         return true;
+    }
+
+    /**
+     * Format header name and returns it
+     * @param $headerName
+     * @return mixed
+     */
+    private function formatHeaderName($headerName)
+    {
+
+        return str_replace(' ', '-', ucwords(strtolower(str_replace(array('-', '_'), ' ', $headerName))));
     }
 
     /**
@@ -88,10 +165,13 @@ class Response
      */
     private function sendBody()
     {
-        if (is_string($this->body)) {
-            echo $this->body;
-        } else {
-            echo json_encode($this->body,JSON_NUMERIC_CHECK | JSON_FORCE_OBJECT);
+        ob_end_clean();
+        if (isset($this->body)) {
+            if (is_string($this->body)) {
+                echo $this->body;
+            } else {
+                echo json_encode($this->body, JSON_NUMERIC_CHECK | JSON_FORCE_OBJECT);
+            }
         }
     }
 }

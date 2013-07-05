@@ -7,7 +7,10 @@ namespace DHP;
  * Objects can subscribe to events happening in the system and
  * functions will be called, with or without arguments.
  */
-const EVENT_ABORT = NULL;
+if (!defined('DHP\\EVENT_ABORT')){
+    define('DHP\\EVENT_ABORT',NULL);
+}
+
 class Event implements EventInterface
 {
 

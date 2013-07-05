@@ -80,6 +80,7 @@ class App extends Module
                 break;
             }
         }
+        $this->response->send();
     }
 
     /**
