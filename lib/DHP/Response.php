@@ -23,7 +23,6 @@ class Response
         409 => 'Conflict',
         500 => 'Internal Server Error'
     );
-
     private $headers = array();
     private $body = NULL;
     private $request = NULL;
@@ -36,19 +35,6 @@ class Response
     public function __construct(Request $request)
     {
         $this->request = $request;
-        ob_start(array($this, 'outputBufferCollector'),1);
-    }
-
-    public function __destruct(){
-    }
-
-    public function outputBufferCollector($buffer, $phase){
-        try{
-            $this->appendContent($buffer);
-        }catch(\BadMethodCallException $e){
-
-        }
-        return true;
     }
 
     /**
@@ -56,10 +42,12 @@ class Response
      * it will, later on, get json-serialized and sent as json.
      *
      * @param mixed $bodyData set the data to be sent via the request
+     * @return $this
      */
     public function setContent($bodyData)
     {
         $this->body = $bodyData;
+        return $this;
     }
 
     /**
@@ -68,6 +56,7 @@ class Response
      * Should only be used with strings
      *
      * @param String $dataToAppend since appending to already set content, we only support String values
+     * @return bool
      * @throws \InvalidArgumentException
      * @throws \BadMethodCallException
      */
@@ -81,18 +70,26 @@ class Response
             throw new \BadMethodCallException("Cannot append string to content, the content is of type " . gettype($this->body));
         }
         $this->body .= $dataToAppend;
+        return true;
     }
 
     /**
      * A simply way of setting a status header
      *
      * @param $int
-     * @param array|null $headerData extra, header name and data to be used in conjuction with status header, 201-created for instance
+     * @param $headerName
+     * @param $headerValue
+     * @return $this
      */
-    public function setStatus($int, Array $headerData = NULL)
+    public function setStatus($int, $headerName = NULL, $headerValue = NULL)
     {
-        #$this->headerStatus = array('statusCode' => $int, 'headerData' => $headerData);
-        $this->addHeader('status', sprintf('HTTP/1.1 %d %s', $int, $this->headerStatusCodes[$int]), $int);
+        if (isset($headerName)) {
+            $this->addHeader($headerName, $headerValue, $int);
+        } else {
+            $statusHeader = sprintf('HTTP/1.1 %d %s', $int, $this->headerStatusCodes[$int]);
+            $this->addHeader('status', $statusHeader, $int);
+        }
+        return $this;
     }
 
     /**
@@ -102,6 +99,7 @@ class Response
      * @param String $headerName name of the header
      * @param String $headerValue Optional, value of header, if needed
      * @param null $statusCode
+     * @return $this
      * @internal param Int $statusValue a int value for status
      */
     public function addHeader($headerName, $headerValue = NULL, $statusCode = NULL)
@@ -113,6 +111,17 @@ class Response
                 break;
         }
         $this->headers[$headerKeyName] = array('value' => trim(sprintf("%s: %s", $this->formatHeaderName($headerName), $headerValue), ' :'), 'statusCode' => $statusCode);
+        return $this;
+    }
+
+    /**
+     * Format header name and returns it
+     * @param $headerName
+     * @return mixed
+     */
+    private function formatHeaderName($headerName)
+    {
+        return str_replace(' ', '-', ucwords(strtolower(str_replace(array('-', '_'), ' ', $headerName))));
     }
 
     /**
@@ -134,6 +143,15 @@ class Response
         if (php_sapi_name() == 'cli' or PHP_SAPI == 'cli') {
             return true;
         }
+        /**
+         * I have yet to be able to test these with PHPUnit. I've tried different combinations of
+         * running in separate process, xdebug_get_headers even tried headers_list (which should not
+         * work in CLI-mode) and either I get errors or no headers at all.
+         *
+         * So I've given up but I will not add @codeCoverageIgnoreStart since I DO want these lines tested.
+         *
+         * When I feel I want to give this another stab, I'll try again.
+         */
         if (headers_sent() === TRUE && $this->headersSent === FALSE) {
             throw new \RuntimeException("Headers already sent");
         }
@@ -150,22 +168,10 @@ class Response
     }
 
     /**
-     * Format header name and returns it
-     * @param $headerName
-     * @return mixed
-     */
-    private function formatHeaderName($headerName)
-    {
-
-        return str_replace(' ', '-', ucwords(strtolower(str_replace(array('-', '_'), ' ', $headerName))));
-    }
-
-    /**
      * Here we format and send the body
      */
     private function sendBody()
     {
-        ob_end_clean();
         if (isset($this->body)) {
             if (is_string($this->body)) {
                 echo $this->body;

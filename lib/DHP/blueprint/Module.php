@@ -94,7 +94,7 @@ abstract class Module
      */
     public function uriNamespace($namespace)
     {
-        $this->uriPrefix = trim($namespace, '/ ');
+        $this->uriPrefix = trim($namespace, '/ ').'/';
         return $this;
     }
 
@@ -106,6 +106,6 @@ abstract class Module
      */
     private function genUri($uri)
     {
-        return $this->uriPrefix . '/' . trim($uri, '/ ');
+        return $this->uriPrefix . trim($uri, '/ ');
     }
 }

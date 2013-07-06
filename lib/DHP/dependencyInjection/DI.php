@@ -233,8 +233,10 @@ class DI
     public function alias($alias, $original)
     {
         if (!isset( $this->store->{$original} )) {
-            throw new \InvalidArgumentException( 'Original must already exist' );
+            #throw new \InvalidArgumentException( 'Original must already exist' );
+            $this->store->{$alias} = $this->set($original);
+        } else {
+            $this->store->{$alias} = & $this->store->{$original};
         }
-        $this->store->{$alias} = & $this->store->{$original};
     }
 }

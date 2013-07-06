@@ -74,13 +74,12 @@ class App extends Module
                 $routeCallable = array($controller, $route['closure']['method']);
             }
             $args = $route['route'];
-            array_push($args, $nextClosure);
+            array_push($args, $nextClosure,$this->DependencyInjector);
             call_user_func_array($routeCallable, $args);
             if ($this->stopRunningRoutes) {
                 break;
             }
         }
-        $this->response->send();
     }
 
     /**

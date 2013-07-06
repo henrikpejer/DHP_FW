@@ -10,6 +10,8 @@ $loader = new SplClassLoader('app', __DIR__);
 $loader->register();
 $di = new DHP\dependencyInjection\DI();
 $di->set('DHP\Request')->addMethodCall('setupWithEnvironment');
+$di->alias('Response','DHP\Response');
+$response = $di->get('Response');
 $app = $di->get('DHP\App');
 $app->start(
     __DIR__ . DIRECTORY_SEPARATOR . 'app/config/routes.php',
@@ -19,7 +21,7 @@ $app->start(
 $t     = microtime(true) - DHP_BENCHMARK_START;
 $micro = sprintf("%06d", ($t - floor($t)) * 1000000);
 $d     = new DateTime(date('Y-m-d H:i:s.' . $micro, $t));
-$response = $di->get('DHP\Response');
+
 $response->addHeader('Generated-By','DHP FW');
 $response->AddHeader('RAM-Usage',sprintf(
     "%0.3f Mb",
