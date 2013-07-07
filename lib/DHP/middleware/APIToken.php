@@ -23,7 +23,7 @@ class APIToken extends Middleware
 
     public function run()
     {
-        $headers = $this->request->getHeaders();
+        $headers = $this->request->headers;
         switch (true) {
             case isset($headers['X-Auth-Token']):
                 $XAuthTokenEventReturn = $this->event->trigger('APIToken.XAuthToken', $headers['X-Auth-Token']);

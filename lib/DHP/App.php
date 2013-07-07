@@ -29,13 +29,14 @@ class App extends Module
         Request $request,
         Response $response,
         Event $event
-    ) {
-        $this->configure          = new utility\Variables();
+    )
+    {
+        $this->configure = new utility\Variables();
         $this->DependencyInjector = $dependencyInjector;
-        $this->routing            = $routing;
-        $this->request            = $request;
-        $this->response           = $response;
-        $this->event              = $event;
+        $this->routing = $routing;
+        $this->request = $request;
+        $this->response = $response;
+        $this->event = $event;
     }
 
     # todo : inject the router the app is currently using....?
@@ -52,11 +53,11 @@ class App extends Module
             $this->loadAppConfig($appConfig);
         }
         $routes = $this->routing->match(
-            $this->request->getMethod(),
-            $this->request->getUri()
+            $this->request->method,
+            $this->request->uri
         );
 
-        $that        = $this;
+        $that = $this;
         $nextClosure = function () use ($that) {
             $that->stopRunningRoutes = false;
         };
@@ -66,15 +67,15 @@ class App extends Module
 
             $routeCallable = $route['closure'];
             if (is_array($route['closure']) &&
-                    isset($route['closure']['controller']) &&
-                    isset($route['closure']['method'])
+                isset($route['closure']['controller']) &&
+                isset($route['closure']['method'])
             ) {
                 $controller = $this->DependencyInjector->get($route['closure']['controller']);
 
                 $routeCallable = array($controller, $route['closure']['method']);
             }
             $args = $route['route'];
-            array_push($args, $nextClosure,$this->DependencyInjector);
+            array_push($args, $nextClosure, $this->DependencyInjector);
             call_user_func_array($routeCallable, $args);
             if ($this->stopRunningRoutes) {
                 break;

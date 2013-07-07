@@ -21,8 +21,8 @@ class BodyParser extends Middleware
 
     public function run()
     {
-        $bodyData     = $this->request->getBody();
-        $jsonDataTest = json_decode($bodyData);
+        $bodyData     = $this->request->body;
+        $jsonDataTest = json_decode($bodyData,true,512,JSON_BIGINT_AS_STRING);
         if (isset($jsonDataTest)) {
             $this->request->setBody($jsonDataTest);
         }

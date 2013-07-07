@@ -9,9 +9,18 @@ use DHP\utility\Util;
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-01 05:34
  */
+if (!defined('CLI')) {
+    if (php_sapi_name() == 'cli' or PHP_SAPI == 'cli') {
+        define('CLI', TRUE);
+    } else {
+        define('CLI', FALSE);
+    }
+    define('HTTP', !CLI);
+}
+
 class Request
 {
-    protected $method, $uri, $body, $post, $get, $files;
+    protected $method, $uri, $body, $post, $get, $files, $headers;
 
     /**
      * This sets up the Request object.
@@ -32,54 +41,34 @@ class Request
         $get = array(),
         $files = array(),
         $headers = array()
-    ) {
+    )
+    {
         $this->method = $method;
-        $this->uri    = $uri;
-        $this->body   = $body;
-        $this->post   = $post;
-        $this->get    = $get;
-        $this->files  = $files;
+        $this->uri = $uri;
+        #$this->body = isset($body)?$body:$this->getBodyContents();
+        $this->setBodyContents($body);
+        $this->post = $post;
+        $this->get = $get;
+        $this->files = $files;
         $this->headers = $headers;
     }
 
     /**
-     * Returns the http-method for the request
-     *
-     * @return String
+     * Reads php://input and uses that for body of request
      */
-    public function getMethod()
+    private function setBodyContents($bodyContent = NULL)
     {
-        return $this->method;
-    }
-
-    /**
-     * Returns the headers in the request
-     *
-     * @return array
-     */
-    public function getHeaders()
-    {
-        return $this->headers;
-    }
-
-    /**
-     * Returns the uri for the request
-     *
-     * @return String
-     */
-    public function getUri()
-    {
-        return $this->uri;
-    }
-
-    /**
-     * Returns body value
-     *
-     * @return null|String
-     */
-    public function getBody()
-    {
-        return $this->body;
+        if (!isset($bodyContent)) {
+            if (HTTP) {
+                $rawData = file_get_contents('php://input');
+            }
+            if (CLI) {
+                $rawData = Util::parseArgv('body');
+            }
+        } else {
+            $rawData = $bodyContent;
+        }
+        $this->body = $rawData;
     }
 
     /**
@@ -89,9 +78,9 @@ class Request
     {
         $this->useHttpRequestUri();
         $this->useHttpMethod();
-        $this->getBodyContents();
-        $this->post  = $_POST;
-        $this->get   = $_GET;
+        $this->setBodyContents();
+        $this->post = $_POST;
+        $this->get = $_GET;
         $this->files = $_FILES;
         $this->headers = array();
         foreach ($_SERVER as $name => $value) {
@@ -101,8 +90,6 @@ class Request
         }
     }
 
-
-
     /**
      * Gets uri from $_SERVER and uses that for uri.
      */
@@ -110,10 +97,10 @@ class Request
     {
         $uri = null;
         if (isset($_SERVER['REQUEST_URI'])) {
-            $uri       = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+            $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
             $this->uri = $uri;
         }
-        if (DHP_CLI) {
+        if (CLI) {
             $this->uri = Util::parseArgv('uri');
         }
         $this->uri = trim($this->uri, '/');
@@ -127,21 +114,8 @@ class Request
         if (isset($_SERVER['REQUEST_METHOD'])) {
             $this->method = $_SERVER['REQUEST_METHOD'];
         }
-        if (DHP_CLI) {
+        if (CLI) {
             $this->method = Util::parseArgv('method');
-        }
-    }
-
-    /**
-     * Reads php://input and uses that for body of request
-     */
-    private function getBodyContents()
-    {
-        if (DHP_HTTP) {
-            $this->body = file_get_contents('php://input');
-        }
-        if (DHP_CLI) {
-            $this->body = Util::parseArgv('body');
         }
     }
 
@@ -152,6 +126,32 @@ class Request
      */
     public function setBody($body)
     {
-        $this->body = $body;
+        $this->setBodyContents($body);
+    }
+
+    public function __get($name)
+    {
+        switch (strtolower($name)) {
+            case 'get':
+                return $this->get;
+                break;
+            case 'post':
+                return $this->post;
+                break;
+            case 'files':
+                return $this->files;
+                break;
+            case 'headers':
+                return $this->headers;
+                break;
+            case 'uri':
+                return $this->uri;
+                break;
+            case 'body':
+                return $this->body;
+                break;
+            case 'method':
+                return $this->method;
+        }
     }
 }

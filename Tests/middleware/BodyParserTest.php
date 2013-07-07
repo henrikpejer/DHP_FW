@@ -17,6 +17,6 @@ class BodyParserTest extends PHPUnit_Framework_TestCase
     public function testJsonData()
     {
         $this->object->run();
-        $this->assertEquals((object)array('name' => "Henrik", 'test' => true), $this->request->getBody());
+        $this->assertEquals(array('name' => "Henrik", 'test' => true), $this->request->body);
     }
 }

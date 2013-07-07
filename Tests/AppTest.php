@@ -16,7 +16,7 @@ class AppTest extends PHPUnit_Framework_TestCase
                 '/blog/title/title-of-blog-post'
             )
         );
-        $this->DI     = $DI;
+        $this->DI = $DI;
         $this->object = $DI->get('DHP\App');
     }
 
@@ -59,5 +59,35 @@ public function title($title){
         $app->start();
     }
 
+    public function testApply()
+    {
+        $this->DI->get('DHP\Request')->setBody('{"Henrik":"Pejer"}');
+        $this->object->apply('DHP\middleware\BodyParser');
+        $this->assertEquals(array('Henrik' => 'Pejer'), $this->DI->get('DHP\Request')->body);
+    }
 
+    public function testAppWithConfigAndRoutes()
+    {
+        # write config file to disk
+        $this->expectOutputString("DONE");
+        $fh = fopen(__DIR__.'/AppTestRoutes.txt','w+');
+        fwrite($fh,'<?php return array(
+                array(
+                    array(\'GET\'),
+                    \'blog/title/:title*\',
+                    function ($title, callable $next, $di) {
+                        $di->get(\'DHP\Response\')->appendContent("DONE");
+                        $next();
+                    }
+                )
+            );');
+        fclose($fh);
+        $fh = fopen(__DIR__.'/AppTestConfig.txt','w+');
+        fwrite($fh,'<?php return array(\'controllers\'=>array(array(\'\DHP\blueprint\Controller\',\'blog\')),\'middleware\'=>array(array(array(\'\DHP\middleware\BodyParser\'))));');
+        fclose($fh);
+        $this->object->start(__DIR__.'/AppTestRoutes.txt',__DIR__.'/AppTestConfig.txt');
+        $this->DI->get('DHP\Response')->send();
+        unlink(__DIR__.'/AppTestRoutes.txt');
+        unlink(__DIR__.'/AppTestConfig.txt');
+    }
 }

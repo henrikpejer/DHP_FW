@@ -7,16 +7,16 @@ namespace DHP;
  * Objects can subscribe to events happening in the system and
  * functions will be called, with or without arguments.
  */
-if (!defined('DHP\\EVENT_ABORT')){
-    define('DHP\\EVENT_ABORT',NULL);
+if (!defined('DHP\\EVENT_ABORT')) {
+    define('DHP\\EVENT_ABORT', NULL);
 }
 
 class Event implements EventInterface
 {
 
+    public $delegates = array();
     protected $events = array('*' => array(),
         '__controller__' => array());
-    public $delegates = array();
 
     /**
      * This triggers an event. All registered events are looped through in the order
@@ -79,110 +79,6 @@ class Event implements EventInterface
                 break;
         }
         return $__return__;
-    }
-
-    /**
-     * This is used to register a callable with a certain event.
-     *
-     * @param String $eventName
-     * @param Callable $callable
-     * @return mixed
-     */
-    public function register($eventName, callable $callable)
-    {
-        if (!isset($this->events[$eventName])) {
-            $this->events[$eventName] = array();
-        }
-        $this->events[$eventName][] = $callable;
-        return TRUE;
-    }
-
-    /**
-     * This is used when there are events that should not be publicly called but only
-     * called on a observer, sort of.
-     *
-     * This way an object can tell it's observer when a certain event happened and
-     * delegate some of its functionality to the observer.
-     *
-     * @param mixed $objectToSubscribeTo object to subscribe to
-     * @param mixed $subscriber observer
-     * @return mixed
-     */
-    public function subscribe($objectToSubscribeTo, &$subscriber)
-    {
-        $objectToSubscribeTo = spl_object_hash($objectToSubscribeTo);
-        if (!isset($this->delegates[$objectToSubscribeTo])) {
-            $this->delegates[$objectToSubscribeTo] = array();
-        }
-        $this->delegates[$objectToSubscribeTo][spl_object_hash($subscriber)] =
-                                                                       & $subscriber;
-    }
-
-    /**
-     * This will call $method on all the observers to the delegate, usually an object
-     * calls this with $this :
-     *
-     * triggerSubscriber($this, 'observerNeedsToReactToThis')
-     *
-     * @param Object $delegate
-     * @param String $method
-     * @param null $one
-     * @param null $two
-     * @param null $three
-     * @param null $four
-     * @return mixed
-     */
-    public function triggerSubscribe($delegate,
-                                     $method,
-                                     &$one = NULL,
-                                     &$two = NULL,
-                                     &$three = NULL,
-                                     &$four = NULL)
-    {
-        $__objectHash__ = spl_object_hash($delegate);
-        $return = NULL;
-        if (isset($this->delegates[$__objectHash__])) {
-            foreach ($this->delegates[$__objectHash__] as $target) {
-                $return = $target->$method($one, $two, $three, $four);
-                if ($return === FALSE) {
-                    break;
-                }
-            }
-        }
-        return $return;
-    }
-
-    /**
-     * This function will get events that match the current
-     * event as well as events with wildcard, *.
-     *
-     *
-     *
-     * @param $eventName : name of event to be called
-     * @return array
-     */
-    private function mergeEventToCall($eventName)
-    {
-        $eventKeys = array($eventName);
-        if (strpos($eventName, '.')) {
-            $eventParts = explode('.', $eventName);
-            $eventBase = '';
-            foreach ($eventParts as $part) {
-                $eventBase .= $part;
-                $eventKeys[] = $eventBase . '*';
-                $eventKeys[] = $eventBase . '.*';
-            }
-        }
-        $eventKeys[] = '*';
-        $eventKeys[] = '__controller__';
-        $eventsToReturn = array();
-        foreach ($eventKeys as $event) {
-            if (isset($this->events[$event])) {
-                $eventsToReturn =
-                    array_merge($eventsToReturn, $this->events[$event]);
-            }
-        }
-        return $eventsToReturn;
     }
 
     /**
@@ -302,6 +198,109 @@ class Event implements EventInterface
                 break;
             }
             $return = $__return__;
+        }
+        return $return;
+    }
+
+    /**
+     * This function will get events that match the current
+     * event as well as events with wildcard, *.
+     *
+     *
+     *
+     * @param $eventName : name of event to be called
+     * @return array
+     */
+    private function mergeEventToCall($eventName)
+    {
+        $eventKeys = array($eventName);
+        if (strpos($eventName, '.')) {
+            $eventParts = explode('.', $eventName);
+            $eventBase = '';
+            foreach ($eventParts as $part) {
+                $eventBase .= $part;
+                $eventKeys[] = $eventBase . '*';
+                $eventKeys[] = $eventBase . '.*';
+            }
+        }
+        $eventKeys[] = '*';
+        $eventKeys[] = '__controller__';
+        $eventsToReturn = array();
+        foreach ($eventKeys as $event) {
+            if (isset($this->events[$event])) {
+                $eventsToReturn =
+                    array_merge($eventsToReturn, $this->events[$event]);
+            }
+        }
+        return $eventsToReturn;
+    }
+
+    /**
+     * This is used to register a callable with a certain event.
+     *
+     * @param String $eventName
+     * @param Callable $callable
+     * @return mixed
+     */
+    public function register($eventName, callable $callable)
+    {
+        if (!isset($this->events[$eventName])) {
+            $this->events[$eventName] = array();
+        }
+        $this->events[$eventName][] = $callable;
+        return TRUE;
+    }
+
+    /**
+     * This is used when there are events that should not be publicly called but only
+     * called on a observer, sort of.
+     *
+     * This way an object can tell it's observer when a certain event happened and
+     * delegate some of its functionality to the observer.
+     *
+     * @param mixed $objectToSubscribeTo object to subscribe to
+     * @param mixed $subscriber observer
+     * @return mixed
+     */
+    public function subscribe($objectToSubscribeTo, &$subscriber)
+    {
+        $objectToSubscribeTo = spl_object_hash($objectToSubscribeTo);
+        if (!isset($this->delegates[$objectToSubscribeTo])) {
+            $this->delegates[$objectToSubscribeTo] = array();
+        }
+        $this->delegates[$objectToSubscribeTo][spl_object_hash($subscriber)] = & $subscriber;
+    }
+
+    /**
+     * This will call $method on all the observers to the delegate, usually an object
+     * calls this with $this :
+     *
+     * triggerSubscriber($this, 'observerNeedsToReactToThis')
+     *
+     * @param Object $delegate
+     * @param String $method
+     * @param null $one
+     * @param null $two
+     * @param null $three
+     * @param null $four
+     * @return mixed
+     */
+    public function triggerSubscribe($delegate,
+                                     $method,
+                                     &$one = NULL,
+                                     &$two = NULL,
+                                     &$three = NULL,
+                                     &$four = NULL)
+    {
+        $__objectHash__ = spl_object_hash($delegate);
+        $return = NULL;
+        if (isset($this->delegates[$__objectHash__])) {
+            foreach ($this->delegates[$__objectHash__] as $target) {
+                $return = $target->$method($one, $two, $three, $four);
+                if ($return === FALSE) {
+                    break;
+                }
+            }
         }
         return $return;
     }
