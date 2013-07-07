@@ -85,6 +85,8 @@ class Util
                         } else {
                             $parsedValues[substr($value, 2)] = true;
                         }
+                    } else {
+                        $parsedValues[$value] = true;
                     }
                 }
             }

@@ -72,12 +72,10 @@ class Uuid extends Component
             } else {
                 $ip = gethostbyname(gethostbyaddr($_SERVER['REMOTE_ADDR']));
             }
-
             $part = explode('.', $ip);
         }
-        $part = explode('[^0-9]+', $ip);
-        for ($i = 0; $i <= count($part) - 1; $i++) {
-            $hex .= substr("0" . dechex($part[$i]), -2);
+        foreach($part as $ipPart){
+            $hex .= substr("0" . dechex($ipPart), -2);
         }
         return $hex;
     }
@@ -89,7 +87,7 @@ class Uuid extends Component
 
     public function __invoke()
     {
-        return __toString();
+        return $this->__toString();
     }
 
     /**
@@ -106,12 +104,12 @@ class Uuid extends Component
      *
      * @return array
      */
-    private function decode()
+    public function decode()
     {
         $uuid = $this->uuId;
         $rez  = Array();
         $u    = explode("-", $uuid);
-        if (is_array($u) == YES && count($u) == 5) {
+        if (is_array($u) == TRUE && count($u) == 5) {
             $rez = Array(
                 'serverID' => $u[0],
                 'ip'       => $this->clientIPFromHex($u[1]),

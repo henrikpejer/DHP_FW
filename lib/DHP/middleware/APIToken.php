@@ -46,7 +46,6 @@ class APIToken extends Middleware
                         # todo : make it so that we convey a meaningful message stating what the new token is, right?
                         #echo "Token is: ".$XAuthUserEventReturn;
                 }
-                break;
         }
     }
 }
