@@ -1,0 +1,26 @@
+<?php return array(
+                array(
+                    array('GET'),
+                    'something/:title',
+                    function(callable $next){
+                        throw new \Exception("Should not be called");
+                        next();
+                    }
+                ),
+                array(
+                    array('GET'),
+                    'blog/:something/title',
+                    function(callable $next){
+                        throw new \Exception("Should not be called");
+                        next();
+                    }
+                ),
+                array(
+                    array('GET'),
+                    'blog/title/:title*',
+                    function ($title, callable $next, $di) {
+                        $di->get('DHP\Response')->appendContent("DONE");
+                        $next();
+                    }
+                )
+            );

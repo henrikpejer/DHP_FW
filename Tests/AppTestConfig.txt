@@ -1,0 +1,1 @@
+<?php return array('controllers'=>array(array('\DHP\blueprint\Controller','blog')),'middleware'=>array(array(array('\DHP\middleware\BodyParser'))));

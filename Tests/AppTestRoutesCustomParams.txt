@@ -1,0 +1,10 @@
+<?php return array(
+                array(
+                    array('GET'),
+                    'blog/title/:blogTitle',
+                    function ($title, callable $next, $di) {
+                        $di->get('DHP\Response')->appendContent("DONE");
+                        $next();
+                    }
+                )
+            );

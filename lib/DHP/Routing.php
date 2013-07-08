@@ -10,20 +10,20 @@ use DHP\utility\Util;
  */
 class Routing
 {
-    const HTTP_METHOD_GET    = 'GET';
-    const HTTP_METHOD_POST   = 'POST';
+    const HTTP_METHOD_GET = 'GET';
+    const HTTP_METHOD_POST = 'POST';
     const HTTP_METHOD_DELETE = 'DELETE';
-    const HTTP_METHOD_PUT    = 'PUT';
-    const HTTP_METHOD_HEAD   = 'HEAD';
-    const HTTP_METHOD_ANY    = 'ANY';
-    const ROUTE_CONTINUE     = 'YES';
+    const HTTP_METHOD_PUT = 'PUT';
+    const HTTP_METHOD_HEAD = 'HEAD';
+    const HTTP_METHOD_ANY = 'ANY';
+    const ROUTE_CONTINUE = 'YES';
     private $routes = array(
-        self::HTTP_METHOD_GET    => array(),
-        self::HTTP_METHOD_POST   => array(),
+        self::HTTP_METHOD_GET => array(),
+        self::HTTP_METHOD_POST => array(),
         self::HTTP_METHOD_DELETE => array(),
-        self::HTTP_METHOD_PUT    => array(),
-        self::HTTP_METHOD_HEAD   => array(),
-        self::HTTP_METHOD_ANY    => array()
+        self::HTTP_METHOD_PUT => array(),
+        self::HTTP_METHOD_HEAD => array(),
+        self::HTTP_METHOD_ANY => array()
     );
     private $allowedMethods = array(
         self::HTTP_METHOD_GET,
@@ -33,6 +33,7 @@ class Routing
         self::HTTP_METHOD_HEAD,
         self::HTTP_METHOD_ANY
     );
+    private $customParamTypes = array();
 
     /**
      * returns routes matching the uri and the method
@@ -53,16 +54,16 @@ class Routing
             $routesToProcess = $this->routes[self::HTTP_METHOD_ANY];
         }
 
-        $uriToMatch    = trim($uri, '/');
+        $uriToMatch = trim($uri, '/');
         $routesMatched = array();
         foreach ($routesToProcess as $routeUri => $closure) {
             if (false !==
-                    ($routeMatchReturn =
-                            $this->matchUriToRoute($uriToMatch, $routeUri))
+                ($routeMatchReturn =
+                    $this->matchUriToRoute($uriToMatch, $routeUri))
             ) {
                 $routesMatched[] = array(
                     'closure' => $closure,
-                    'route'   => $routeMatchReturn
+                    'route' => $routeMatchReturn
                 );
             }
         }
@@ -108,7 +109,7 @@ class Routing
     {
         # get parts of uri & routeUri, that is, split by /
         $routeUriParts = explode('/', trim($routeUri, '/'));
-        $uriParts      = explode('/', trim($uri, '/'));
+        $uriParts = explode('/', trim($uri, '/'));
         if (count($uriParts) != count($routeUriParts)) {
             return false;
         }
@@ -119,7 +120,7 @@ class Routing
                     return false;
                 }
                 $realValue = $this->cleanUriPartForParam($uriParts[$index]);
-                $return[]  = $this->checkParameterType($part, $realValue);
+                $return[] = $this->checkParameterType($part, $realValue);
             }
         }
         return $return;
@@ -155,15 +156,20 @@ class Routing
     private function checkParameterType($parameterType, $paramValue)
     {
         $parameterType = str_replace(':', '', $parameterType);
-        $return        = $paramValue;
+        $return = $paramValue;
         if (isset($this->customParamTypes[$parameterType])) {
             $return =
-                    call_user_func_array(
-                        $this->customParamTypes[$parameterType],
-                        array($paramValue)
-                    );
+                call_user_func_array(
+                    $this->customParamTypes[$parameterType],
+                    array($paramValue)
+                );
         }
         return $return;
+    }
+
+    public function addCustomParameter($parameter, callable $closure)
+    {
+        $this->customParamTypes[$parameter] = $closure;
     }
 
     /**
@@ -175,14 +181,14 @@ class Routing
         $controller = new \ReflectionClass($controllerClass);
         foreach ($controller->getMethods(\ReflectionMethod::IS_PUBLIC) as $controllerMethod) {
             $controllerMethodName = $controllerMethod->getName();
-            $methodDocComments    = Util::methodDocComments($controllerMethod);
+            $methodDocComments = Util::methodDocComments($controllerMethod);
             if (isset($methodDocComments['method']) && isset($methodDocComments['uri'])) {
                 $routeCall = array(
                     'controller' => $controllerClass,
-                    'method'     => $controllerMethodName
+                    'method' => $controllerMethodName
                 );
-                $method    = explode(',', $methodDocComments['method']);
-                $uri       = $methodDocComments['uri'];
+                $method = explode(',', $methodDocComments['method']);
+                $uri = $methodDocComments['uri'];
                 if (isset($uriNamespace)) {
                     $uri = trim($uriNamespace, '/') . '/' . trim($uri, '/');
                 }
@@ -198,13 +204,13 @@ class Routing
      * available methods
      *
      * @param String|array $httpMethods one or more methods this route is used for
-     * @param String       $uri the uri for the route
-     * @param mixed        $routeCall is either a callable or an array of controller, method
+     * @param String $uri the uri for the route
+     * @param mixed $routeCall is either a callable or an array of controller, method
      */
     public function registerRoute($httpMethods, $uri, $routeCall)
     {
         $httpMethods =
-                is_array($httpMethods) ? $httpMethods : array($httpMethods);
+            is_array($httpMethods) ? $httpMethods : array($httpMethods);
         $httpMethods = array_intersect($this->allowedMethods, $httpMethods);
         foreach ($httpMethods as $method) {
             if (in_array($method, $httpMethods)) {
@@ -221,8 +227,8 @@ class Routing
     public function loadRoutes($routesFile)
     {
         $routes = require_once($routesFile);
-        foreach($routes as $route){
-            $this->registerRoute($route[0], $route[1],$route[2]);
+        foreach ($routes as $route) {
+            $this->registerRoute($route[0], $route[1], $route[2]);
         }
     }
 

@@ -73,24 +73,37 @@ public function title($title){
     {
         # write config file to disk
         $this->expectOutputString("DONE");
-        $fh = fopen(__DIR__.'/AppTestRoutes.txt','w+');
-        fwrite($fh,'<?php return array(
-                array(
-                    array(\'GET\'),
-                    \'blog/title/:title*\',
-                    function ($title, callable $next, $di) {
-                        $di->get(\'DHP\Response\')->appendContent("DONE");
-                        $next();
-                    }
-                )
-            );');
-        fclose($fh);
-        $fh = fopen(__DIR__.'/AppTestConfig.txt','w+');
-        fwrite($fh,'<?php return array(\'controllers\'=>array(array(\'\DHP\blueprint\Controller\',\'blog\')),\'middleware\'=>array(array(array(\'\DHP\middleware\BodyParser\'))));');
-        fclose($fh);
-        $this->object->start(__DIR__.'/AppTestRoutes.txt',__DIR__.'/AppTestConfig.txt');
+        $this->object->start(__DIR__ . '/AppTestRoutes.txt', __DIR__ . '/AppTestConfig.txt');
         $this->DI->get('DHP\Response')->send();
-        unlink(__DIR__.'/AppTestRoutes.txt');
-        unlink(__DIR__.'/AppTestConfig.txt');
+    }
+
+    /**
+     */
+    public function testAppWithCustomParamType()
+    {
+        # write config file to disk
+        $global = null;
+        $this->DI->get('DHP\Routing')->addCustomParameter('blogTitle',function($title)use(&$global){
+            $global = $title;
+            return true;
+        });
+        $this->object->start(__DIR__ . '/AppTestRoutesCustomParams.txt', __DIR__ . '/AppTestConfig.txt');
+        $this->assertEquals('title of blog post',$global);
+        $routeMatch = array(
+            'GET' => array(
+                'blog/title/:blogTitle' =>
+                function ($title, callable $next, $di) {
+                    $di->get('DHP\Response')->appendContent("DONE");
+                    $next();
+                }
+            ),
+            'POST' => array(),
+            'DELETE' => array(),
+            'PUT' => array(),
+            'HEAD' => array(),
+            'ANY' => array()
+        );
+        $this->assertEquals($routeMatch,$this->DI->get('DHP\Routing')->getRoutes());
+
     }
 }
