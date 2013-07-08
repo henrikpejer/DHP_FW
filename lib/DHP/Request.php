@@ -131,27 +131,31 @@ class Request
 
     public function __get($name)
     {
+        $return = null;
         switch (strtolower($name)) {
             case 'get':
-                return $this->get;
+                $return = $this->get;
                 break;
             case 'post':
-                return $this->post;
+                $return = $this->post;
                 break;
             case 'files':
-                return $this->files;
+                $return = $this->files;
                 break;
             case 'headers':
-                return $this->headers;
+                $return = $this->headers;
                 break;
             case 'uri':
-                return $this->uri;
+                $return = $this->uri;
                 break;
             case 'body':
-                return $this->body;
+                $return = $this->body;
                 break;
             case 'method':
-                return $this->method;
+                $return = $this->method;
+                break;
         }
+        return $return;
     }
+
 }
