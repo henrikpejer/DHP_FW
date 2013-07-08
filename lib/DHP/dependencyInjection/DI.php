@@ -118,14 +118,13 @@ class DI
             switch (true) {
                 case ( $temp->isSubclassOf('DHP\blueprint\Component') ):
                     return $this->instantiateObject($frameworkClass);
-                    break;
             }
             unset( $temp );
             $this->set($name, $frameworkClass);
         }
         $objectToGet = $this->store->{$name};
         switch (true) {
-            case ( is_a($objectToGet, '\\DHP\\dependencyInjection\\DIProxy') ):
+            case ( is_a($objectToGet, '\DHP\dependencyInjection\DiProxy') ):
                 $initProcess = $objectToGet->get();
                 $instance    = $this->instantiateObject(
                     $initProcess['class'],

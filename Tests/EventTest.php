@@ -87,14 +87,13 @@ class EventTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(null,$obs->value);
         eval('class sub{
             public function observerCalls($val){
-                return $val." the end";
+                return false;
             }
         }');
         $sub = new \sub;
         $this->object->subscribe($obs,$sub);
         $obs->run();
-        $this->assertEquals('new value the end',$obs->value);
-
+        $this->assertFalse($obs->value);
     }
 
 }
