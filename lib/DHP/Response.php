@@ -141,7 +141,7 @@ class Response
     private function sendHeaders()
     {
         if (php_sapi_name() == 'cli' or PHP_SAPI == 'cli') {
-            return true;
+            #return true;
         }
         /**
          * I have yet to be able to test these with PHPUnit. I've tried different combinations of

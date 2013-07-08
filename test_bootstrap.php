@@ -1,5 +1,4 @@
 <?php
-# require_once 'bootstrap.php';
 // lets automagicly try to include all lib/DHP files, ok?
 $autoIncludeRecursive = function ($root) {
     if (file_exists($root) && is_file($root)){

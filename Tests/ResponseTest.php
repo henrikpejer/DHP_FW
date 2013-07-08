@@ -6,12 +6,6 @@ class ResponseTest extends PHPUnit_Framework_TestCase
 {
     private $object;
 
-    protected function setUp()
-    {
-        $request = new \DHP\Request();
-        $this->object = new \DHP\Response($request);
-    }
-
     /**
      * @runInSeparateProcess
      */
@@ -51,7 +45,6 @@ class ResponseTest extends PHPUnit_Framework_TestCase
         $this->object->appendContent('else');
     }
 
-
     /**
      * @runInSeparateProcess
      */
@@ -86,9 +79,24 @@ class ResponseTest extends PHPUnit_Framework_TestCase
             'Location' => array('value' => 'Location: /blog/title', 'statusCode' => 201),
             'content-type' => array('value' => 'Content-Type: text/html', 'statusCode' => null)
         );
-        $this->object->setStatus(201,'Location','/blog/title');
+        $this->object->setStatus(201, 'Location', '/blog/title');
         $this->object->addHeader("content-type", "text/html");
         $this->object->send();
         $this->assertAttributeEquals($headerTestAgainst, 'headers', $this->object);
+
+    }
+
+    /**
+     * @expectedException \RuntimeException
+     */
+    public function testSendingHeadersWhenHeadersAlreadySent()
+    {
+        $this->object->send();
+    }
+
+    protected function setUp()
+    {
+        $request = new \DHP\Request();
+        $this->object = new \DHP\Response($request);
     }
 }

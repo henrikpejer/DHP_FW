@@ -66,6 +66,9 @@ public function title($title){
         $this->assertEquals(array('Henrik' => 'Pejer'), $this->DI->get('DHP\Request')->body);
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testAppWithConfigAndRoutes()
     {
         # write config file to disk
