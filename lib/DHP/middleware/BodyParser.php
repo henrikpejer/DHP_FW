@@ -14,6 +14,12 @@ class BodyParser extends Middleware
 
     private $request = NULL;
 
+    /**
+     * Set up the body parser, injects the request object since we rely on it
+     * to get and set the body of the request.
+     *
+     * @param Request $request
+     */
     public function __construct(Request $request)
     {
         $this->request = $request;

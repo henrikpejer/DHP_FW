@@ -163,7 +163,6 @@ class Response
             if (is_string($this->body)) {
                 echo $this->body;
             } else {
-                # lets... wrap this in somekind of object, no?
                 $return = (object)array(
                     'payload'  => $this->body,
                     'status'   => $this->getStatus(TRUE),
