@@ -18,16 +18,16 @@ class APIToken extends Middleware
     public function __construct(Request $request, Event $event)
     {
         $this->request = $request;
-        $this->event = $event;
+        $this->event   = $event;
     }
 
     public function run()
     {
         $headers = $this->request->headers;
-        switch (true) {
+        switch (TRUE) {
             case isset($headers['X-Auth-Token']):
                 $XAuthTokenEventReturn = $this->event->trigger('APIToken.XAuthToken', $headers['X-Auth-Token']);
-                switch (true) {
+                switch (TRUE) {
                     case $XAuthTokenEventReturn === FALSE:
                         throw new \RuntimeException("Not allowed");
                         break;
@@ -36,8 +36,8 @@ class APIToken extends Middleware
                 }
                 break;
             case isset($headers['X-Auth-User']) && isset($headers['X-Auth-Password']):
-                $XAuthUserEventReturn = $this->event->trigger('APIToken.XAuthToken', $headers['X-Auth-User'],$headers['X-Auth-Password']);
-                switch(true){
+                $XAuthUserEventReturn = $this->event->trigger('APIToken.XAuthToken', $headers['X-Auth-User'], $headers['X-Auth-Password']);
+                switch (TRUE) {
                     case $XAuthUserEventReturn === FALSE:
                     case $XAuthUserEventReturn === NULL:
                         throw new \RuntimeException("Not allowed");

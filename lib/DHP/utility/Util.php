@@ -19,7 +19,7 @@ class Util
     {
         $args = array();
         try {
-            $refClass = new \ReflectionClass($class);
+            $refClass    = new \ReflectionClass($class);
             $constructor = $refClass->getConstructor();
             if ($constructor) {
                 $params = $constructor->getParameters();
@@ -27,17 +27,17 @@ class Util
                     foreach ($params as $param) {
                         $arg =
                             array(
-                                'name' => $param->getName(),
-                                'required' => true,
-                                'class' => null
+                                'name'     => $param->getName(),
+                                'required' => TRUE,
+                                'class'    => NULL
                             );
                         if ($param->getClass()) {
                             $arg['class'] =
                                 $param->getClass()->getName();
                         }
                         if ($param->isOptional()) {
-                            $arg['required'] = false;
-                            $arg['default'] =
+                            $arg['required'] = FALSE;
+                            $arg['default']  =
                                 $param->getDefaultValue();
                         }
                         $args[] = $arg;
@@ -55,7 +55,7 @@ class Util
         $__comments__ = array();
         # get the docs
         $__comment__ = $reflectionMethod->getDocComment();
-        if (false !== $__comment__) {
+        if (FALSE !== $__comment__) {
             $lines = explode("\n", $__comment__);
             foreach ($lines as $line) {
                 $line = trim($line, ' *');
@@ -73,21 +73,21 @@ class Util
         if (isset($_SERVER['argv'])) {
             $ln = count($_SERVER['argv']);
             for ($i = 0; $i < $ln; $i++) {
-                $value = $_SERVER['argv'][$i];
+                $value     = $_SERVER['argv'][$i];
                 $nextValue = isset($_SERVER['argv'][($i + 1)]) ?
-                    $_SERVER['argv'][($i + 1)] : null;
+                    $_SERVER['argv'][($i + 1)] : NULL;
                 if (substr($value, 0, 2) === '--') {
                     if (substr($nextValue, 0, 2) !== '--') {
                         $parsedValues[substr($value, 2)] = $nextValue;
                         ++$i;
                     } else {
-                        $parsedValues[substr($value, 2)] = true;
+                        $parsedValues[substr($value, 2)] = TRUE;
                     }
                 } else {
-                    $parsedValues[$value] = true;
+                    $parsedValues[$value] = TRUE;
                 }
             }
         }
-        return isset($parsedValues[$name]) ? $parsedValues[$name] : null;
+        return isset($parsedValues[$name]) ? $parsedValues[$name] : NULL;
     }
 }

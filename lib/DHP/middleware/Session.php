@@ -11,7 +11,7 @@ namespace DHP\middleware;
 class Session
 {
 
-    private $id, $sessionData, $flashData = null;
+    private $id, $sessionData, $flashData = NULL;
 
     public function __construct()
     {

@@ -12,12 +12,12 @@ use DHP\dependencyInjection\DI;
 class App extends Module
 {
 
-    protected $DependencyInjector = null;
-    protected $routing = null;
-    protected $request = null;
-    protected $response = null;
-    protected $routeNamespace = null;
-    protected $stopRunningRoutes = true;
+    protected $DependencyInjector = NULL;
+    protected $routing = NULL;
+    protected $request = NULL;
+    protected $response = NULL;
+    protected $routeNamespace = NULL;
+    protected $stopRunningRoutes = TRUE;
     protected $middlewares = array();
 
     /**
@@ -31,12 +31,12 @@ class App extends Module
         Event $event
     )
     {
-        $this->configure = new utility\Variables();
+        $this->configure          = new utility\Variables();
         $this->DependencyInjector = $dependencyInjector;
-        $this->routing = $routing;
-        $this->request = $request;
-        $this->response = $response;
-        $this->event = $event;
+        $this->routing            = $routing;
+        $this->request            = $request;
+        $this->response           = $response;
+        $this->event              = $event;
     }
 
     # todo : inject the router the app is currently using....?
@@ -44,7 +44,7 @@ class App extends Module
     /**
      * Starts the app, find matching routes and invokes them
      */
-    public function start($routesFile = null, $appConfig = null)
+    public function start($routesFile = NULL, $appConfig = NULL)
     {
         if (isset($routesFile)) {
             $this->loadRoutes($routesFile);
@@ -57,13 +57,13 @@ class App extends Module
             $this->request->uri
         );
 
-        $that = $this;
+        $that        = $this;
         $nextClosure = function () use ($that) {
-            $that->stopRunningRoutes = false;
+            $that->stopRunningRoutes = FALSE;
         };
 
         foreach ($routes as $route) {
-            $this->stopRunningRoutes = true;
+            $this->stopRunningRoutes = TRUE;
 
             $routeCallable = $route['closure'];
             if (is_array($route['closure']) &&
@@ -99,7 +99,7 @@ class App extends Module
         /** @noinspection PhpIncludeInspection */
         $configs = require_once $appConfigFile;
         foreach ($configs['controllers'] as $controller) {
-            $controller[1] = isset($controller[1]) ? $controller[1] : null;
+            $controller[1] = isset($controller[1]) ? $controller[1] : NULL;
             $this->addController($controller[0], $controller[1]);
         }
         foreach ($configs['middleware'] as $middleware) {
@@ -113,7 +113,7 @@ class App extends Module
      * @param String $controller
      * @param String $uriNamespace a namespace for the controller
      */
-    public function addController($controller, $uriNamespace = null)
+    public function addController($controller, $uriNamespace = NULL)
     {
         $this->routing->makeRoutesForClass($controller, $uriNamespace);
     }

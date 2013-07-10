@@ -10,20 +10,20 @@ use DHP\utility\Util;
  */
 class Routing
 {
-    const HTTP_METHOD_GET = 'GET';
-    const HTTP_METHOD_POST = 'POST';
+    const HTTP_METHOD_GET    = 'GET';
+    const HTTP_METHOD_POST   = 'POST';
     const HTTP_METHOD_DELETE = 'DELETE';
-    const HTTP_METHOD_PUT = 'PUT';
-    const HTTP_METHOD_HEAD = 'HEAD';
-    const HTTP_METHOD_ANY = 'ANY';
-    const ROUTE_CONTINUE = 'YES';
+    const HTTP_METHOD_PUT    = 'PUT';
+    const HTTP_METHOD_HEAD   = 'HEAD';
+    const HTTP_METHOD_ANY    = 'ANY';
+    const ROUTE_CONTINUE     = 'YES';
     private $routes = array(
-        self::HTTP_METHOD_GET => array(),
-        self::HTTP_METHOD_POST => array(),
+        self::HTTP_METHOD_GET    => array(),
+        self::HTTP_METHOD_POST   => array(),
         self::HTTP_METHOD_DELETE => array(),
-        self::HTTP_METHOD_PUT => array(),
-        self::HTTP_METHOD_HEAD => array(),
-        self::HTTP_METHOD_ANY => array()
+        self::HTTP_METHOD_PUT    => array(),
+        self::HTTP_METHOD_HEAD   => array(),
+        self::HTTP_METHOD_ANY    => array()
     );
     private $allowedMethods = array(
         self::HTTP_METHOD_GET,
@@ -54,16 +54,16 @@ class Routing
             $routesToProcess = $this->routes[self::HTTP_METHOD_ANY];
         }
 
-        $uriToMatch = trim($uri, '/');
+        $uriToMatch    = trim($uri, '/');
         $routesMatched = array();
         foreach ($routesToProcess as $routeUri => $closure) {
-            if (false !==
+            if (FALSE !==
                 ($routeMatchReturn =
                     $this->matchUriToRoute($uriToMatch, $routeUri))
             ) {
                 $routesMatched[] = array(
                     'closure' => $closure,
-                    'route' => $routeMatchReturn
+                    'route'   => $routeMatchReturn
                 );
             }
         }
@@ -81,15 +81,15 @@ class Routing
     private function matchUriToRoute($uri, $routeUri)
     {
         $__haveParams__ = strpos($routeUri, ':');
-        if ($__haveParams__ === false && ($routeUri == $uri
-                || preg_match('#^' . str_replace('*', '.*', $routeUri) . '$#', $uri))
+        if ($__haveParams__ === FALSE && ($routeUri == $uri
+                                          || preg_match('#^' . str_replace('*', '.*', $routeUri) . '$#', $uri))
         ) {
             return array();
         }
-        if (true == $__haveParams__) {
+        if (TRUE == $__haveParams__) {
             return $this->parseUriForParameters($uri, $routeUri);
         }
-        return false;
+        return FALSE;
     }
 
     /**
@@ -109,18 +109,18 @@ class Routing
     {
         # get parts of uri & routeUri, that is, split by /
         $routeUriParts = explode('/', trim($routeUri, '/'));
-        $uriParts = explode('/', trim($uri, '/'));
+        $uriParts      = explode('/', trim($uri, '/'));
         if (count($uriParts) != count($routeUriParts)) {
-            return false;
+            return FALSE;
         }
         $return = array();
         foreach ($routeUriParts as $index => $part) {
             if ($part != $uriParts[$index]) {
                 if ($part{0} != ':') { #wrong route after all!
-                    return false;
+                    return FALSE;
                 }
                 $realValue = $this->cleanUriPartForParam($uriParts[$index]);
-                $return[] = $this->checkParameterType($part, $realValue);
+                $return[]  = $this->checkParameterType($part, $realValue);
             }
         }
         return $return;
@@ -156,7 +156,7 @@ class Routing
     private function checkParameterType($parameterType, $paramValue)
     {
         $parameterType = str_replace(':', '', $parameterType);
-        $return = $paramValue;
+        $return        = $paramValue;
         if (isset($this->customParamTypes[$parameterType])) {
             $return =
                 call_user_func_array(
@@ -176,19 +176,19 @@ class Routing
      * @param      $controllerClass
      * @param null $uriNamespace
      */
-    public function makeRoutesForClass($controllerClass, $uriNamespace = null)
+    public function makeRoutesForClass($controllerClass, $uriNamespace = NULL)
     {
         $controller = new \ReflectionClass($controllerClass);
         foreach ($controller->getMethods(\ReflectionMethod::IS_PUBLIC) as $controllerMethod) {
             $controllerMethodName = $controllerMethod->getName();
-            $methodDocComments = Util::methodDocComments($controllerMethod);
+            $methodDocComments    = Util::methodDocComments($controllerMethod);
             if (isset($methodDocComments['method']) && isset($methodDocComments['uri'])) {
                 $routeCall = array(
                     'controller' => $controllerClass,
-                    'method' => $controllerMethodName
+                    'method'     => $controllerMethodName
                 );
-                $method = explode(',', $methodDocComments['method']);
-                $uri = $methodDocComments['uri'];
+                $method    = explode(',', $methodDocComments['method']);
+                $uri       = $methodDocComments['uri'];
                 if (isset($uriNamespace)) {
                     $uri = trim($uriNamespace, '/') . '/' . trim($uri, '/');
                 }
@@ -204,8 +204,8 @@ class Routing
      * available methods
      *
      * @param String|array $httpMethods one or more methods this route is used for
-     * @param String $uri the uri for the route
-     * @param mixed $routeCall is either a callable or an array of controller, method
+     * @param String       $uri the uri for the route
+     * @param mixed        $routeCall is either a callable or an array of controller, method
      */
     public function registerRoute($httpMethods, $uri, $routeCall)
     {

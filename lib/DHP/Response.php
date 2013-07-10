@@ -11,7 +11,7 @@ use DHP\Request;
 class Response
 {
     private $headerStatus = array('statusCode' => '200',
-        'headerData' => NULL);
+                                  'headerData' => NULL);
     private $headerStatusCodes = array(
         200 => 'OK',
         201 => 'Created',
@@ -70,7 +70,7 @@ class Response
             throw new \BadMethodCallException("Cannot append string to content, the content is of type " . gettype($this->body));
         }
         $this->body .= $dataToAppend;
-        return true;
+        return TRUE;
     }
 
     /**
@@ -98,7 +98,7 @@ class Response
      *
      * @param String $headerName name of the header
      * @param String $headerValue Optional, value of header, if needed
-     * @param null $statusCode
+     * @param null   $statusCode
      * @return $this
      * @internal param Int $statusValue a int value for status
      */
@@ -158,13 +158,13 @@ class Response
         foreach ($this->headers as $headerType => $headerDataArray) {
 
             if (isset($headerDataArray['statusCode'])) {
-                \header($headerDataArray['value'], true, $headerDataArray['statusCode']);
+                \header($headerDataArray['value'], TRUE, $headerDataArray['statusCode']);
             } else {
-                \header($headerDataArray['value'], true);
+                \header($headerDataArray['value'], TRUE);
             }
         }
         $this->headersSent = TRUE;
-        return true;
+        return TRUE;
     }
 
     /**

@@ -12,7 +12,7 @@ use DHP\blueprint\Middleware;
 class BodyParser extends Middleware
 {
 
-    private $request = null;
+    private $request = NULL;
 
     public function __construct(Request $request)
     {
@@ -22,7 +22,7 @@ class BodyParser extends Middleware
     public function run()
     {
         $bodyData     = $this->request->body;
-        $jsonDataTest = json_decode($bodyData,true,512,JSON_BIGINT_AS_STRING);
+        $jsonDataTest = json_decode($bodyData, TRUE, 512, JSON_BIGINT_AS_STRING);
         if (isset($jsonDataTest)) {
             $this->request->setBody($jsonDataTest);
         }

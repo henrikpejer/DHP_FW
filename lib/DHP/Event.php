@@ -15,8 +15,8 @@ class Event implements EventInterface
 {
 
     public $delegates = array();
-    protected $events = array('*' => array(),
-        '__controller__' => array());
+    protected $events = array('*'              => array(),
+                              '__controller__' => array());
 
     /**
      * This triggers an event. All registered events are looped through in the order
@@ -28,13 +28,13 @@ class Event implements EventInterface
      *
      *
      * @param String $eventName
-     * @param null $one
-     * @param null $two
-     * @param null $three
-     * @param null $four
-     * @param null $five
-     * @param null $six
-     * @param null $seven
+     * @param null   $one
+     * @param null   $two
+     * @param null   $three
+     * @param null   $four
+     * @param null   $five
+     * @param null   $six
+     * @param null   $seven
      *
      * @return mixed
      */
@@ -47,7 +47,7 @@ class Event implements EventInterface
                             &$six = NULL,
                             &$seven = NULL)
     {
-        $args = func_get_args();
+        $args       = func_get_args();
         $__return__ = NULL;
         switch (count($args)) {
             case 1:
@@ -67,15 +67,15 @@ class Event implements EventInterface
                 break;
             case 6:
                 $__return__ = $this->call($eventName, $one, $two, $three, $four,
-                    $five);
+                                          $five);
                 break;
             case 7:
                 $__return__ = $this->call($eventName, $one, $two, $three, $four,
-                    $five, $six);
+                                          $five, $six);
                 break;
             case 8:
                 $__return__ = $this->call($eventName, $one, $two, $three, $four,
-                    $five, $six, $seven);
+                                          $five, $six, $seven);
                 break;
         }
         return $__return__;
@@ -104,8 +104,8 @@ class Event implements EventInterface
                           &$six = NULL,
                           &$seven = NULL)
     {
-        $return = NULL;
-        $numArgs = (func_num_args() - 1);
+        $return   = NULL;
+        $numArgs  = (func_num_args() - 1);
         $callArgs = NULL;
         foreach ($this->mergeEventToCall($eventName) as $event) {
             $__return__ = NULL;
@@ -173,7 +173,7 @@ class Event implements EventInterface
                 case 6:
                     if (!isset($callArgs)) {
                         $callArgs = array(&$one, &$two, &$three, &$four, &$five,
-                            &$six);
+                                          &$six);
                     }
                     if (is_array($event)) {
                         $__return__ = call_user_func_array($event, $callArgs);
@@ -184,13 +184,13 @@ class Event implements EventInterface
                 case 7:
                     if (!isset($callArgs)) {
                         $callArgs = array(&$one, &$two, &$three, &$four, &$five,
-                            &$six, &$seven);
+                                          &$six, &$seven);
                     }
                     if (is_array($event)) {
                         $__return__ = call_user_func_array($event, $callArgs);
                     } else {
                         $__return__ = $event($one, $two, $three, $four, $five, $six,
-                            $seven);
+                                             $seven);
                     }
                     break;
             }
@@ -216,15 +216,15 @@ class Event implements EventInterface
         $eventKeys = array($eventName);
         if (strpos($eventName, '.')) {
             $eventParts = explode('.', $eventName);
-            $eventBase = '';
+            $eventBase  = '';
             foreach ($eventParts as $part) {
                 $eventBase .= $part;
                 $eventKeys[] = $eventBase . '*';
                 $eventKeys[] = $eventBase . '.*';
             }
         }
-        $eventKeys[] = '*';
-        $eventKeys[] = '__controller__';
+        $eventKeys[]    = '*';
+        $eventKeys[]    = '__controller__';
         $eventsToReturn = array();
         foreach ($eventKeys as $event) {
             if (isset($this->events[$event])) {
@@ -238,7 +238,7 @@ class Event implements EventInterface
     /**
      * This is used to register a callable with a certain event.
      *
-     * @param String $eventName
+     * @param String   $eventName
      * @param Callable $callable
      * @return mixed
      */
@@ -279,10 +279,10 @@ class Event implements EventInterface
      *
      * @param Object $delegate
      * @param String $method
-     * @param null $one
-     * @param null $two
-     * @param null $three
-     * @param null $four
+     * @param null   $one
+     * @param null   $two
+     * @param null   $three
+     * @param null   $four
      * @return mixed
      */
     public function triggerSubscribe($delegate,
@@ -293,7 +293,7 @@ class Event implements EventInterface
                                      &$four = NULL)
     {
         $__objectHash__ = spl_object_hash($delegate);
-        $return = NULL;
+        $return         = NULL;
         if (isset($this->delegates[$__objectHash__])) {
             foreach ($this->delegates[$__objectHash__] as $target) {
                 $return = $target->$method($one, $two, $three, $four);

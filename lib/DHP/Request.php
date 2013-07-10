@@ -28,15 +28,15 @@ class Request
      * @param String $method http-method
      * @param String $uri uri of the request
      * @param String $body if a body was sent with the request, this is it contents
-     * @param Array $post the post-data from the request
-     * @param Array $get the get-data from the request
-     * @param Array $files the files sent with the request
-     * @param array $headers the headers sent with the request
+     * @param Array  $post the post-data from the request
+     * @param Array  $get the get-data from the request
+     * @param Array  $files the files sent with the request
+     * @param array  $headers the headers sent with the request
      */
     public function __construct(
         $method = "HEADER",
-        $uri = null,
-        $body = null,
+        $uri = NULL,
+        $body = NULL,
         $post = array(),
         $get = array(),
         $files = array(),
@@ -44,12 +44,11 @@ class Request
     )
     {
         $this->method = $method;
-        $this->uri = $uri;
-        #$this->body = isset($body)?$body:$this->getBodyContents();
+        $this->uri    = $uri;
         $this->setBodyContents($body);
-        $this->post = $post;
-        $this->get = $get;
-        $this->files = $files;
+        $this->post    = $post;
+        $this->get     = $get;
+        $this->files   = $files;
         $this->headers = $headers;
     }
 
@@ -79,9 +78,9 @@ class Request
         $this->useHttpRequestUri();
         $this->useHttpMethod();
         $this->setBodyContents();
-        $this->post = $_POST;
-        $this->get = $_GET;
-        $this->files = $_FILES;
+        $this->post    = $_POST;
+        $this->get     = $_GET;
+        $this->files   = $_FILES;
         $this->headers = array();
         foreach ($_SERVER as $name => $value) {
             if (substr($name, 0, 5) == 'HTTP_') {
@@ -95,9 +94,9 @@ class Request
      */
     private function useHttpRequestUri()
     {
-        $uri = null;
+        $uri = NULL;
         if (isset($_SERVER['REQUEST_URI'])) {
-            $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+            $uri       = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
             $this->uri = $uri;
         }
         if (CLI) {
@@ -131,7 +130,7 @@ class Request
 
     public function __get($name)
     {
-        $return = null;
+        $return = NULL;
         switch (strtolower($name)) {
             case 'get':
                 $return = $this->get;
