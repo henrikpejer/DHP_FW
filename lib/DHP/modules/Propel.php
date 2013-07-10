@@ -1,11 +1,14 @@
 <?php
-declare(encoding="UTF8");
+declare(encoding = "UTF8");
 /**
  * Created by Henrik Pejer ( mr@henrikpejer.com )
  * Date: 2013-07-11 00:12
  */
 
 namespace DHP\modules;
+use DHP\blueprint\Module;
+use DHP\Response;
+use DHP\Routing;
 
 /**
  * Class Propel
@@ -57,6 +60,99 @@ namespace DHP\modules;
  * These kind of commands might be available further down the road. How they will be
  * implemented, have not been considered just yet.
  */
-class Propel {
+class Propel extends Module
+{
+    private $response;
 
+    /**
+     * @param \DHP\Routing  $routing
+     * @param \DHP\Response $response
+     * @param String        $uriPrefix the trigger in the URI that this will use. If 'api' then 'api/...' will be handled by this module
+     * @param String        $propelConfig the path to the propel config
+     * @param String        $propelIncludeDir the include dir of the propel files
+     * @param null|String   $propelLibraryDir if the propel library isn't included by the app, this will include it
+     * @internal param String $propelDir
+     */
+    public function __construct(Routing $routing,Response $response,$uriPrefix, $propelConfig, $propelIncludeDir, $propelLibraryDir = NULL)
+    {
+        $this->routing = $routing;
+        $this->response = $response;
+        $that = $this;
+        # setup single post uris
+        $this->get($uriPrefix . '/:model/:idOrSlug', function($model,$idOrSLug = NULL)use($that){
+            $that->getData($model,$idOrSLug);
+        });
+        $this->post($uriPrefix . '/:model/:idOrSlug', function($model,$idOrSLug = NULL)use($that){
+            return $that->postData($model,$idOrSLug);
+        });
+        $this->put($uriPrefix . '/:model/:idOrSlug', function($model,$idOrSLug = NULL)use($that){
+            return $that->putData($model,$idOrSLug);
+        });
+        $this->delete($uriPrefix . '/:model/:idOrSlug', function($model,$idOrSLug = NULL)use($that){
+            return $that->deleteData($model,$idOrSLug);
+        });
+
+        # setup page uris
+        $this->get($uriPrefix . '/:model/page/', function($model)use($that){
+            return $that->pageData($model,1);
+        });
+        $this->get($uriPrefix . '/:model/page/:pageNum', function($model,$pageNum)use($that){
+            return $that->pageData($model,$pageNum);
+        });
+    }
+
+    /**
+     * Handles GET requests
+     *
+     * @param String $model
+     * @param null   $idOrSlug
+     */
+    public function getData($model, $idOrSlug = NULL)
+    {
+        $this->response->setContent("Should get {$model} w. id {$idOrSlug}");
+    }
+
+    /**
+     * Handles POST requests
+     *
+     * @param String $model
+     * @param null   $idOrSlug
+     */
+    public function postData($model, $idOrSlug = NULL)
+    {
+
+    }
+
+    /**
+     * Handles PUT requests
+     *
+     * @param String $model
+     * @param null   $idOrSlug
+     */
+    public function putData($model, $idOrSlug = NULL)
+    {
+
+    }
+
+    /**
+     * Handles DELETE requests
+     *
+     * @param String $model
+     * @param null   $idOrSlug
+     */
+    public function deleteData($model, $idOrSlug = NULL)
+    {
+
+    }
+
+    /**
+     * Handles page requests
+     *
+     * @param String $model
+     * @param int    $pageNum the page to get, defaults to first page
+     */
+    public function pageData($model, $pageNum = 1)
+    {
+
+    }
 }

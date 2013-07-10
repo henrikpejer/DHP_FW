@@ -21,7 +21,7 @@ use DHP\utility\Util;
  */
 class DI
 {
-    private $config, $store;
+    public  $config, $store;
 
     /**
      * Starts the whole DI off.
@@ -177,13 +177,11 @@ class DI
             return NULL;
         }
         $args = array();
+        $argsNotUsed = array_values($argsForObject);
         try {
             foreach ($constructorArguments as $key => $constructorArgument) {
                 # get a value, if possible...
                 switch (TRUE) {
-                    case isset($argsForObject[$key]):
-                        $args[] = $argsForObject[$key];
-                        break;
                     case (!empty($constructorArgument['class']) &&
                           ($__arg__ =
                               $this->get($constructorArgument['class'])) !== NULL):
@@ -192,6 +190,9 @@ class DI
                               $this->get($constructorArgument['name'])) !== NULL):
                         $args[] = $__arg__;
                         break;
+                    case isset($argsForObject[$key]):
+                        $args[] = $argsForObject[$key];
+                        break;
                     case isset($argsForObject[$constructorArgument['name']]):
                         $args[] = $argsForObject[$constructorArgument['name']];
                         break;
@@ -199,9 +200,13 @@ class DI
                         $args[] = $constructorArgument['default'];
                         break;
                     default:
+                        #$args[] = current($argsNotUsed);
+                        #next($argsNotUsed);
                         $args[] = NULL;
                 }
             }
+            # add the argsNotUsed to the end, right?
+            $args +=$argsNotUsed;
             $return = count($args) == 0 ? $classReflector->newInstance() :
                 $classReflector->newInstanceArgs($args);
         } catch (\Exception $e) {
@@ -215,6 +220,7 @@ class DI
         return $return;
     }
 
+    # todo : alias messes things up, somehing is really wonky when you set alias and it already exists etc, check the following cases : when DI::set('namespace') have been set before alias call, alias call with no original set before...
     /**
      * Here we set an alias for an key:
      *
@@ -227,15 +233,15 @@ class DI
      * @param $alias    String, alias for...
      * @param $original String,
      *
+     * @return $this
      * @throws \InvalidArgumentException
      */
     public function alias($alias, $original)
     {
         if (!isset($this->store->{$original})) {
-            #throw new \InvalidArgumentException( 'Original must already exist' );
-            $this->store->{$alias} = $this->set($original);
-        } else {
-            $this->store->{$alias} = & $this->store->{$original};
+            throw new \InvalidArgumentException( 'Original must already exist' );
         }
+        $this->store->{$alias} = & $this->store->{$original};
+        return $this;
     }
 }

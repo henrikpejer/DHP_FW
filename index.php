@@ -10,8 +10,11 @@ $loader = new SplClassLoader('app', __DIR__);
 $loader->register();
 $di = new DHP\dependencyInjection\DI();
 $di->set('DHP\Request')->addMethodCall('setupWithEnvironment');
-$di->alias('Response','DHP\Response');
-$response = $di->get('Response');
+
+($di->set('DHP\modules\Propel')->setArguments(array(2=>'api',3=>'config',4=>'includeDir')));
+$di->get('DHP\modules\Propel');
+
+$response = $di->get('DHP\Response');
 $app = $di->get('DHP\App');
 $app->start(
     __DIR__ . DIRECTORY_SEPARATOR . 'app/config/routes.php',
@@ -29,3 +32,12 @@ $response->AddHeader('RAM-Usage',sprintf(
 ) );
 $response->addHeader('Page Time',sprintf("%0.3f seconds", $d->format('s.u'))."\n");
 $response->send();
+echo "\n";
+foreach((array)$di->store as $key => $value){
+    if(strpos($key,'Response') !== FALSE){
+        var_dump(str_replace('0','',spl_object_hash($value)." : {$key}"));
+    }
+}
+
+#var_dump($di->get('DHP\Response'));
+#var_dump($di->get('DHP\Routing')->getRoutes());

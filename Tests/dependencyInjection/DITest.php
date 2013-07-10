@@ -47,11 +47,14 @@ class DITest extends \PHPUnit_Framework_TestCase
         \PHPUnit_Framework_Assert::assertEquals($ref, spl_object_hash($this->object->get('masta')));
     }
 
+    /**
+     * @expectedException \InvalidArgumentException
+     */
     public function testAliasNotPresent()
     {
         $this->object->alias('new_alias', 'DHP\app');
         $app = $this->object->get('new_alias');
-        $this->assertInstanceOf('DHP\app', $app);
+        #$this->assertInstanceOf('DHP\app', $app);
     }
 
     public function testLoadingClass()
