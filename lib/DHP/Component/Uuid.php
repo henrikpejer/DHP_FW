@@ -15,12 +15,12 @@ class Uuid extends Component
      * ID of the server that generated this unique id
      * @var int
      */
-    private $serverId = null;
+    private $serverId = NULL;
     /**
      * The actual uuId value
      * @var null
      */
-    private $uuId = null;
+    private $uuId = NULL;
 
     /**
      * Sets up the Uuid-component.
@@ -74,7 +74,7 @@ class Uuid extends Component
             }
             $part = explode('.', $ip);
         }
-        foreach($part as $ipPart){
+        foreach ($part as $ipPart) {
             $hex .= substr("0" . dechex($ipPart), -2);
         }
         return $hex;

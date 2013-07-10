@@ -140,23 +140,10 @@ class Response
      */
     private function sendHeaders()
     {
-        if (php_sapi_name() == 'cli' or PHP_SAPI == 'cli') {
-            #return true;
-        }
-        /**
-         * I have yet to be able to test these with PHPUnit. I've tried different combinations of
-         * running in separate process, xdebug_get_headers even tried headers_list (which should not
-         * work in CLI-mode) and either I get errors or no headers at all.
-         *
-         * So I've given up but I will not add @codeCoverageIgnoreStart since I DO want these lines tested.
-         *
-         * When I feel I want to give this another stab, I'll try again.
-         */
         if (headers_sent() === TRUE && $this->headersSent === FALSE) {
             throw new \RuntimeException("Headers already sent");
         }
-        foreach ($this->headers as $headerType => $headerDataArray) {
-
+        foreach ($this->headers as $headerDataArray) {
             if (isset($headerDataArray['statusCode'])) {
                 \header($headerDataArray['value'], TRUE, $headerDataArray['statusCode']);
             } else {
@@ -176,8 +163,29 @@ class Response
             if (is_string($this->body)) {
                 echo $this->body;
             } else {
-                echo json_encode($this->body, JSON_NUMERIC_CHECK | JSON_FORCE_OBJECT);
+                # lets... wrap this in somekind of object, no?
+                $return = (object)array(
+                    'payload'  => $this->body,
+                    'status'   => $this->getStatus(TRUE),
+                    'messages' => array()
+                );
+                echo json_encode($return, JSON_NUMERIC_CHECK | JSON_FORCE_OBJECT);
             }
         }
+    }
+
+    /**
+     * Returns, if set, the current status of the request.
+     *
+     * @param bool $intOnly defaults to true, returns only the
+     * @return null
+     */
+    private function getStatus($intOnly = TRUE)
+    {
+        $return = NULL;
+        if (isset($this->headers['status'])) {
+            $return = $intOnly === TRUE ? $this->headers['status']['statusCode'] : $this->headers['status'];
+        }
+        return $return;
     }
 }

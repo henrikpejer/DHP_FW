@@ -12,7 +12,7 @@ abstract class Module
 {
 
     private $uriPrefix = '';
-    private $routing = null;
+    private $routing = NULL;
 
     /**
      * Sets up the dependency on Routing
@@ -94,7 +94,7 @@ abstract class Module
      */
     public function uriNamespace($namespace)
     {
-        $this->uriPrefix = trim($namespace, '/ ').'/';
+        $this->uriPrefix = trim($namespace, '/ ') . '/';
         return $this;
     }
 

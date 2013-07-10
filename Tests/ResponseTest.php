@@ -51,7 +51,7 @@ class ResponseTest extends PHPUnit_Framework_TestCase
     public function testJsonExport()
     {
         $this->object->setContent(array('thiswillbe' => 'an object'));
-        $this->expectOutputString('{"thiswillbe":"an object"}');
+        $this->expectOutputString('{"payload":{"thiswillbe":"an object"},"status":null,"messages":{}}');
         $this->object->send();
     }
 

@@ -8,7 +8,7 @@ namespace DHP\dependencyInjection;
  */
 class DiProxy
 {
-    private $classToInstantiate = null;
+    private $classToInstantiate = NULL;
     private $argumentsToConstructor = array();
     private $methodCalls = array();
 

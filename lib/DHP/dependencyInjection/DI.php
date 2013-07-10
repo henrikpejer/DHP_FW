@@ -1,5 +1,5 @@
 <?php
-declare( encoding = "UTF8" );
+declare(encoding = "UTF8");
 namespace DHP\dependencyInjection;
 
 use DHP\utility\Util;
@@ -35,7 +35,7 @@ class DI
      */
     function __construct(array $config = array())
     {
-        $this->config                    = (object) $config;
+        $this->config                    = (object)$config;
         $this->store                     = new \StdClass;
         $this->store->{'DI'}             = & $this;
         $this->store->{get_class($this)} = & $this;
@@ -77,13 +77,13 @@ class DI
      *
      * @return $value
      */
-    public function set($name, $value = null)
+    public function set($name, $value = NULL)
     {
-        if ($value === null) {
+        if ($value === NULL) {
             $value = $name;
         }
         if (is_string($value)) {
-            $this->store->{$name} = new DIProxy( $value );
+            $this->store->{$name} = new DIProxy($value);
         } else {
             $this->store->{$name} = $value;
         }
@@ -100,31 +100,31 @@ class DI
      */
     function get($name)
     {
-        if (!isset( $this->store->{$name} )) {
+        if (!isset($this->store->{$name})) {
             $frameworkClass = $this->findMatchWithinFramework($name);
-            if ($frameworkClass == null) {
+            if ($frameworkClass == NULL) {
                 # lets try to load this as-if it where a class being called, ok?
                 try {
                     if (class_exists($name)) {
                         $frameworkClass = $this->instantiateObject($name);
                     } else {
-                        return null;
+                        return NULL;
                     }
                 } catch (\Exception $e) {
-                    return null;
+                    return NULL;
                 }
             }
-            $temp = new \ReflectionClass( $frameworkClass );
-            switch (true) {
-                case ( $temp->isSubclassOf('DHP\blueprint\Component') ):
+            $temp = new \ReflectionClass($frameworkClass);
+            switch (TRUE) {
+                case ($temp->isSubclassOf('DHP\blueprint\Component')):
                     return $this->instantiateObject($frameworkClass);
             }
-            unset( $temp );
+            unset($temp);
             $this->set($name, $frameworkClass);
         }
         $objectToGet = $this->store->{$name};
-        switch (true) {
-            case ( is_a($objectToGet, '\DHP\dependencyInjection\DiProxy') ):
+        switch (TRUE) {
+            case (is_a($objectToGet, '\DHP\dependencyInjection\DiProxy')):
                 $initProcess = $objectToGet->get();
                 $instance    = $this->instantiateObject(
                     $initProcess['class'],
@@ -157,7 +157,7 @@ class DI
     {
         $dhpFwClass = str_replace('Interface', '', $name);
         return strpos($name, 'DHP\\') === 0 && class_exists($dhpFwClass) ?
-          $dhpFwClass : null;
+            $dhpFwClass : NULL;
     }
 
     /**
@@ -172,44 +172,44 @@ class DI
     {
         # $this->event->trigger('DHP_FW.DI.instantiate', $class, $__args__);
         $constructorArguments = Util::classConstructorArguments($class);
-        $classReflector       = new \ReflectionClass( $class );
+        $classReflector       = new \ReflectionClass($class);
         if ($classReflector->isInterface() || $classReflector->isAbstract()) {
-            return null;
+            return NULL;
         }
         $args = array();
         try {
             foreach ($constructorArguments as $key => $constructorArgument) {
                 # get a value, if possible...
-                switch (true) {
-                    case isset( $argsForObject[$key] ):
+                switch (TRUE) {
+                    case isset($argsForObject[$key]):
                         $args[] = $argsForObject[$key];
                         break;
-                    case ( !empty( $constructorArgument['class'] ) &&
-                      ( $__arg__ =
-                        $this->get($constructorArgument['class']) ) !== null ):
-                    case ( !empty( $constructorArgument['name'] ) &&
-                      ( $__arg__ =
-                        $this->get($constructorArgument['name']) ) !== null ):
+                    case (!empty($constructorArgument['class']) &&
+                          ($__arg__ =
+                              $this->get($constructorArgument['class'])) !== NULL):
+                    case (!empty($constructorArgument['name']) &&
+                          ($__arg__ =
+                              $this->get($constructorArgument['name'])) !== NULL):
                         $args[] = $__arg__;
                         break;
-                    case isset( $argsForObject[$constructorArgument['name']] ):
+                    case isset($argsForObject[$constructorArgument['name']]):
                         $args[] = $argsForObject[$constructorArgument['name']];
                         break;
-                    case isset( $constructorArgument['default'] ):
+                    case isset($constructorArgument['default']):
                         $args[] = $constructorArgument['default'];
                         break;
                     default:
-                        $args[] = null;
+                        $args[] = NULL;
                 }
             }
             $return = count($args) == 0 ? $classReflector->newInstance() :
-              $classReflector->newInstanceArgs($args);
+                $classReflector->newInstanceArgs($args);
         } catch (\Exception $e) {
             try {
                 $return = count($args) == 0 ? $classReflector->newInstance() :
-                  $classReflector->newInstanceArgs($args);
+                    $classReflector->newInstanceArgs($args);
             } catch (\Exception $e) {
-                $return = null;
+                $return = NULL;
             }
         }
         return $return;
@@ -231,7 +231,7 @@ class DI
      */
     public function alias($alias, $original)
     {
-        if (!isset( $this->store->{$original} )) {
+        if (!isset($this->store->{$original})) {
             #throw new \InvalidArgumentException( 'Original must already exist' );
             $this->store->{$alias} = $this->set($original);
         } else {
