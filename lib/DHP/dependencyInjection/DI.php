@@ -100,7 +100,7 @@ class DI
      */
     function get($name)
     {
-        if (!isset($this->store->{$name})) {
+        if (!@isset($this->store->{$name})) {
             $frameworkClass = $this->findMatchWithinFramework($name);
             if ($frameworkClass == NULL) {
                 # lets try to load this as-if it where a class being called, ok?
@@ -122,7 +122,18 @@ class DI
             unset($temp);
             $this->set($name, $frameworkClass);
         }
-        $objectToGet = $this->store->{$name};
+        if (is_string($this->store->{$name}) && isset($this->store->{$this->store->{$name}})) {
+            if ( is_string($this->store->{$this->store->{$name}})){
+                $objectToGet = $this->get($this->store->{$this->store->{$name}});
+            } else {
+                $objectToGet = $this->store->{$this->store->{$name}};
+            }
+        } else {
+            $objectToGet = $this->store->{$name};
+        }
+        if ( is_string($objectToGet) ){
+            $objectToGet = $this->instantiateObject($objectToGet);
+        }
         switch (TRUE) {
             case (is_a($objectToGet, '\DHP\dependencyInjection\DiProxy')):
                 $initProcess = $objectToGet->get();
@@ -140,9 +151,12 @@ class DI
                     );
                 }
                 $this->store->{$name} = & $instance;
-                $this->alias(get_class($instance), $name);
+                $this->store->{get_class($instance)} = & $instance;
+                #$this->alias(get_class($instance), $name);
+                $objectToGet = & $instance;
         }
-        return $this->store->{$name};
+        return $objectToGet;
+        #return $this->store->{$name};
     }
 
     /**
@@ -238,10 +252,15 @@ class DI
      */
     public function alias($alias, $original)
     {
+        $this->store->{$alias} = $original;
+        return;
         if (!isset($this->store->{$original})) {
             throw new \InvalidArgumentException( 'Original must already exist' );
+            $this->store->{$alias} = $original;
+        } else {
+            # todo : perhaps this will bork since... we are refereing to an object, nolonger here, right?
+            $this->store->{$alias} = & $this->store->{$original};
         }
-        $this->store->{$alias} = & $this->store->{$original};
         return $this;
     }
 }

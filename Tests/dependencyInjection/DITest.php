@@ -48,13 +48,13 @@ class DITest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \InvalidArgumentException
+     * @__expectedException \InvalidArgumentException
      */
     public function testAliasNotPresent()
     {
-        $this->object->alias('new_alias', 'DHP\app');
+        $this->object->alias('new_alias', 'DHP\App');
         $app = $this->object->get('new_alias');
-        #$this->assertInstanceOf('DHP\app', $app);
+        $this->assertInstanceOf('DHP\App', $app);
     }
 
     public function testLoadingClass()
