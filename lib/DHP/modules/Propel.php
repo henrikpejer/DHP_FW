@@ -73,30 +73,30 @@ class Propel extends Module
      * @param null|String   $propelLibraryDir if the propel library isn't included by the app, this will include it
      * @internal param String $propelDir
      */
-    public function __construct(Routing $routing,Response $response,$uriPrefix, $propelConfig, $propelIncludeDir, $propelLibraryDir = NULL)
+    public function __construct(Routing $routing, Response $response, $uriPrefix, $propelConfig, $propelIncludeDir, $propelLibraryDir = NULL)
     {
-        $this->routing = $routing;
+        $this->routing  = $routing;
         $this->response = $response;
-        $that = $this;
+        $that           = $this;
         # setup single post uris
-        $this->get($uriPrefix . '/:model/:idOrSlug', function($model,$idOrSLug = NULL)use($that){
-            $that->getData($model,$idOrSLug);
+        $this->get($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
+            $that->getData($model, $idOrSLug);
         });
-        $this->post($uriPrefix . '/:model', function($model,$idOrSLug = NULL)use($that){
+        $this->post($uriPrefix . '/:model', function ($model, $idOrSLug = NULL) use ($that) {
             return $that->postData($model);
         });
-        $this->post($uriPrefix . '/:model/new', function($model,$idOrSLug = NULL)use($that){
+        $this->post($uriPrefix . '/:model/new', function ($model, $idOrSLug = NULL) use ($that) {
             return $that->postData($model);
         });
-        $this->put($uriPrefix . '/:model/:idOrSlug', function($model,$idOrSLug = NULL)use($that){
-            return $that->putData($model,$idOrSLug);
+        $this->put($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
+            return $that->putData($model, $idOrSLug);
         });
-        $this->delete($uriPrefix . '/:model/:idOrSlug', function($model,$idOrSLug = NULL)use($that){
-            return $that->deleteData($model,$idOrSLug);
+        $this->delete($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
+            return $that->deleteData($model, $idOrSLug);
         });
         # setup page uris
-        $this->get($uriPrefix . '/:model/page/:pageNum', function($model,$pageNum)use($that){
-            return $that->pageData($model,$pageNum);
+        $this->get($uriPrefix . '/:model/page/:pageNum', function ($model, $pageNum) use ($that) {
+            return $that->pageData($model, $pageNum);
         });
     }
 
@@ -108,7 +108,26 @@ class Propel extends Module
      */
     public function getData($model, $idOrSlug = NULL)
     {
-        $this->response->setContent("Should get {$model} w. id {$idOrSlug}");
+        $model = $this->getPropelQuery($model);
+        if (is_numeric($idOrSlug) == TRUE) {
+            $data = $model->findPk($idOrSlug);
+        } else {
+            # todo: this should perhaps not be necessary
+            $slug = str_replace(' ', '-', $idOrSlug);
+            $data = $model->findBySlug($slug);
+        }
+        $this->response->setContent($data);
+    }
+
+    private function getPropelQuery($model)
+    {
+        $model         = ucfirst($model);
+        $apiClassToUse = '\\espressoTaster\\data\\' . $model . 'Query';
+        if (class_exists($apiClassToUse)) {
+            return $apiClassToUse::create()->setFormatter('PropelArrayFormatter');
+        } else {
+            throw new \RuntimeException("Model not found");
+        }
     }
 
     /**
@@ -151,6 +170,19 @@ class Propel extends Module
      */
     public function pageData($model, $pageNum = 1)
     {
-        $this->response->setContent("Should get page {$pageNum} for {$model}");
+        #$this->response->setContent("Should get page {$pageNum} for {$model}");
+        if ( $pageNum < 1 ){
+            $pageNum = 1;
+        }
+        $model = $this->getPropelQuery($model);
+        # todo: 10, below, should be configurable
+        $pageData = $model->paginate($pageNum, 10);
+        $data     = array('data' => array(), 'pagination' => array('numberOfPages' => $pageData->getLastPage(), 'numberOfHits' => $pageData->getNbResults()));
+        if ($pageNum <= $pageData->getlastPage()) {
+            foreach ($pageData as $post) {
+                $data[] = $post;
+            }
+        }
+        $this->response->setContent($data);
     }
 }

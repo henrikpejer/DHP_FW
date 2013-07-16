@@ -6,6 +6,10 @@
 ini_set('DISPLAY_ERRORS', 1);
 error_reporting(E_ALL);
 require_once 'bootstrap.php';
+# propel?
+require_once realpath('../espresso_taster/server/vendor/autoload.php');
+Propel::init(realpath("../espresso_taster/server/propel/build/conf/espressoTaster-conf.php"));
+set_include_path(get_include_path() . PATH_SEPARATOR . realpath('../espresso_taster/server/propel/build/classes'));
 $loader = new SplClassLoader('app', __DIR__);
 $loader->register();
 $di = new DHP\dependencyInjection\DI();
