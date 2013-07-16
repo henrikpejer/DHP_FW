@@ -82,8 +82,11 @@ class Propel extends Module
         $this->get($uriPrefix . '/:model/:idOrSlug', function($model,$idOrSLug = NULL)use($that){
             $that->getData($model,$idOrSLug);
         });
-        $this->post($uriPrefix . '/:model/:idOrSlug', function($model,$idOrSLug = NULL)use($that){
-            return $that->postData($model,$idOrSLug);
+        $this->post($uriPrefix . '/:model', function($model,$idOrSLug = NULL)use($that){
+            return $that->postData($model);
+        });
+        $this->post($uriPrefix . '/:model/new', function($model,$idOrSLug = NULL)use($that){
+            return $that->postData($model);
         });
         $this->put($uriPrefix . '/:model/:idOrSlug', function($model,$idOrSLug = NULL)use($that){
             return $that->putData($model,$idOrSLug);
@@ -91,11 +94,7 @@ class Propel extends Module
         $this->delete($uriPrefix . '/:model/:idOrSlug', function($model,$idOrSLug = NULL)use($that){
             return $that->deleteData($model,$idOrSLug);
         });
-
         # setup page uris
-        $this->get($uriPrefix . '/:model/page/', function($model)use($that){
-            return $that->pageData($model,1);
-        });
         $this->get($uriPrefix . '/:model/page/:pageNum', function($model,$pageNum)use($that){
             return $that->pageData($model,$pageNum);
         });
@@ -116,11 +115,10 @@ class Propel extends Module
      * Handles POST requests
      *
      * @param String $model
-     * @param null   $idOrSlug
      */
-    public function postData($model, $idOrSlug = NULL)
+    public function postData($model)
     {
-
+        $this->response->setContent("Should create {$model}");
     }
 
     /**
@@ -131,7 +129,7 @@ class Propel extends Module
      */
     public function putData($model, $idOrSlug = NULL)
     {
-
+        $this->response->setContent("Should update {$model} w. id {$idOrSlug}");
     }
 
     /**
@@ -142,7 +140,7 @@ class Propel extends Module
      */
     public function deleteData($model, $idOrSlug = NULL)
     {
-
+        $this->response->setContent("Should delete {$model} w. id {$idOrSlug}");
     }
 
     /**
@@ -153,6 +151,6 @@ class Propel extends Module
      */
     public function pageData($model, $pageNum = 1)
     {
-
+        $this->response->setContent("Should get page {$pageNum} for {$model}");
     }
 }
