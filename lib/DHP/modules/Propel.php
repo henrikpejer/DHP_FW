@@ -63,7 +63,8 @@ use DHP\Routing;
  */
 class Propel extends Module
 {
-    private $response;
+    protected $response, $request, $uriPrefix, $routing;
+    protected $numPerPage = 10;
 
     /**
      * @param \DHP\Routing  $routing
@@ -75,12 +76,13 @@ class Propel extends Module
      * @param null|String   $propelLibraryDir if the propel library isn't included by the app, this will include it
      * @internal param String $propelDir
      */
-    public function __construct(Routing $routing, Response $response,Request $request, $uriPrefix, $propelConfig, $propelIncludeDir, $propelLibraryDir = NULL)
+    public function __construct(Routing $routing, Response $response, Request $request, $uriPrefix, $propelConfig, $propelIncludeDir, $propelLibraryDir = NULL)
     {
-        $this->routing  = $routing;
-        $this->response = $response;
-        $this->request = $request;
-        $that           = $this;
+        $this->routing   = $routing;
+        $this->response  = $response;
+        $this->request   = $request;
+        $this->uriPrefix = $uriPrefix;
+        $that            = $this;
         # setup single post uris
         $this->get($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
             $that->getData($model, $idOrSLug);
@@ -136,15 +138,6 @@ class Propel extends Module
         }
     }
 
-    private function getPropelRecord($model){
-        $classToUse         = '\\espressoTaster\\data\\' .ucfirst($model);
-        if (class_exists($classToUse)) {
-            return new $classToUse();
-        } else {
-            throw new \RuntimeException("Model not found");
-        }
-    }
-
     /**
      * Handles POST requests
      *
@@ -154,9 +147,22 @@ class Propel extends Module
     {
         $object = $this->getPropelRecord($model);
         $object->fromArray($this->request->body);
-        $object->save();
-        # todo: create correct 201 with location header to API-call for the newly created post, right?
-        $this->response->setStatus(201);
+        if ($object->save()) {
+            $this->response->setStatus(201, 'Location', "{$this->uriPrefix}/{$model}/{$object->getPrimaryKey()}");
+        } else {
+            $this->response->setStatus(500);
+        }
+
+    }
+
+    private function getPropelRecord($model)
+    {
+        $classToUse = '\\espressoTaster\\data\\' . ucfirst($model);
+        if (class_exists($classToUse)) {
+            return new $classToUse();
+        } else {
+            throw new \RuntimeException("Model not found");
+        }
     }
 
     /**
@@ -168,19 +174,19 @@ class Propel extends Module
     public function putData($model, $idOrSlug = NULL)
     {
         $object = $this->getPropelQuery($model);
-        if ( is_numeric($idOrSlug) ){
+        if (is_numeric($idOrSlug)) {
             $object->filterByPrimaryKey($idOrSlug);
         } else {
             $object->filterBySlug($idOrSlug);
         }
-        if ( $object->count() == 1){
-            if ($object->update($this->request->body, null, true) ){
+        if ($object->count() == 1) {
+            if ($object->update($this->request->body, NULL, TRUE)) {
                 $post = $object->findOne();
                 $this->response->setContent($post);
             } else {
                 $this->response->setStatus(500);
             }
-        }else{
+        } else {
             $this->response->setStatus(404);
         }
     }
@@ -194,14 +200,14 @@ class Propel extends Module
     public function deleteData($model, $idOrSlug = NULL)
     {
         $object = $this->getPropelQuery($model);
-        if ( is_numeric($idOrSlug) ){
+        if (is_numeric($idOrSlug)) {
             $object->filterByPrimaryKey($idOrSlug);
         } else {
             $object->filterBySlug($idOrSlug);
         }
-        if ( $object->count() == 1 && $object->delete()){
+        if ($object->count() == 1 && $object->delete()) {
             $this->response->setStatus(204);
-        }else{
+        } else {
             $this->response->setStatus(404);
         }
 
@@ -216,12 +222,11 @@ class Propel extends Module
     public function pageData($model, $pageNum = 1)
     {
         #$this->response->setContent("Should get page {$pageNum} for {$model}");
-        if ( $pageNum < 1 ){
+        if ($pageNum < 1) {
             $pageNum = 1;
         }
-        $model = $this->getPropelQuery($model);
-        # todo: 10, below, should be configurable
-        $pageData = $model->paginate($pageNum, 10);
+        $model    = $this->getPropelQuery($model);
+        $pageData = $model->paginate($pageNum, $this->numPerPage);
         $data     = array('data' => array(), 'pagination' => array('numberOfPages' => $pageData->getLastPage(), 'numberOfHits' => $pageData->getNbResults()));
         if ($pageNum <= $pageData->getlastPage()) {
             foreach ($pageData as $post) {
@@ -229,5 +234,10 @@ class Propel extends Module
             }
         }
         $this->response->setContent($data);
+    }
+
+    public function setNumPerPage($num)
+    {
+        $this->numPerPage = $num;
     }
 }
