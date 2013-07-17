@@ -8,6 +8,7 @@ declare(encoding = "UTF8");
 namespace DHP\modules;
 use DHP\blueprint\Module;
 use DHP\Response;
+use DHP\Request;
 use DHP\Routing;
 
 /**
@@ -67,16 +68,18 @@ class Propel extends Module
     /**
      * @param \DHP\Routing  $routing
      * @param \DHP\Response $response
+     * @param \DHP\Request  $request
      * @param String        $uriPrefix the trigger in the URI that this will use. If 'api' then 'api/...' will be handled by this module
      * @param String        $propelConfig the path to the propel config
      * @param String        $propelIncludeDir the include dir of the propel files
      * @param null|String   $propelLibraryDir if the propel library isn't included by the app, this will include it
      * @internal param String $propelDir
      */
-    public function __construct(Routing $routing, Response $response, $uriPrefix, $propelConfig, $propelIncludeDir, $propelLibraryDir = NULL)
+    public function __construct(Routing $routing, Response $response,Request $request, $uriPrefix, $propelConfig, $propelIncludeDir, $propelLibraryDir = NULL)
     {
         $this->routing  = $routing;
         $this->response = $response;
+        $this->request = $request;
         $that           = $this;
         # setup single post uris
         $this->get($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
@@ -89,6 +92,9 @@ class Propel extends Module
             return $that->postData($model);
         });
         $this->put($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
+            return $that->putData($model, $idOrSLug);
+        });
+        $this->post($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
             return $that->putData($model, $idOrSLug);
         });
         $this->delete($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
@@ -130,6 +136,15 @@ class Propel extends Module
         }
     }
 
+    private function getPropelRecord($model){
+        $classToUse         = '\\espressoTaster\\data\\' .ucfirst($model);
+        if (class_exists($classToUse)) {
+            return new $classToUse();
+        } else {
+            throw new \RuntimeException("Model not found");
+        }
+    }
+
     /**
      * Handles POST requests
      *
@@ -137,7 +152,11 @@ class Propel extends Module
      */
     public function postData($model)
     {
-        $this->response->setContent("Should create {$model}");
+        $object = $this->getPropelRecord($model);
+        $object->fromArray($this->request->body);
+        $object->save();
+        # todo: create correct 201 with location header to API-call for the newly created post, right?
+        $this->response->setStatus(201);
     }
 
     /**
@@ -148,7 +167,22 @@ class Propel extends Module
      */
     public function putData($model, $idOrSlug = NULL)
     {
-        $this->response->setContent("Should update {$model} w. id {$idOrSlug}");
+        $object = $this->getPropelQuery($model);
+        if ( is_numeric($idOrSlug) ){
+            $object->filterByPrimaryKey($idOrSlug);
+        } else {
+            $object->filterBySlug($idOrSlug);
+        }
+        if ( $object->count() == 1){
+            if ($object->update($this->request->body, null, true) ){
+                $post = $object->findOne();
+                $this->response->setContent($post);
+            } else {
+                $this->response->setStatus(500);
+            }
+        }else{
+            $this->response->setStatus(404);
+        }
     }
 
     /**
@@ -159,7 +193,18 @@ class Propel extends Module
      */
     public function deleteData($model, $idOrSlug = NULL)
     {
-        $this->response->setContent("Should delete {$model} w. id {$idOrSlug}");
+        $object = $this->getPropelQuery($model);
+        if ( is_numeric($idOrSlug) ){
+            $object->filterByPrimaryKey($idOrSlug);
+        } else {
+            $object->filterBySlug($idOrSlug);
+        }
+        if ( $object->count() == 1 && $object->delete()){
+            $this->response->setStatus(204);
+        }else{
+            $this->response->setStatus(404);
+        }
+
     }
 
     /**

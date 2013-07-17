@@ -16,7 +16,7 @@ $di = new DHP\dependencyInjection\DI();
 $di->alias('Response','DHP\Response');
 $di->get('DHP\Response');
 $di->set('DHP\Request')->addMethodCall('setupWithEnvironment');
-($di->set('DHP\modules\Propel')->setArguments(array(2=>'api',3=>'config',4=>'includeDir')));
+($di->set('DHP\modules\Propel')->setArguments(array(3=>'api',4=>'config',5=>'includeDir')));
 $di->get('DHP\modules\Propel');
 
 #$di->set('DHP\Response');
