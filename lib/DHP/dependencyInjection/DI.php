@@ -253,7 +253,7 @@ class DI
     public function alias($alias, $original)
     {
         $this->store->{$alias} = $original;
-        return;
+        return $this;
         if (!isset($this->store->{$original})) {
             throw new \InvalidArgumentException( 'Original must already exist' );
             $this->store->{$alias} = $original;

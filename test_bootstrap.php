@@ -23,4 +23,6 @@ $autoIncludeRecursive('lib/DHP/middleware');
 $autoIncludeRecursive('lib/DHP/utility');
 $autoIncludeRecursive('lib/DHP/dependencyInjection');
 $autoIncludeRecursive('lib/DHP/EventInterface.php');
+$autoIncludeRecursive('lib/DHP/modules/propelJson');
+$autoIncludeRecursive('lib/DHP/modules');
 $autoIncludeRecursive('lib/DHP');

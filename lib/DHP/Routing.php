@@ -34,6 +34,7 @@ class Routing
         self::HTTP_METHOD_ANY
     );
     private $customParamTypes = array();
+    private $routeAliases     = array();
 
     /**
      * returns routes matching the uri and the method
@@ -167,6 +168,13 @@ class Routing
         return $return;
     }
 
+    /**
+     * Add own parameters such as userId to quickly load a user if needed.
+     *
+     *
+     * @param          $parameter
+     * @param callable $closure
+     */
     public function addCustomParameter($parameter, callable $closure)
     {
         $this->customParamTypes[$parameter] = $closure;
@@ -192,7 +200,8 @@ class Routing
                 if (isset($uriNamespace)) {
                     $uri = trim($uriNamespace, '/') . '/' . trim($uri, '/');
                 }
-                $this->registerRoute($method, $uri, $routeCall);
+                $routeAlias = isset($methodDocComments['routeAlias'])?$methodDocComments['routeAlias']:NULL;
+                $this->registerRoute($method, $uri, $routeCall,$routeAlias);
             }
         }
     }
@@ -204,10 +213,11 @@ class Routing
      * available methods
      *
      * @param String|array $httpMethods one or more methods this route is used for
-     * @param String       $uri the uri for the route
-     * @param mixed        $routeCall is either a callable or an array of controller, method
+     * @param String       $uri         the uri for the route
+     * @param mixed        $routeCall   is either a callable or an array of controller, method
+     * @param String       $routeAlias  a Alias used to reference this route
      */
-    public function registerRoute($httpMethods, $uri, $routeCall)
+    public function registerRoute($httpMethods, $uri, $routeCall,$routeAlias = NULL)
     {
         $httpMethods =
             is_array($httpMethods) ? $httpMethods : array($httpMethods);
@@ -215,6 +225,9 @@ class Routing
         foreach ($httpMethods as $method) {
             if (in_array($method, $httpMethods)) {
                 $this->routes[$method][$uri] = $routeCall;
+                if (isset( $routeAlias )) {
+                    $this->routeAliases[$routeAlias] = $uri;
+                }
             }
         }
     }
@@ -238,5 +251,23 @@ class Routing
     public function getRoutes()
     {
         return $this->routes;
+    }
+
+    /**
+     * With this function, we should be able to generate URLs for easy
+     * navigation between different pages in the application.
+     *
+     * Example:
+     * generateUrlFromRoute('blog.page',array(':title'=>'this-is-the-title')
+     *
+     * returns blog/this-is-the-title
+     *
+     * @param string $route the name of a route or a uri where we substitue values
+     * @param array $values an array with key => values
+     * @return string
+     */
+    public function generateUrlFromRoute($route,$values){
+        $routeUri = isset($this->routeAliases[$route])?$this->routeAliases[$route]:$route;
+        return str_replace(array_keys($values),array_values($values),$routeUri);
     }
 }

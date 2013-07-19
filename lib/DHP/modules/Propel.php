@@ -61,6 +61,9 @@ use DHP\Routing;
  * These kind of commands might be available further down the road. How they will be
  * implemented, have not been considered just yet.
  */
+
+# todo : array map of model/fieldNames to names in object to return
+# todo : look into jsonapi.org and see what can implement... somewhat easily
 class Propel extends Module
 {
     protected $response, $request, $uriPrefix, $routing;
@@ -87,10 +90,10 @@ class Propel extends Module
         $this->get($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
             $that->getData($model, $idOrSLug);
         });
-        $this->post($uriPrefix . '/:model', function ($model, $idOrSLug = NULL) use ($that) {
+        $this->post($uriPrefix . '/:model', function ($model) use ($that) {
             return $that->postData($model);
         });
-        $this->post($uriPrefix . '/:model/new', function ($model, $idOrSLug = NULL) use ($that) {
+        $this->post($uriPrefix . '/:model/new', function ($model) use ($that) {
             return $that->postData($model);
         });
         $this->put($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
@@ -155,6 +158,11 @@ class Propel extends Module
 
     }
 
+    /**
+     * @param $model
+     * @return mixed
+     * @throws \RuntimeException
+     */
     private function getPropelRecord($model)
     {
         $classToUse = '\\espressoTaster\\data\\' . ucfirst($model);
@@ -236,6 +244,10 @@ class Propel extends Module
         $this->response->setContent($data);
     }
 
+    /**
+     * Sets the number of posts to have on one page
+     * @param $num
+     */
     public function setNumPerPage($num)
     {
         $this->numPerPage = $num;

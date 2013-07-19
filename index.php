@@ -16,8 +16,10 @@ $di = new DHP\dependencyInjection\DI();
 $di->alias('Response','DHP\Response');
 $di->get('DHP\Response');
 $di->set('DHP\Request')->addMethodCall('setupWithEnvironment');
-($di->set('DHP\modules\Propel')->setArguments(array(3=>'api',4=>'config',5=>'includeDir')));
-$di->get('DHP\modules\Propel');
+#($di->set('DHP\modules\Propel')->setArguments(array(3=>'api',4=>'config',5=>'includeDir')));
+($di->set('DHP\modules\propelJson\API')->setArguments(array(2=>array('bag'=>array('Id'=> 'id'),'cup'=>array('Coffeeweight'=>'coffee'),'roaster' => array('Id' => 'id','Name'=>'name','Slug'=>'slug'),'blend'=>array('RoasterId'=>'roaster','Id'=>'id','Name'=>'name','Slug'=>'slug')),3=>'\\espressoTaster\\data\\')));
+$di->get('DHP\modules\propelJson\API');
+
 
 #$di->set('DHP\Response');
 $response = $di->get('Response');

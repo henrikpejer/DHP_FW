@@ -10,8 +10,6 @@ use DHP\Request;
 
 class Response
 {
-    private $headerStatus = array('statusCode' => '200',
-                                  'headerData' => NULL);
     private $headerStatusCodes = array(
         200 => 'OK',
         201 => 'Created',
@@ -163,12 +161,17 @@ class Response
             if (is_string($this->body)) {
                 echo $this->body;
             } else {
-                $return = (object)array(
-                    'payload'  => $this->body,
-                    'status'   => $this->getStatus(TRUE),
-                    'messages' => array()
+                $return = array(
+                    'meta'=>array(
+                        'status'   => $this->getStatus(TRUE),
+                        'messages' => array())
                 );
-                echo json_encode($return, JSON_NUMERIC_CHECK | JSON_FORCE_OBJECT);
+                $return += $this->body;
+                $options = JSON_NUMERIC_CHECK;
+                if (defined('STDIN')){
+                    $options = ($options + JSON_PRETTY_PRINT);
+                }
+                echo json_encode($return, $options);
             }
         }
     }

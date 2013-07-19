@@ -27,6 +27,7 @@ class AppTest extends PHPUnit_Framework_TestCase
 /**
 * @method GET
 * @uri /title/:title
+* @routeAlias blog.page
 */
 public function title($title){
  echo "this is the title : {$title}";
@@ -36,6 +37,7 @@ public function title($title){
 
         $this->object->addController('AppController', 'blog');
         $this->object->start();
+        $this->assertEquals('blog/title/the-title',$this->DI->get('DHP\Routing')->generateUrlFromRoute('blog.page',array(':title'=>'the-title')));
     }
 
     public function testExtendingApp()
