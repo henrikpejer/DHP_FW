@@ -115,47 +115,6 @@ class Data
         return $this->data;
     }
 
-    protected function oldfetchData()
-    {
-        $data = array();
-        if (count($this->dataCommands) == 1 && current($this->dataCommands) === NULL) {
-            $dataObject = $this->getQuery(key($this->dataCommands));
-            $res        = $dataObject->paginate(1, 10);
-            $tempData   = array();
-            foreach ($res as $post) {
-                $tempData[] = $post->toArray();
-            }
-            $data[key($this->dataCommands)] = $tempData;
-        } else {
-            foreach ($this->dataCommands as $command => $id) {
-                if (isset($id)) {
-                    if (!preg_match("#[^0-9,]+#", $id)) {
-                        $id = explode(',', $id);
-                    }
-                    try {
-                        $dataObject     = $this->getQuery($command);
-                        $res            = is_array($id) ? $dataObject->findPks($id) : $dataObject->findBySlug($id);
-                        $data[$command] = $res;
-                    } catch (\Exception $e) {
-                        var_dump($e);
-                    }
-                } else {
-                    try {
-                        $dataObject = $this->getQuery($command);
-                        $filterName = 'filterBy' . ucfirst($lastCommand);
-                        $dataObject->$filterName($data[$lastCommand]);
-                        $res            = $dataObject->find();
-                        $data[$command] = $res;
-                    } catch (\Exception $e) {
-                        var_dump($e);
-                    }
-                }
-                $lastCommand = $command;
-            }
-        }
-        $this->data = $data;
-    }
-
     /**
      * Returns a propel record object for $model
      * @return

@@ -91,23 +91,23 @@ class Propel extends Module
             $that->getData($model, $idOrSLug);
         });
         $this->post($uriPrefix . '/:model', function ($model) use ($that) {
-            return $that->postData($model);
+            $that->postData($model);
         });
         $this->post($uriPrefix . '/:model/new', function ($model) use ($that) {
-            return $that->postData($model);
+            $that->postData($model);
         });
         $this->put($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
-            return $that->putData($model, $idOrSLug);
+            $that->putData($model, $idOrSLug);
         });
         $this->post($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
-            return $that->putData($model, $idOrSLug);
+            $that->putData($model, $idOrSLug);
         });
         $this->delete($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
-            return $that->deleteData($model, $idOrSLug);
+            $that->deleteData($model, $idOrSLug);
         });
         # setup page uris
         $this->get($uriPrefix . '/:model/page/:pageNum', function ($model, $pageNum) use ($that) {
-            return $that->pageData($model, $pageNum);
+            $that->pageData($model, $pageNum);
         });
     }
 

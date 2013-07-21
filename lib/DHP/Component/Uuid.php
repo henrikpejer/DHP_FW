@@ -55,24 +55,24 @@ class Uuid extends Component
     /**
      * Converts an ip-adress to hexadecimal value
      *
-     * @param string $ip
+     * @param string $ipAddress
      * @return string
      */
-    private function clientIPToHex($ip = '')
+    private function clientIPToHex($ipAddress = '')
     {
         $hex = "";
-        if ($ip == "") {
-            $ip = getEnv("REMOTE_ADDR");
+        if ($ipAddress == "") {
+            $ipAddress = getEnv("REMOTE_ADDR");
         }
-        $part = explode('.', $ip);
+        $part = explode('.', $ipAddress);
         # fix for when we have ipv6... and like to have ipv4 IP's....
         if (count($part) < 4) {
             if (!isset($_SERVER['REMOTE_ADDR'])) {
-                $ip = gethostbyname(gethostbyaddr('127.0.0.1'));
+                $ipAddress = gethostbyname(gethostbyaddr('127.0.0.1'));
             } else {
-                $ip = gethostbyname(gethostbyaddr($_SERVER['REMOTE_ADDR']));
+                $ipAddress = gethostbyname(gethostbyaddr($_SERVER['REMOTE_ADDR']));
             }
-            $part = explode('.', $ip);
+            $part = explode('.', $ipAddress);
         }
         foreach ($part as $ipPart) {
             $hex .= substr("0" . dechex($ipPart), -2);
@@ -92,11 +92,11 @@ class Uuid extends Component
 
     /**
      * Sets the unique id
-     * @param $id
+     * @param $uuId
      */
-    public function setId($id)
+    public function setId($uuId)
     {
-        $this->uuId = $id;
+        $this->uuId = $uuId;
     }
 
     /**
@@ -108,13 +108,13 @@ class Uuid extends Component
     {
         $uuid = $this->uuId;
         $rez  = Array();
-        $u    = explode("-", $uuid);
-        if (is_array($u) == TRUE && count($u) == 5) {
+        $uPart    = explode("-", $uuid);
+        if (is_array($uPart) == TRUE && count($uPart) == 5) {
             $rez = Array(
-                'serverID' => $u[0],
-                'ip'       => $this->clientIPFromHex($u[1]),
-                'unixtime' => hexdec($u[2]),
-                'micro'    => (hexdec($u[3]) / 65536)
+                'serverID' => $uPart[0],
+                'ip'       => $this->clientIPFromHex($uPart[1]),
+                'unixtime' => hexdec($uPart[2]),
+                'micro'    => (hexdec($uPart[3]) / 65536)
             );
         }
         return $rez;
@@ -128,13 +128,13 @@ class Uuid extends Component
      */
     private function clientIPFromHex($hex)
     {
-        $ip = "";
+        $ipAddress = "";
         if (strlen($hex) == 8) {
-            $ip .= hexdec(substr($hex, 0, 2)) . ".";
-            $ip .= hexdec(substr($hex, 2, 2)) . ".";
-            $ip .= hexdec(substr($hex, 4, 2)) . ".";
-            $ip .= hexdec(substr($hex, 6, 2));
+            $ipAddress .= hexdec(substr($hex, 0, 2)) . ".";
+            $ipAddress .= hexdec(substr($hex, 2, 2)) . ".";
+            $ipAddress .= hexdec(substr($hex, 4, 2)) . ".";
+            $ipAddress .= hexdec(substr($hex, 6, 2));
         }
-        return $ip;
+        return $ipAddress;
     }
 }

@@ -36,10 +36,10 @@ class APIToken extends Middleware
                 }
                 break;
             case isset($headers['X-Auth-User']) && isset($headers['X-Auth-Password']):
-                $XAuthUserEventReturn = $this->event->trigger('APIToken.XAuthToken', $headers['X-Auth-User'], $headers['X-Auth-Password']);
+                $xAuthUserEventReturn = $this->event->trigger('APIToken.XAuthToken', $headers['X-Auth-User'], $headers['X-Auth-Password']);
                 switch (TRUE) {
-                    case $XAuthUserEventReturn === FALSE:
-                    case $XAuthUserEventReturn === NULL:
+                    case $xAuthUserEventReturn === FALSE:
+                    case $xAuthUserEventReturn === NULL:
                         throw new \RuntimeException("Not allowed");
                         break;
                     default:

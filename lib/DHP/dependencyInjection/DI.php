@@ -197,12 +197,12 @@ class DI
                 # get a value, if possible...
                 switch (TRUE) {
                     case (!empty($constructorArgument['class']) &&
-                          ($__arg__ =
+                          ($arg =
                               $this->get($constructorArgument['class'])) !== NULL):
                     case (!empty($constructorArgument['name']) &&
-                          ($__arg__ =
+                          ($arg =
                               $this->get($constructorArgument['name'])) !== NULL):
-                        $args[] = $__arg__;
+                        $args[] = $arg;
                         break;
                     case isset($argsForObject[$key]):
                         $args[] = $argsForObject[$key];
@@ -253,14 +253,6 @@ class DI
     public function alias($alias, $original)
     {
         $this->store->{$alias} = $original;
-        return $this;
-        if (!isset($this->store->{$original})) {
-            throw new \InvalidArgumentException( 'Original must already exist' );
-            $this->store->{$alias} = $original;
-        } else {
-            # todo : perhaps this will bork since... we are refereing to an object, nolonger here, right?
-            $this->store->{$alias} = & $this->store->{$original};
-        }
         return $this;
     }
 }

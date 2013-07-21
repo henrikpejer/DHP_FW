@@ -9,14 +9,6 @@ use DHP\utility\Util;
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-01 05:34
  */
-if (!defined('CLI')) {
-    if (php_sapi_name() == 'cli' or PHP_SAPI == 'cli') {
-        define('CLI', TRUE);
-    } else {
-        define('CLI', FALSE);
-    }
-    define('HTTP', !CLI);
-}
 
 class Request
 {
@@ -58,10 +50,9 @@ class Request
     private function setBodyContents($bodyContent = NULL)
     {
         if (!isset($bodyContent)) {
-            if (HTTP) {
+            if (!PHP_SAPI == 'cli') {
                 $rawData = file_get_contents('php://input');
-            }
-            if (CLI) {
+            } else {
                 $rawData = Util::parseArgv('body');
             }
         } else {
@@ -99,7 +90,7 @@ class Request
             $uri       = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
             $this->uri = $uri;
         }
-        if (CLI) {
+        if (PHP_SAPI == 'cli') {
             $this->uri = Util::parseArgv('uri');
         }
         $this->uri = trim($this->uri, '/');
@@ -113,7 +104,7 @@ class Request
         if (isset($_SERVER['REQUEST_METHOD'])) {
             $this->method = $_SERVER['REQUEST_METHOD'];
         }
-        if (CLI) {
+        if (PHP_SAPI == 'cli') {
             $this->method = Util::parseArgv('method');
         }
     }

@@ -52,19 +52,19 @@ class Util
 
     static public function methodDocComments($reflectionMethod)
     {
-        $__comments__ = array();
+        $comments = array();
         # get the docs
-        $__comment__ = $reflectionMethod->getDocComment();
-        if (FALSE !== $__comment__) {
-            $lines = explode("\n", $__comment__);
+        $comment = $reflectionMethod->getDocComment();
+        if (FALSE !== $comment) {
+            $lines = explode("\n", $comment);
             foreach ($lines as $line) {
                 $line = trim($line, ' *');
                 if (preg_match('/^@([a-z]+) (.*)$/i', $line, $matches)) {
-                    $__comments__[$matches[1]] = $matches[2];
+                    $comments[$matches[1]] = $matches[2];
                 }
             }
         }
-        return $__comments__;
+        return $comments;
     }
 
     static public function parseArgv($name)
