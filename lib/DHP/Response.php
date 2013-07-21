@@ -168,7 +168,7 @@ class Response
                 );
                 $return += $this->body;
                 $options = JSON_NUMERIC_CHECK;
-                if (defined('STDIN')){
+                if (PHP_SAPI == 'cli'){
                     $options = ($options + JSON_PRETTY_PRINT);
                 }
                 echo json_encode($return, $options);
