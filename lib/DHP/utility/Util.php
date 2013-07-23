@@ -50,10 +50,15 @@ class Util
         return $args;
     }
 
+    /**
+     * @param $reflectionMethod
+     * @return array
+     */
     static public function methodDocComments($reflectionMethod)
     {
         $comments = array();
         # get the docs
+        /** @noinspection PhpUndefinedMethodInspection */
         $comment = $reflectionMethod->getDocComment();
         if (FALSE !== $comment) {
             $lines = explode("\n", $comment);
@@ -67,6 +72,10 @@ class Util
         return $comments;
     }
 
+    /**
+     * @param $name
+     * @return null
+     */
     static public function parseArgv($name)
     {
         $parsedValues = array();

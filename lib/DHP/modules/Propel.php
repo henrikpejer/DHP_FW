@@ -121,20 +121,28 @@ class Propel extends Module
     {
         $model = $this->getPropelQuery($model);
         if (is_numeric($idOrSlug) == TRUE) {
+            /** @noinspection PhpUndefinedMethodInspection */
             $data = $model->findPk($idOrSlug);
         } else {
             # todo: this should perhaps not be necessary
             $slug = str_replace(' ', '-', $idOrSlug);
+            /** @noinspection PhpUndefinedMethodInspection */
             $data = $model->findBySlug($slug);
         }
         $this->response->setContent($data);
     }
 
+    /**
+     * @param $model
+     * @return mixed
+     * @throws \RuntimeException
+     */
     private function getPropelQuery($model)
     {
         $model         = ucfirst($model);
         $apiClassToUse = '\\espressoTaster\\data\\' . $model . 'Query';
         if (class_exists($apiClassToUse)) {
+            /** @noinspection PhpUndefinedMethodInspection */
             return $apiClassToUse::create()->setFormatter('PropelArrayFormatter');
         } else {
             throw new \RuntimeException("Model not found");
@@ -183,12 +191,16 @@ class Propel extends Module
     {
         $object = $this->getPropelQuery($model);
         if (is_numeric($idOrSlug)) {
+            /** @noinspection PhpUndefinedMethodInspection */
             $object->filterByPrimaryKey($idOrSlug);
         } else {
+            /** @noinspection PhpUndefinedMethodInspection */
             $object->filterBySlug($idOrSlug);
         }
         if ($object->count() == 1) {
+            /** @noinspection PhpUndefinedMethodInspection */
             if ($object->update($this->request->body, NULL, TRUE)) {
+                /** @noinspection PhpUndefinedMethodInspection */
                 $post = $object->findOne();
                 $this->response->setContent($post);
             } else {
@@ -209,10 +221,13 @@ class Propel extends Module
     {
         $object = $this->getPropelQuery($model);
         if (is_numeric($idOrSlug)) {
+            /** @noinspection PhpUndefinedMethodInspection */
             $object->filterByPrimaryKey($idOrSlug);
         } else {
+            /** @noinspection PhpUndefinedMethodInspection */
             $object->filterBySlug($idOrSlug);
         }
+        /** @noinspection PhpUndefinedMethodInspection */
         if ($object->count() == 1 && $object->delete()) {
             $this->response->setStatus(204);
         } else {
@@ -234,8 +249,11 @@ class Propel extends Module
             $pageNum = 1;
         }
         $model    = $this->getPropelQuery($model);
+        /** @noinspection PhpUndefinedMethodInspection */
         $pageData = $model->paginate($pageNum, $this->numPerPage);
+        /** @noinspection PhpUndefinedMethodInspection */
         $data     = array('data' => array(), 'pagination' => array('numberOfPages' => $pageData->getLastPage(), 'numberOfHits' => $pageData->getNbResults()));
+        /** @noinspection PhpUndefinedMethodInspection */
         if ($pageNum <= $pageData->getlastPage()) {
             foreach ($pageData as $post) {
                 $data[] = $post;

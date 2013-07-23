@@ -93,6 +93,7 @@ class API
                     $dataApiObject->setData($this->request->body);
                 }
                 $data[$command]  = $dataApiObject->getData();
+                /** @noinspection PhpUndefinedMethodInspection */
                 if ($gotResults == false && $data[$command]->count() > 0){
                     $gotResults = true;
                 }
@@ -121,6 +122,7 @@ class API
             if (is_a($realData,'PropelModelPager')){
                 $tempData = array();
                 foreach($realData as $post){
+                    /** @noinspection PhpUndefinedMethodInspection */
                     $tempData[] = $post->toArray();
                 }
                 $realData = $tempData;
@@ -128,11 +130,13 @@ class API
             if (is_array($realData)) {
                 $tempData = $realData;
             } else {
+                /** @noinspection PhpUndefinedMethodInspection */
                 $tempData = $realData->toArray();
             }
             foreach ($tempData as $post) {
                 $data = array();
                 if(!is_array($post)){
+                    /** @noinspection PhpUndefinedMethodInspection */
                     $post = $post->toArray();
                 }
                 foreach ($this->dataMap[$model] as $key => $value) {

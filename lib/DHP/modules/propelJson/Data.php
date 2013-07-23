@@ -8,6 +8,10 @@ declare(encoding = "UTF8");
 namespace DHP\modules\propelJson;
 
 
+/**
+ * Class Data
+ * @package DHP\modules\propelJson
+ */
 class Data
 {
 
@@ -55,10 +59,13 @@ class Data
     {
         $pageNumber = strpos($this->dataId, 'page_') !== false ? str_replace('page_', '', $this->dataId) : 1;
         $dataObject = $this->getQuery();
+        /** @noinspection PhpUndefinedMethodInspection */
         $res        = $dataObject->paginate($pageNumber, $this->numPerPage);
+        /** @noinspection PhpUndefinedMethodInspection */
         if ($pageNumber > 0 && $pageNumber <= $res->getLastPage()) {
             $postPks = array();
             foreach ($res as $post) {
+                /** @noinspection PhpUndefinedMethodInspection */
                 $postPks[] = $post->getPrimaryKey();
             }
             $this->data = $this->getQuery()->findPks($postPks);
@@ -69,11 +76,12 @@ class Data
 
     /**
      * Returns a query for the model
-     * @return
+     * @return \ModelCriteria
      */
     protected function getQuery()
     {
         $class = $this->getPropelClassForModel();
+        /** @noinspection PhpUndefinedMethodInspection */
         return $class::create();
     }
 
@@ -121,6 +129,7 @@ class Data
             if ($numeric) {
                 $res = $dataObject->findPks($dataId);
             } else {
+                /** @noinspection PhpUndefinedMethodInspection */
                 $res = $dataObject->filterBySlug($dataId)->find();
             }
             # $res = is_array($dataId) ? $dataObject->findPks($dataId) : $dataObject->findBySlug($dataId);
@@ -128,6 +137,9 @@ class Data
         $this->data = $res;
     }
 
+    /**
+     * @param $numPerPage
+     */
     public function setNumPerPage($numPerPage)
     {
         $this->numPerPage = $numPerPage;
@@ -140,10 +152,15 @@ class Data
         return $this->data;
     }
 
+    /**
+     * @param $data
+     */
     public function setData($data)
     {
         foreach ($this->data as $post) {
+            /** @noinspection PhpUndefinedMethodInspection */
             $post->fromArray($data);
+            /** @noinspection PhpUndefinedMethodInspection */
             $post->save();
         }
     }
