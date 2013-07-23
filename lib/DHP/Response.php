@@ -23,17 +23,7 @@ class Response
     );
     private $headers = array();
     private $body = NULL;
-    private $request = NULL;
     private $headersSent = FALSE;
-
-    /**
-     * Sets up the request
-     * @param Request $request
-     */
-    public function __construct(Request $request)
-    {
-        $this->request = $request;
-    }
 
     /**
      * The body can contain either a string or object / array. IF it is an object or array
