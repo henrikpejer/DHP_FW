@@ -172,7 +172,7 @@ class Response
      * @param bool $intOnly defaults to true, returns only the
      * @return null
      */
-    private function getStatus($intOnly = TRUE)
+    public function getStatus($intOnly = TRUE)
     {
         $return = NULL;
         if (isset($this->headers['status'])) {

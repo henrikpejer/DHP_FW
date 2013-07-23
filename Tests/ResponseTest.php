@@ -74,6 +74,15 @@ class ResponseTest extends PHPUnit_Framework_TestCase
         );
         $this->object->setStatus(200);
         $this->object->addHeader("content-type", "text/html");
+        $this->assertEquals(200,$this->object->getStatus(true));
+        $this->assertEquals(
+            array(
+                 'statusCode' => 200,
+                 'value'      => 'HTTP/1.1 200 OK'
+
+            ),
+            $this->object->getStatus(false)
+        );
         $this->object->send();
         $this->assertAttributeEquals($headerTestAgainst, 'headers', $this->object);
     }

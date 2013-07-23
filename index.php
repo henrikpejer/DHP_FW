@@ -13,17 +13,11 @@ set_include_path(get_include_path() . PATH_SEPARATOR . realpath('../espresso_tas
 $loader = new SplClassLoader('app', __DIR__);
 $loader->register();
 $di = new DHP\dependencyInjection\DI();
-$di->alias('Response','DHP\Response');
-$di->get('DHP\Response');
 $di->set('DHP\Request')->addMethodCall('setupWithEnvironment');
-#($di->set('DHP\modules\Propel')->setArguments(array(3=>'api',4=>'config',5=>'includeDir')));
-($di->set('DHP\modules\propelJson\API')->setArguments(array(2=>array('bag'=>array('Id'=> 'id'),'cup'=>array('Coffeeweight'=>'coffee'),'roaster' => array('Id' => 'id','Name'=>'name','Slug'=>'slug'),'blend'=>array('RoasterId'=>'roaster','Id'=>'id','Name'=>'name','Slug'=>'slug')),3=>'\\espressoTaster\\data\\')));
-$di->get('DHP\modules\propelJson\API');
-
-
-#$di->set('DHP\Response');
+$di->alias('Response', 'DHP\Response');
+$di->get('DHP\Response');
 $response = $di->get('Response');
-$app = $di->get('DHP\App');
+$app      = $di->get('DHP\App');
 $app->start(
     __DIR__ . DIRECTORY_SEPARATOR . 'app/config/routes.php',
     __DIR__ . DIRECTORY_SEPARATOR . 'app/config/app.php'
@@ -33,12 +27,15 @@ $t     = microtime(true) - DHP_BENCHMARK_START;
 $micro = sprintf("%06d", ($t - floor($t)) * 1000000);
 $d     = new DateTime(date('Y-m-d H:i:s.' . $micro, $t));
 
-$response->addHeader('Generated-By','DHP FW');
-$response->AddHeader('RAM-Usage',sprintf(
-    "%0.3f Mb",
-    ((memory_get_peak_usage() - DHP_BENCHMARK_MEMORY) / 1024) / 1024
-) );
-$response->addHeader('Page Time',sprintf("%0.3f seconds", $d->format('s.u'))."\n");
+$response->addHeader('Generated-By', 'DHP FW');
+$response->AddHeader(
+    'RAM-Usage',
+    sprintf(
+        "%0.3f Mb",
+        ((memory_get_peak_usage() - DHP_BENCHMARK_MEMORY) / 1024) / 1024
+    )
+);
+$response->addHeader('Page Time', sprintf("%0.3f seconds", $d->format('s.u')) . "\n");
 $response->send();
 echo "\n";
 #var_dump($di->get('DHP\Response'));

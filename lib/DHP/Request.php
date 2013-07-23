@@ -27,17 +27,18 @@ class Request
      */
     public function __construct(
         $method = "HEADER",
-        $uri = NULL,
-        $body = NULL,
+        $uri = null,
+        $body = null,
         $post = array(),
         $get = array(),
         $files = array(),
         $headers = array()
-    )
-    {
+    ) {
         $this->method = $method;
         $this->uri    = $uri;
-        $this->setBodyContents($body);
+        if (isset($body)) {
+            $this->setBodyContents($body);
+        }
         $this->post    = $post;
         $this->get     = $get;
         $this->files   = $files;
@@ -47,10 +48,10 @@ class Request
     /**
      * Reads php://input and uses that for body of request
      */
-    private function setBodyContents($bodyContent = NULL)
+    private function setBodyContents($bodyContent = null)
     {
         if (!isset($bodyContent)) {
-            if (!PHP_SAPI == 'cli') {
+            if (PHP_SAPI != 'cli') {
                 $rawData = file_get_contents('php://input');
             } else {
                 $rawData = Util::parseArgv('body');
@@ -75,7 +76,11 @@ class Request
         $this->headers = array();
         foreach ($_SERVER as $name => $value) {
             if (substr($name, 0, 5) == 'HTTP_') {
-                $this->headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+                $this->headers[str_replace(
+                    ' ',
+                    '-',
+                    ucwords(strtolower(str_replace('_', ' ', substr($name, 5))))
+                )] = $value;
             }
         }
     }
@@ -85,7 +90,7 @@ class Request
      */
     private function useHttpRequestUri()
     {
-        $uri = NULL;
+        $uri = null;
         if (isset($_SERVER['REQUEST_URI'])) {
             $uri       = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
             $this->uri = $uri;
@@ -121,7 +126,7 @@ class Request
 
     public function __get($name)
     {
-        $return = NULL;
+        $return = null;
         switch (strtolower($name)) {
             case 'get':
                 $return = $this->get;

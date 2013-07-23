@@ -80,6 +80,7 @@ class API
     {
         $data            = array();
         $previousCommand = NULL;
+        $gotResults = false;
         foreach ($this->dataCommands as $command => $value) {
             $value = $value == '-'?NULL:$value;
             if ( !isset($value) && isset($previousCommand) ){
@@ -87,13 +88,24 @@ class API
             }
             try{
                 $dataApiObject   = new Data($this->propelNamespace . ucfirst($command), $value, $previousCommand);
+                $requestBody = $this->request->body;
+                if (!empty($requestBody)){
+                    $dataApiObject->setData($this->request->body);
+                }
                 $data[$command]  = $dataApiObject->getData();
+                if ($gotResults == false && $data[$command]->count() > 0){
+                    $gotResults = true;
+                }
                 $previousCommand = $command;
             }catch(\Exception $e){
                 var_dump($e->getMessage());
             }
         }
-        $this->response->setContent($this->formatDataForResponse($data));
+        if ( $gotResults == false){
+            $this->response->setStatus(404);
+        } else {
+            $this->response->setContent($this->formatDataForResponse($data));
+        }
     }
 
     public function returnDataCommands()

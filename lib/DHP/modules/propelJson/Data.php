@@ -19,13 +19,13 @@ class Data
      * @param null    $columnName
      * @internal param null $id
      */
-    public function __construct($model, $dataId = NULL, $columnName = NULL)
+    public function __construct($model, $dataId = null, $columnName = null)
     {
 
         $this->model      = $model;
         $this->dataId     = $dataId;
         $this->columnName = $columnName;
-        if (isset($this->columnName) && !is_object($this->dataId)){
+        if (isset($this->columnName) && !is_object($this->dataId)) {
             unset($this->columnName);
         }
         $this->fetchData();
@@ -39,37 +39,30 @@ class Data
      */
     protected function fetchData()
     {
-        switch (TRUE) {
+        switch (true) {
             case !isset($this->dataId): # pagination
-            case is_string($this->dataId) && strpos($this->dataId, 'page_') !== FALSE: # what page we should get
-                $pageNumber = strpos($this->dataId, 'page_') !== FALSE ? str_replace('page_', '', $this->dataId) : 1;
-                $dataObject = $this->getQuery();
-                $res        = $dataObject->paginate($pageNumber, 2);
-                if ( $pageNumber > 0 && $pageNumber <= $res->getLastPage()){
-                    $postPks    = array();
-                    foreach ($res as $post) {
-                        $postPks[] = $post->getPrimaryKey();
-                    }
-                    $this->data = $this->getQuery()->findPks($postPks);
-                } else {
-                    $this->data = $this->getQuery()->findPks(array(0));
-                }
+            case is_string($this->dataId) && strpos($this->dataId, 'page_') !== false: # what page we should get
+                $this->fetchPage();
                 break;
             default:
-                if (is_string($this->dataId)) {
-                    $dataId = explode(',', $this->dataId);
-                } else {
-                    $dataId = $this->dataId;
-                }
-                $dataObject = $this->getQuery();
-                if (isset($this->columnName)) {
-                    $filterMethod = 'filterBy' . ucfirst($this->columnName);
-                    $res          = $dataObject->$filterMethod($dataId)->find();
-                } else {
-                    $res = is_array($dataId) ? $dataObject->findPks($dataId) : $dataObject->findBySlug($dataId);
-                }
-                $this->data = $res;
+                $this->fetchObject();
                 break;
+        }
+    }
+
+    protected function fetchPage()
+    {
+        $pageNumber = strpos($this->dataId, 'page_') !== false ? str_replace('page_', '', $this->dataId) : 1;
+        $dataObject = $this->getQuery();
+        $res        = $dataObject->paginate($pageNumber, 2);
+        if ($pageNumber > 0 && $pageNumber <= $res->getLastPage()) {
+            $postPks = array();
+            foreach ($res as $post) {
+                $postPks[] = $post->getPrimaryKey();
+            }
+            $this->data = $this->getQuery()->findPks($postPks);
+        } else {
+            $this->data = $this->getQuery()->findPks(array(0));
         }
     }
 
@@ -95,10 +88,10 @@ class Data
      * @internal param string $model
      * @return string
      */
-    protected function getPropelClassForModel($getRecord = FALSE)
+    protected function getPropelClassForModel($getRecord = false)
     {
         $class = $this->model;
-        if ($getRecord === FALSE) {
+        if ($getRecord === false) {
             $class .= 'Query';
         }
         if (class_exists($class)) {
@@ -108,11 +101,45 @@ class Data
         }
     }
 
+    protected function fetchObject()
+    {
+        $numeric = true;
+        if (preg_match("#[^0-9,]+#", $this->dataId)) {
+            $numeric = false;
+        }
+        if (is_string($this->dataId)) {
+            $dataId = explode(',', $this->dataId);
+        } else {
+            $dataId = $this->dataId;
+        }
+        $dataObject = $this->getQuery();
+        if (isset($this->columnName)) {
+            $filterMethod = 'filterBy' . ucfirst($this->columnName);
+            $res          = $dataObject->$filterMethod($dataId)->find();
+        } else {
+            if ($numeric) {
+                $res = $dataObject->findPks($dataId);
+            } else {
+                $res = $dataObject->filterBySlug($dataId)->find();
+            }
+            # $res = is_array($dataId) ? $dataObject->findPks($dataId) : $dataObject->findBySlug($dataId);
+        }
+        $this->data = $res;
+    }
+
     # todo : perhaps skipping this smart way and just take every-other
 
     public function getData()
     {
         return $this->data;
+    }
+
+    public function setData($data)
+    {
+        foreach($this->data as $post){
+            $post->fromArray($data);
+            $post->save();
+        }
     }
 
     /**
@@ -121,7 +148,7 @@ class Data
      */
     protected function getRecord()
     {
-        $class = $this->getPropelClassForModel(TRUE);
+        $class = $this->getPropelClassForModel(true);
         return new $class();
     }
 }
