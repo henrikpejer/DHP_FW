@@ -12,6 +12,7 @@ class Data
 {
 
     protected $model, $dataId, $data, $columnName;
+    protected $numPerPage = 10;
 
     /**
      * @param  String $model the model to use for Propel
@@ -29,6 +30,10 @@ class Data
             unset($this->columnName);
         }
         $this->fetchData();
+    }
+
+    public function setNumPerPage($numPerPage){
+        $this->numPerPage = $numPerPage;
     }
 
     /**
@@ -54,7 +59,7 @@ class Data
     {
         $pageNumber = strpos($this->dataId, 'page_') !== false ? str_replace('page_', '', $this->dataId) : 1;
         $dataObject = $this->getQuery();
-        $res        = $dataObject->paginate($pageNumber, 2);
+        $res        = $dataObject->paginate($pageNumber, $this->numPerPage);
         if ($pageNumber > 0 && $pageNumber <= $res->getLastPage()) {
             $postPks = array();
             foreach ($res as $post) {
