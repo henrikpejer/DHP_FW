@@ -1,7 +1,6 @@
 <?php
 declare(encoding = "UTF8");
 namespace DHP;
-use DHP\Request;
 
 /**
  * User: Henrik Pejer mr@henrikpejer.com
