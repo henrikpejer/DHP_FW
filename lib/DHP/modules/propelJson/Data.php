@@ -32,10 +32,6 @@ class Data
         $this->fetchData();
     }
 
-    public function setNumPerPage($numPerPage){
-        $this->numPerPage = $numPerPage;
-    }
-
     /**
      * This should read the data commands array and fetch the data accordingly
      *
@@ -132,6 +128,11 @@ class Data
         $this->data = $res;
     }
 
+    public function setNumPerPage($numPerPage)
+    {
+        $this->numPerPage = $numPerPage;
+    }
+
     # todo : perhaps skipping this smart way and just take every-other
 
     public function getData()
@@ -141,7 +142,7 @@ class Data
 
     public function setData($data)
     {
-        foreach($this->data as $post){
+        foreach ($this->data as $post) {
             $post->fromArray($data);
             $post->save();
         }
