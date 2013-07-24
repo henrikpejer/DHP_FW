@@ -9,7 +9,10 @@ use DHP\utility\Util;
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-01-01 05:34
  */
-
+/**
+ * Class Request
+ * @package DHP
+ */
 class Request
 {
     protected $method, $uri, $body, $post, $get, $files, $headers;
@@ -124,6 +127,10 @@ class Request
         $this->setBodyContents($body);
     }
 
+    /**
+     * @param $name
+     * @return array|null|String
+     */
     public function __get($name)
     {
         $return = null;
