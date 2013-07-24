@@ -105,6 +105,7 @@ class API
         if ( $gotResults == false){
             $this->response->setStatus(404);
         } else {
+            $this->response->addHeader('Content-Type','application/json');
             $this->response->setContent($this->formatDataForResponse($data));
         }
     }
@@ -135,14 +136,18 @@ class API
             }
             foreach ($tempData as $post) {
                 $data = array();
+                $primaryKey = null;
                 if(!is_array($post)){
                     /** @noinspection PhpUndefinedMethodInspection */
+                    $primaryKey = $post->getPrimaryKey();
                     $post = $post->toArray();
+                } else {
+                    $primaryKey = $post['Id'];
                 }
                 foreach ($this->dataMap[$model] as $key => $value) {
                     $data[$value] = is_numeric($key) ? $post[$value] : $post[$key];
                 }
-                $return[$model][] = (object)$data;
+                $return[$model][$primaryKey] = (object)$data;
             }
         }
         return $return;
