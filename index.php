@@ -3,6 +3,12 @@
  * User: Henrik Pejer mr@henrikpejer.com
  * Date: 2013-03-29 23:00
  */
+header("Access-Control-Allow-Origin: *",true);
+header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept",true);
+header("Access-Control-Allow-Methods: POST, PUT, DELETE, GET",true);
+if( $_SERVER['REQUEST_METHOD'] == 'OPTIONS') {
+    exit;
+}
 ini_set('DISPLAY_ERRORS', 1);
 error_reporting(E_ALL);
 require_once 'bootstrap.php';
