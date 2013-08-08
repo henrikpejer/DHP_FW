@@ -160,7 +160,7 @@ class Response
                 if (PHP_SAPI == 'cli'){
                     $options = ($options + JSON_PRETTY_PRINT);
                 }
-                echo json_encode($return, $options);
+                echo ")]}',\n".json_encode($return, $options);
             }
         }
     }
