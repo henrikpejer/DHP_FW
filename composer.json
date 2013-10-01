@@ -9,5 +9,8 @@
     ],
     "require": {
  	"propel/propel1": "~1.6"
-    }
+    },
+   "require-dev":{
+   	"sami/sami":"~1.1"
+   }
 }
