@@ -1,6 +1,7 @@
 <?php
 declare(encoding = "UTF8");
 namespace DHP\middleware;
+
 use DHP\blueprint\Middleware;
 use DHP\Event;
 use DHP\Request;
@@ -13,8 +14,13 @@ use DHP\Request;
 class APIToken extends Middleware
 {
 
-    private $request, $event;
+    private $request;
+    private $event;
 
+    /**
+     * @param Request $request
+     * @param Event   $event
+     */
     public function __construct(Request $request, Event $event)
     {
         $this->request = $request;
@@ -24,11 +30,14 @@ class APIToken extends Middleware
     public function run()
     {
         $headers = $this->request->headers;
-        switch (TRUE) {
+        switch (true) {
             case isset($headers['X-Auth-Token']):
-                $xAuthTokenEventReturn = $this->event->trigger('APIToken.XAuthToken', $headers['X-Auth-Token']);
-                switch (TRUE) {
-                    case $xAuthTokenEventReturn === FALSE:
+                $xAuthTokenReturn = $this->event->trigger(
+                    'APIToken.XAuthToken',
+                    $headers['X-Auth-Token']
+                );
+                switch (true) {
+                    case $xAuthTokenReturn === false:
                         throw new \RuntimeException("Not allowed");
                         break;
                     default:
@@ -36,14 +45,18 @@ class APIToken extends Middleware
                 }
                 break;
             case isset($headers['X-Auth-User']) && isset($headers['X-Auth-Password']):
-                $xAuthUserEventReturn = $this->event->trigger('APIToken.XAuthToken', $headers['X-Auth-User'], $headers['X-Auth-Password']);
-                switch (TRUE) {
-                    case $xAuthUserEventReturn === FALSE:
-                    case $xAuthUserEventReturn === NULL:
+                $xAuthUserEventReturn = $this->event->trigger(
+                    'APIToken.XAuthToken',
+                    $headers['X-Auth-User'],
+                    $headers['X-Auth-Password']
+                );
+                switch (true) {
+                    case $xAuthUserEventReturn === false:
+                    case $xAuthUserEventReturn === null:
                         throw new \RuntimeException("Not allowed");
                         break;
                     default:
-                        # todo : make it so that we convey a meaningful message stating what the new token is, right?
+                        # todo : make it so that we convey a meaningful message stating what the new token is, right? And if so, we need to include response here also
                         #echo "Token is: ".$XAuthUserEventReturn;
                 }
         }
