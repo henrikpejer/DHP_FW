@@ -19,7 +19,8 @@ class APITokenTest extends PHPUnit_Framework_TestCase
     public function testAuthToken()
     {
         $request = new \DHP\Request('GET',array(),array(),array(),array(),array(),array('X-Auth-Token'=>'123'));
-        $object = new \DHP\middleware\APIToken($request,$this->event);
+        $response = new \DHP\Response();
+        $object = new \DHP\middleware\APIToken($request,$this->event,$response);
         $this->event->register('APIToken.XAuthToken',function($token){
             return $token == 123?TRUE:FALSE;
         });
@@ -32,7 +33,8 @@ class APITokenTest extends PHPUnit_Framework_TestCase
     public function testWrongAuthToken()
     {
         $request = new \DHP\Request('GET',array(),array(),array(),array(),array(),array('X-Auth-Token'=>'124'));
-        $object = new \DHP\middleware\APIToken($request,$this->event);
+        $response = new \DHP\Response();
+        $object = new \DHP\middleware\APIToken($request,$this->event,$response);
         $this->event->register('APIToken.XAuthToken',function($token){
             return $token == 123?TRUE:FALSE;
         });
@@ -42,14 +44,23 @@ class APITokenTest extends PHPUnit_Framework_TestCase
     public function testAuthAuthentication()
     {
         $request = new \DHP\Request('GET',array(),array(),array(),array(),array(),array('X-Auth-User'=>'Henrik','X-Auth-Password'=>'Pejer'));
-        $object = new \DHP\middleware\APIToken($request,$this->event);
+        $response = new \DHP\Response();
+        $object = new \DHP\middleware\APIToken($request,$this->event,$response);
         $this->event->register('APIToken.XAuthToken',function($user,$pass){
             if ($user == 'Henrik' && $pass == 'Pejer' ){
-                return true;
+                return 'token-value-which-is-correct';
             }
             return false;
         });
         $this->assertNull($object->run());
+        $headerTestAgainst = array(
+            'X-AUTH-TOKEN'=>array(
+                'value'=>'X-Auth-Token: token-value-which-is-correct',
+                'statusCode' => null
+            )
+        );
+        $this->assertAttributeEquals($headerTestAgainst, 'headers', $response);
+
     }
 
     /**
@@ -58,7 +69,8 @@ class APITokenTest extends PHPUnit_Framework_TestCase
     public function testWrongAuthAuthentication()
     {
         $request = new \DHP\Request('GET',array(),array(),array(),array(),array(),array('X-Auth-User'=>'Henrik','X-Auth-Password'=>'pejer'));
-        $object = new \DHP\middleware\APIToken($request,$this->event);
+        $response = new \DHP\Response();
+        $object = new \DHP\middleware\APIToken($request,$this->event,$response);
         $this->event->register('APIToken.XAuthToken',function($user,$pass){
             if ($user == 'Henrik' && $pass == 'Pejer' ){
                 return true;

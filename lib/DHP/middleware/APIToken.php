@@ -5,6 +5,7 @@ namespace DHP\middleware;
 use DHP\blueprint\Middleware;
 use DHP\Event;
 use DHP\Request;
+use DHP\Response;
 
 /**
  * A very basic token handler, complete with callbacks and other nifty things
@@ -18,13 +19,15 @@ class APIToken extends Middleware
     private $event;
 
     /**
-     * @param Request $request
-     * @param Event   $event
+     * @param Request  $request
+     * @param Event    $event
+     * @param Response $response
      */
-    public function __construct(Request $request, Event $event)
+    public function __construct(Request $request, Event $event, Response $response)
     {
-        $this->request = $request;
-        $this->event   = $event;
+        $this->request  = $request;
+        $this->event    = $event;
+        $this->response = $response;
     }
 
     public function run()
@@ -56,8 +59,7 @@ class APIToken extends Middleware
                         throw new \RuntimeException("Not allowed");
                         break;
                     default:
-                        # todo : make it so that we convey a meaningful message stating what the new token is, right? And if so, we need to include response here also
-                        #echo "Token is: ".$XAuthUserEventReturn;
+                        $this->response->addHeader('X-AUTH-TOKEN', $xAuthUserEventReturn);
                 }
         }
     }
