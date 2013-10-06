@@ -15,7 +15,10 @@ namespace DHP\modules\propelJson;
 class Data
 {
 
-    protected $model, $dataId, $data, $columnName;
+    protected $model;
+    protected $dataId;
+    protected $data;
+    protected $columnName;
     protected $numPerPage = 10;
 
     /**
@@ -60,7 +63,7 @@ class Data
         $pageNumber = strpos($this->dataId, 'page_') !== false ? str_replace('page_', '', $this->dataId) : 1;
         $dataObject = $this->getQuery();
         /** @noinspection PhpUndefinedMethodInspection */
-        $res        = $dataObject->paginate($pageNumber, $this->numPerPage);
+        $res = $dataObject->paginate($pageNumber, $this->numPerPage);
         /** @noinspection PhpUndefinedMethodInspection */
         if ($pageNumber > 0 && $pageNumber <= $res->getLastPage()) {
             $postPks = array();
@@ -110,8 +113,15 @@ class Data
         }
     }
 
+    /**
+     * @return bool
+     */
     protected function fetchObject()
     {
+        if ($this->dataId === 'new') {
+            $this->data = array($this->getRecord());
+            return true;
+        }
         $numeric = true;
         if (preg_match("#[^0-9,]+#", $this->dataId)) {
             $numeric = false;
@@ -138,34 +148,6 @@ class Data
     }
 
     /**
-     * @param $numPerPage
-     */
-    public function setNumPerPage($numPerPage)
-    {
-        $this->numPerPage = $numPerPage;
-    }
-
-    # todo : perhaps skipping this smart way and just take every-other
-
-    public function getData()
-    {
-        return $this->data;
-    }
-
-    /**
-     * @param $data
-     */
-    public function setData($data)
-    {
-        foreach ($this->data as $post) {
-            /** @noinspection PhpUndefinedMethodInspection */
-            $post->fromArray($data);
-            /** @noinspection PhpUndefinedMethodInspection */
-            $post->save();
-        }
-    }
-
-    /**
      * Returns a propel record object for $model
      * @return
      */
@@ -173,5 +155,42 @@ class Data
     {
         $class = $this->getPropelClassForModel(true);
         return new $class();
+    }
+
+    # todo : perhaps skipping this smart way and just take every-other
+
+    /**
+     * @param $numPerPage
+     */
+    public function setNumPerPage($numPerPage)
+    {
+        $this->numPerPage = $numPerPage;
+    }
+
+    /**
+     * @return \Countable
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * @param $data
+     * @return void
+     */
+    public function setData($data)
+    {
+        foreach ($this->data as $post) {
+            try {
+                /** @noinspection PhpUndefinedMethodInspection */
+                $post->fromArray($data);
+                /** @noinspection PhpUndefinedMethodInspection */
+                $post->save();
+            } catch (\Exception $e) {
+                var_dump($e);
+            }
+        }
+
     }
 }

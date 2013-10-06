@@ -1,5 +1,5 @@
 <?php
-declare( encoding = "UTF8" );
+declare(encoding = "UTF8");
 /**
  * Created by Henrik Pejer ( mr@henrikpejer.com )
  * Date: 2013-07-18 20:11
@@ -68,16 +68,21 @@ class API
         $maxKey   = count($uriParts) - 1;
         for ($i = 0; $i <= $maxKey; $i++) {
             # is this something for a model?
+            # todo: We want to alias a model: check for _model in array... I think
             if (in_array($uriParts[$i], array_keys($this->dataMap))) {
+                $uriPartsData = isset($uriParts[$i]['_model'])?$uriParts[$i]['_model']:$uriParts[$i];
                 if ($i == $maxKey) {
-                    $this->dataCommands[$uriParts[$i]] = null;
+                    $this->dataCommands[$uriPartsData] = null;
                 } else {
-                    $this->dataCommands[$uriParts[$i]] = $uriParts[++$i];
+                    $this->dataCommands[$uriPartsData] = $uriParts[++$i];
                 }
             }
         }
     }
 
+    /**
+     * This method runs it all!
+     */
     public function run()
     {
         $data            = array();
@@ -85,19 +90,20 @@ class API
         $gotResults      = false;
         foreach ($this->dataCommands as $command => $value) {
             $value = $value == '-' ? null : $value;
-            if (!isset( $value ) && isset( $previousCommand )) {
+            if (!isset($value) && isset($previousCommand)) {
                 $value = $data[$previousCommand];
             }
             try {
-                $dataApiObject = new Data( $this->propelNamespace . ucfirst($command), $value, $previousCommand );
+                $dataApiObject = new Data($this->propelNamespace . ucfirst($command), $value, $previousCommand);
                 $requestBody   = $this->request->body;
-                if (!empty( $requestBody )) {
+                if (!empty($requestBody)) {
                     # this should reformat the request according to the map of
-                    $dataApiObject->setData($this->mapColumnsForInput($command,$requestBody));
+                    $dataApiObject->setData($this->mapColumnsForInput($command, $requestBody));
                 }
                 $data[$command] = $dataApiObject->getData();
-                /** @noinspection PhpUndefinedMethodInspection */
-                if ($gotResults == false && $data[$command]->count() > 0) {
+                if ($value === 'new') {
+                    $gotResults = true;
+                } elseif ($gotResults == false && $data[$command]->count() > 0) {
                     $gotResults = true;
                 }
                 $previousCommand = $command;
@@ -122,20 +128,27 @@ class API
      * database equivalents...
      *
      * @param String $model name of model
-     * @param Array $data data to rename columns for
+     * @param Array  $data  data to rename columns for
      *
      * @return array
      */
     protected function mapColumnsForInput($model, $data)
     {
         $columnsForModel = array_flip($this->dataMap[$model]);
-        $return = array();
+        $return          = array();
         foreach ($data as $key => $value) {
+            if ($key == 'id' || $key[0] == '_') {
+                continue;
+            }
             $return[$columnsForModel[$key]] = $value;
         }
         return $return;
     }
 
+    /**
+     * @param $dataToFormat
+     * @return array
+     */
     protected function formatDataForResponse($dataToFormat)
     {
         $return = array();
@@ -162,19 +175,27 @@ class API
                 if (!is_array($post)) {
                     /** @noinspection PhpUndefinedMethodInspection */
                     $primaryKey = $post->getPrimaryKey();
+                    /** @noinspection PhpUndefinedMethodInspection */
                     $post       = $post->toArray();
                 } else {
                     $primaryKey = $post['Id'];
                 }
                 foreach ($this->dataMap[$model] as $key => $value) {
+                    # lets not allow underscore as first character - that means something special
+                    if($key[0] == '_'){
+                        continue;
+                    }
                     $data[$value] = is_numeric($key) ? $post[$value] : $post[$key];
                 }
-                $return[$model][$primaryKey] = (object) $data;
+                $return[$model][$primaryKey] = (object)$data;
             }
         }
         return $return;
     }
 
+    /**
+     * @return array
+     */
     public function returnDataCommands()
     {
         return $this->dataCommands;
