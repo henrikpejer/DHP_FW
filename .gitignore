@@ -6,3 +6,6 @@ app
 composer.lock
 /vendor/
 docs
+phpdocumentor
+sami
+propelApiTest
