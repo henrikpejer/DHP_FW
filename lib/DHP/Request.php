@@ -12,10 +12,24 @@ use DHP\utility\Util;
 /**
  * Class Request
  * @package DHP
+ *
+ * @property-read string method
+ * @property-read string uri
+ * @property-read string body
+ * @property-read array  post
+ * @property-read array  get
+ * @property-read array  files
+ * @property-read array  headers
  */
 class Request
 {
-    protected $method, $uri, $body, $post, $get, $files, $headers;
+    protected $requestMethod;
+    protected $requestUri;
+    protected $requestBody;
+    protected $requestPost;
+    protected $requestGet;
+    protected $requestFiles;
+    protected $requestHeaders;
 
     /**
      * This sets up the Request object.
@@ -37,15 +51,15 @@ class Request
         $files = array(),
         $headers = array()
     ) {
-        $this->method = $method;
-        $this->uri    = $uri;
+        $this->requestMethod = $method;
+        $this->requestUri    = $uri;
         if (isset($body)) {
             $this->setBodyContents($body);
         }
-        $this->post    = $post;
-        $this->get     = $get;
-        $this->files   = $files;
-        $this->headers = $headers;
+        $this->requestPost    = $post;
+        $this->requestGet     = $get;
+        $this->requestFiles   = $files;
+        $this->requestHeaders = $headers;
     }
 
     /**
@@ -62,24 +76,27 @@ class Request
         } else {
             $rawData = $bodyContent;
         }
-        $this->body = $rawData;
+        $this->requestBody = $rawData;
     }
 
     /**
      * This sets default values based on the current environment
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     public function setupWithEnvironment()
     {
         $this->useHttpRequestUri();
         $this->useHttpMethod();
         $this->setBodyContents();
-        $this->post    = $_POST;
-        $this->get     = $_GET;
-        $this->files   = $_FILES;
-        $this->headers = array();
+        $this->post           = $_POST;
+        $this->get            = $_GET;
+        $this->files          = $_FILES;
+        $this->requestHeaders = array();
         foreach ($_SERVER as $name => $value) {
             if (substr($name, 0, 5) == 'HTTP_') {
-                $this->headers[str_replace(
+                $this->requestHeaders[str_replace(
                     ' ',
                     '-',
                     ucwords(strtolower(str_replace('_', ' ', substr($name, 5))))
@@ -90,6 +107,9 @@ class Request
 
     /**
      * Gets uri from $_SERVER and uses that for uri.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     private function useHttpRequestUri()
     {
@@ -106,14 +126,17 @@ class Request
 
     /**
      * Gets http method from $_SERVER and uses that for method.
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     private function useHttpMethod()
     {
         if (isset($_SERVER['REQUEST_METHOD'])) {
-            $this->method = $_SERVER['REQUEST_METHOD'];
+            $this->requestMethod = $_SERVER['REQUEST_METHOD'];
         }
         if (PHP_SAPI == 'cli') {
-            $this->method = Util::parseArgv('method');
+            $this->requestMethod = Util::parseArgv('method');
         }
     }
 
@@ -136,28 +159,27 @@ class Request
         $return = null;
         switch (strtolower($name)) {
             case 'get':
-                $return = $this->get;
+                $return = $this->requestGet;
                 break;
             case 'post':
-                $return = $this->post;
+                $return = $this->requestPost;
                 break;
             case 'files':
-                $return = $this->files;
+                $return = $this->requestFiles;
                 break;
             case 'headers':
-                $return = $this->headers;
+                $return = $this->requestHeaders;
                 break;
             case 'uri':
-                $return = $this->uri;
+                $return = $this->requestUri;
                 break;
             case 'body':
-                $return = $this->body;
+                $return = $this->requestBody;
                 break;
             case 'method':
-                $return = $this->method;
+                $return = $this->requestMethod;
                 break;
         }
         return $return;
     }
-
 }
