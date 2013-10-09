@@ -67,10 +67,11 @@ class API
         $uriParts = explode('/', $this->uri);
         $maxKey   = count($uriParts) - 1;
         for ($i = 0; $i <= $maxKey; $i++) {
-            # is this something for a model?
-            # todo: We want to alias a model: check for _model in array... I think
             if (in_array($uriParts[$i], array_keys($this->dataMap))) {
-                $uriPartsData = isset($uriParts[$i]['_model'])?$uriParts[$i]['_model']:$uriParts[$i];
+                # special case - check if _model exists, then that should be the command to use
+                $uriPartsData = isset($this->dataMap[$uriParts[$i]]['_model']) ?
+                    $this->dataMap[$uriParts[$i]]['_model'] :
+                    $uriParts[$i];
                 if ($i == $maxKey) {
                     $this->dataCommands[$uriPartsData] = null;
                 } else {
@@ -93,29 +94,44 @@ class API
             if (!isset($value) && isset($previousCommand)) {
                 $value = $data[$previousCommand];
             }
-            try {
-                $dataApiObject = new Data($this->propelNamespace . ucfirst($command), $value, $previousCommand);
-                $requestBody   = $this->request->body;
-                if (!empty($requestBody)) {
-                    # this should reformat the request according to the map of
-                    $dataApiObject->setData($this->mapColumnsForInput($command, $requestBody));
-                }
-                $data[$command] = $dataApiObject->getData();
-                if ($value === 'new') {
-                    $gotResults = true;
-                } elseif ($gotResults == false && $data[$command]->count() > 0) {
-                    $gotResults = true;
-                }
-                $previousCommand = $command;
-            } catch (\Exception $e) {
-                var_dump($e->getMessage());
-            }
+            $this->getData($command, $value, $previousCommand, $data, $gotResults);
         }
         if ($gotResults == false) {
             $this->response->setStatus(404);
         } else {
             $this->response->addHeader('Content-Type', 'application/json');
             $this->response->setContent($this->formatDataForResponse($data));
+        }
+    }
+
+    /**
+     *
+     * This method fetches the data for the different commands
+     *
+     * @param $command
+     * @param $value
+     * @param $previousCommand
+     * @param $data
+     * @param $gotResults
+     */
+    private function getData(&$command, &$value, &$previousCommand, &$data, &$gotResults)
+    {
+        try {
+            $dataApiObject = new Data($this->propelNamespace . ucfirst($command), $value, $previousCommand);
+            $requestBody   = $this->request->body;
+            if (!empty($requestBody)) {
+                # this should reformat the request according to the map of
+                $dataApiObject->setData($this->mapColumnsForInput($command, $requestBody));
+            }
+            $data[$command] = $dataApiObject->getData();
+            if ($value === 'new') {
+                $gotResults = true;
+            } elseif ($gotResults == false && $data[$command]->count() > 0) {
+                $gotResults = true;
+            }
+            $previousCommand = $command;
+        } catch (\Exception $e) {
+            var_dump($e->getMessage());
         }
     }
 
@@ -176,13 +192,13 @@ class API
                     /** @noinspection PhpUndefinedMethodInspection */
                     $primaryKey = $post->getPrimaryKey();
                     /** @noinspection PhpUndefinedMethodInspection */
-                    $post       = $post->toArray();
+                    $post = $post->toArray();
                 } else {
                     $primaryKey = $post['Id'];
                 }
                 foreach ($this->dataMap[$model] as $key => $value) {
                     # lets not allow underscore as first character - that means something special
-                    if($key[0] == '_'){
+                    if ($key[0] == '_') {
                         continue;
                     }
                     $data[$value] = is_numeric($key) ? $post[$value] : $post[$key];
