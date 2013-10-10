@@ -80,11 +80,18 @@ class Uuid extends Component
         return $hex;
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return sprintf('%s', $this->uuId);
     }
 
+
+    /**
+     * @return string
+     */
     public function __invoke()
     {
         return $this->__toString();

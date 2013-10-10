@@ -13,6 +13,9 @@ class Session
 
     private $sessionId, $sessionData, $flashData = NULL;
 
+    /**
+     * Initiates the session library
+     */
     public function __construct()
     {
         $this->sessionData = array();

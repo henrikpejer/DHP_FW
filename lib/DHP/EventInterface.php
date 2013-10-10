@@ -2,6 +2,13 @@
 declare(encoding = "UTF8");
 namespace DHP;
 
+/**
+ * Class EventInterface
+ *
+ * The interface for events
+ *
+ * @package DHP
+ */
 interface EventInterface
 {
     /**

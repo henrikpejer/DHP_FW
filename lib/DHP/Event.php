@@ -11,6 +11,13 @@ if (!defined('DHP\\EVENT_ABORT')) {
     define('DHP\\EVENT_ABORT', NULL);
 }
 
+/**
+ * Class Event
+ *
+ * Handles events for the system.
+ *
+ * @package DHP
+ */
 class Event implements EventInterface
 {
 

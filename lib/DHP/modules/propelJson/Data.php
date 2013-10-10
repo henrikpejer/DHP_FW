@@ -145,6 +145,7 @@ class Data
             # $res = is_array($dataId) ? $dataObject->findPks($dataId) : $dataObject->findBySlug($dataId);
         }
         $this->data = $res;
+        return true;
     }
 
     /**

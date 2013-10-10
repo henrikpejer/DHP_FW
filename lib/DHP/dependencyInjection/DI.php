@@ -100,7 +100,7 @@ class DI
      */
     function get($name)
     {
-        if (!@isset($this->store->{$name})) {
+        if (!isset($this->store->{$name})) {
             $frameworkClass = $this->findMatchWithinFramework($name);
             if ($frameworkClass == NULL) {
                 # lets try to load this as-if it where a class being called, ok?

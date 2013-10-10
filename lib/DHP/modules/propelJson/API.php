@@ -126,7 +126,7 @@ class API
             $data[$command] = $dataApiObject->getData();
             if ($value === 'new') {
                 $gotResults = true;
-            } elseif ($gotResults == false && $data[$command]->count() > 0) {
+            } /** @noinspection PhpUndefinedMethodInspection */ elseif ($gotResults == false && $data[$command]->count() > 0) {
                 $gotResults = true;
             }
             $previousCommand = $command;

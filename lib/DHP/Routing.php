@@ -239,6 +239,7 @@ class Routing
      */
     public function loadRoutes($routesFile)
     {
+        /** @noinspection PhpIncludeInspection */
         $routes = require_once($routesFile);
         foreach ($routes as $route) {
             $this->registerRoute($route[0], $route[1], $route[2]);
