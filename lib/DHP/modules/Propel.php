@@ -6,6 +6,7 @@ declare(encoding = "UTF8");
  */
 
 namespace DHP\modules;
+
 use DHP\blueprint\Module;
 use DHP\Response;
 use DHP\Request;
@@ -66,49 +67,80 @@ use DHP\Routing;
 # todo : look into jsonapi.org and see what can implement... somewhat easily
 class Propel extends Module
 {
-    protected $response, $request, $uriPrefix, $routing;
+    protected $response;
+    protected $request;
+    protected $uriPrefix;
+    protected $routing;
     protected $numPerPage = 10;
 
     /**
      * @param \DHP\Routing  $routing
      * @param \DHP\Response $response
      * @param \DHP\Request  $request
-     * @param String        $uriPrefix the trigger in the URI that this will use. If 'api' then 'api/...' will be handled by this module
+     * @param String        $uriPrefix the trigger in the URI. If 'api' then 'api/...' will be handled by this module
      * @param String        $propelConfig the path to the propel config
      * @param String        $propelIncludeDir the include dir of the propel files
      * @param null|String   $propelLibraryDir if the propel library isn't included by the app, this will include it
      * @internal param String $propelDir
      */
-    public function __construct(Routing $routing, Response $response, Request $request, $uriPrefix, $propelConfig, $propelIncludeDir, $propelLibraryDir = NULL)
-    {
+    public function __construct(
+        Routing $routing,
+        Response $response,
+        Request $request,
+        $uriPrefix,
+        $propelConfig,
+        $propelIncludeDir,
+        $propelLibraryDir = null
+    ) {
         $this->routing   = $routing;
         $this->response  = $response;
         $this->request   = $request;
         $this->uriPrefix = $uriPrefix;
         $that            = $this;
         # setup single post uris
-        $this->get($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
-            $that->getData($model, $idOrSLug);
-        });
-        $this->post($uriPrefix . '/:model', function ($model) use ($that) {
-            $that->postData($model);
-        });
-        $this->post($uriPrefix . '/:model/new', function ($model) use ($that) {
-            $that->postData($model);
-        });
-        $this->put($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
-            $that->putData($model, $idOrSLug);
-        });
-        $this->post($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
-            $that->putData($model, $idOrSLug);
-        });
-        $this->delete($uriPrefix . '/:model/:idOrSlug', function ($model, $idOrSLug = NULL) use ($that) {
-            $that->deleteData($model, $idOrSLug);
-        });
+        $this->get(
+            $uriPrefix . '/:model/:idOrSlug',
+            function ($model, $idOrSLug = null) use ($that) {
+                $that->getData($model, $idOrSLug);
+            }
+        );
+        $this->post(
+            $uriPrefix . '/:model',
+            function ($model) use ($that) {
+                $that->postData($model);
+            }
+        );
+        $this->post(
+            $uriPrefix . '/:model/new',
+            function ($model) use ($that) {
+                $that->postData($model);
+            }
+        );
+        $this->put(
+            $uriPrefix . '/:model/:idOrSlug',
+            function ($model, $idOrSLug = null) use ($that) {
+                $that->putData($model, $idOrSLug);
+            }
+        );
+        $this->post(
+            $uriPrefix . '/:model/:idOrSlug',
+            function ($model, $idOrSLug = null) use ($that) {
+                $that->putData($model, $idOrSLug);
+            }
+        );
+        $this->delete(
+            $uriPrefix . '/:model/:idOrSlug',
+            function ($model, $idOrSLug = null) use ($that) {
+                $that->deleteData($model, $idOrSLug);
+            }
+        );
         # setup page uris
-        $this->get($uriPrefix . '/:model/page/:pageNum', function ($model, $pageNum) use ($that) {
-            $that->pageData($model, $pageNum);
-        });
+        $this->get(
+            $uriPrefix . '/:model/page/:pageNum',
+            function ($model, $pageNum) use ($that) {
+                $that->pageData($model, $pageNum);
+            }
+        );
     }
 
     /**
@@ -117,10 +149,10 @@ class Propel extends Module
      * @param String $model
      * @param null   $idOrSlug
      */
-    public function getData($model, $idOrSlug = NULL)
+    public function getData($model, $idOrSlug = null)
     {
         $model = $this->getPropelQuery($model);
-        if (is_numeric($idOrSlug) == TRUE) {
+        if (is_numeric($idOrSlug) == true) {
             /** @noinspection PhpUndefinedMethodInspection */
             $data = $model->findPk($idOrSlug);
         } else {
@@ -187,7 +219,7 @@ class Propel extends Module
      * @param String $model
      * @param null   $idOrSlug
      */
-    public function putData($model, $idOrSlug = NULL)
+    public function putData($model, $idOrSlug = null)
     {
         $object = $this->getPropelQuery($model);
         if (is_numeric($idOrSlug)) {
@@ -199,7 +231,7 @@ class Propel extends Module
         }
         if ($object->count() == 1) {
             /** @noinspection PhpUndefinedMethodInspection */
-            if ($object->update($this->request->body, NULL, TRUE)) {
+            if ($object->update($this->request->body, null, true)) {
                 /** @noinspection PhpUndefinedMethodInspection */
                 $post = $object->findOne();
                 $this->response->setContent($post);
@@ -217,7 +249,7 @@ class Propel extends Module
      * @param String $model
      * @param null   $idOrSlug
      */
-    public function deleteData($model, $idOrSlug = NULL)
+    public function deleteData($model, $idOrSlug = null)
     {
         $object = $this->getPropelQuery($model);
         if (is_numeric($idOrSlug)) {
@@ -248,11 +280,17 @@ class Propel extends Module
         if ($pageNum < 1) {
             $pageNum = 1;
         }
-        $model    = $this->getPropelQuery($model);
+        $model = $this->getPropelQuery($model);
         /** @noinspection PhpUndefinedMethodInspection */
         $pageData = $model->paginate($pageNum, $this->numPerPage);
         /** @noinspection PhpUndefinedMethodInspection */
-        $data     = array('data' => array(), 'pagination' => array('numberOfPages' => $pageData->getLastPage(), 'numberOfHits' => $pageData->getNbResults()));
+        $data = array(
+            'data'       => array(),
+            'pagination' => array(
+                'numberOfPages' => $pageData->getLastPage(),
+                'numberOfHits'  => $pageData->getNbResults()
+            )
+        );
         /** @noinspection PhpUndefinedMethodInspection */
         if ($pageNum <= $pageData->getlastPage()) {
             foreach ($pageData as $post) {

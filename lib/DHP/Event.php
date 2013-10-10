@@ -1,6 +1,7 @@
 <?php
 declare(encoding = "UTF8");
 namespace DHP;
+
 /**
  *
  * This little piggy will handle events throughout the system.
@@ -8,7 +9,7 @@ namespace DHP;
  * functions will be called, with or without arguments.
  */
 if (!defined('DHP\\EVENT_ABORT')) {
-    define('DHP\\EVENT_ABORT', NULL);
+    define('DHP\\EVENT_ABORT', null);
 }
 
 /**
@@ -22,8 +23,10 @@ class Event implements EventInterface
 {
 
     public $delegates = array();
-    protected $events = array('*'              => array(),
-                              '__controller__' => array());
+    protected $events = array(
+        '*'              => array(),
+        '__controller__' => array()
+    );
 
     /**
      * This triggers an event. All registered events are looped through in the order
@@ -44,18 +47,20 @@ class Event implements EventInterface
      * @param null   $seven
      *
      * @return mixed
+     *
      */
-    public function trigger($eventName,
-                            &$one = NULL,
-                            &$two = NULL,
-                            &$three = NULL,
-                            &$four = NULL,
-                            &$five = NULL,
-                            &$six = NULL,
-                            &$seven = NULL)
-    {
-        $args       = func_get_args();
-        $return = NULL;
+    public function trigger(
+        $eventName,
+        &$one = null,
+        &$two = null,
+        &$three = null,
+        &$four = null,
+        &$five = null,
+        &$six = null,
+        &$seven = null
+    ) {
+        $args   = func_get_args();
+        $return = null;
         switch (count($args)) {
             case 1:
                 $return = $this->call($eventName);
@@ -73,16 +78,37 @@ class Event implements EventInterface
                 $return = $this->call($eventName, $one, $two, $three, $four);
                 break;
             case 6:
-                $return = $this->call($eventName, $one, $two, $three, $four,
-                                          $five);
+                $return = $this->call(
+                    $eventName,
+                    $one,
+                    $two,
+                    $three,
+                    $four,
+                    $five
+                );
                 break;
             case 7:
-                $return = $this->call($eventName, $one, $two, $three, $four,
-                                          $five, $six);
+                $return = $this->call(
+                    $eventName,
+                    $one,
+                    $two,
+                    $three,
+                    $four,
+                    $five,
+                    $six
+                );
                 break;
             case 8:
-                $return = $this->call($eventName, $one, $two, $three, $four,
-                                          $five, $six, $seven);
+                $return = $this->call(
+                    $eventName,
+                    $one,
+                    $two,
+                    $three,
+                    $four,
+                    $five,
+                    $six,
+                    $seven
+                );
                 break;
         }
         return $return;
@@ -101,26 +127,32 @@ class Event implements EventInterface
      * @param null $seven
      *
      * @return mixed|null
+     *
+     *
+     * We know this is a very complicated function, due to the large amount of switch-statements
+     * bue we choose to suppress this warning, since it actually isn't such a complicated method
+     * after all
+     *
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
-    private function call($eventName,
-                          &$one = NULL,
-                          &$two = NULL,
-                          &$three = NULL,
-                          &$four = NULL,
-                          &$five = NULL,
-                          &$six = NULL,
-                          &$seven = NULL)
-    {
-        $return   = NULL;
+    private function call(
+        $eventName,
+        &$one = null,
+        &$two = null,
+        &$three = null,
+        &$four = null,
+        &$five = null,
+        &$six = null,
+        &$seven = null
+    ) {
+        $return   = null;
         $numArgs  = (func_num_args() - 1);
-        $callArgs = NULL;
+        $callArgs = null;
         foreach ($this->mergeEventToCall($eventName) as $event) {
-            $tempReturn = NULL;
+            $tempReturn = null;
             switch ($numArgs) {
                 case 0:
-                    if (!isset($callArgs)) {
-                        $callArgs = array();
-                    }
+                    $callArgs = isset($callArgs)?$callArgs:array();
                     if (is_array($event)) {
                         $tempReturn = call_user_func($event);
                     } else {
@@ -128,9 +160,7 @@ class Event implements EventInterface
                     }
                     break;
                 case 1:
-                    if (!isset($callArgs)) {
-                        $callArgs = array(&$one);
-                    }
+                    $callArgs = isset($callArgs)?$callArgs:array(&$one);
                     if (is_array($event)) {
                         $tempReturn = call_user_func_array($event, $callArgs);
                     } else {
@@ -138,9 +168,7 @@ class Event implements EventInterface
                     }
                     break;
                 case 2:
-                    if (!isset($callArgs)) {
-                        $callArgs = array(&$one, &$two);
-                    }
+                    $callArgs = isset($callArgs)?$callArgs:array(&$one, &$two);
                     if (is_array($event)) {
                         $tempReturn = call_user_func_array($event, $callArgs);
                     } else {
@@ -148,9 +176,7 @@ class Event implements EventInterface
                     }
                     break;
                 case 3:
-                    if (!isset($callArgs)) {
-                        $callArgs = array(&$one, &$two, &$three);
-                    }
+                    $callArgs = isset($callArgs)?$callArgs:array(&$one, &$two, &$three);
                     if (is_array($event)) {
                         $tempReturn = call_user_func_array($event, $callArgs);
                     } else {
@@ -158,9 +184,7 @@ class Event implements EventInterface
                     }
                     break;
                 case 4:
-                    if (!isset($callArgs)) {
-                        $callArgs = array(&$one, &$two, &$three, &$four);
-                    }
+                    $callArgs = isset($callArgs)?$callArgs:array(&$one, &$two, &$three, &$four);
                     if (is_array($event)) {
                         $tempReturn = call_user_func_array($event, $callArgs);
                     } else {
@@ -168,9 +192,7 @@ class Event implements EventInterface
                     }
                     break;
                 case 5:
-                    if (!isset($callArgs)) {
-                        $callArgs = array(&$one, &$two, &$three, &$four, &$five);
-                    }
+                    $callArgs = isset($callArgs)?$callArgs:array(&$one, &$two, &$three, &$four, &$five);
                     if (is_array($event)) {
                         $tempReturn = call_user_func_array($event, $callArgs);
                     } else {
@@ -178,10 +200,7 @@ class Event implements EventInterface
                     }
                     break;
                 case 6:
-                    if (!isset($callArgs)) {
-                        $callArgs = array(&$one, &$two, &$three, &$four, &$five,
-                                          &$six);
-                    }
+                    $callArgs = isset($callArgs)?$callArgs:array(&$one,&$two,&$three,&$four,&$five,&$six);
                     if (is_array($event)) {
                         $tempReturn = call_user_func_array($event, $callArgs);
                     } else {
@@ -189,15 +208,11 @@ class Event implements EventInterface
                     }
                     break;
                 case 7:
-                    if (!isset($callArgs)) {
-                        $callArgs = array(&$one, &$two, &$three, &$four, &$five,
-                                          &$six, &$seven);
-                    }
+                    $callArgs = isset($callArgs)?$callArgs:array(&$one,&$two,&$three,&$four,&$five,&$six,&$seven);
                     if (is_array($event)) {
                         $tempReturn = call_user_func_array($event, $callArgs);
                     } else {
-                        $tempReturn = $event($one, $two, $three, $four, $five, $six,
-                                             $seven);
+                        $tempReturn = $event($one,$two,$three,$four,$five,$six,$seven);
                     }
                     break;
             }
@@ -255,7 +270,7 @@ class Event implements EventInterface
             $this->events[$eventName] = array();
         }
         $this->events[$eventName][] = $callable;
-        return TRUE;
+        return true;
     }
 
     /**
@@ -292,19 +307,20 @@ class Event implements EventInterface
      * @param null   $four
      * @return mixed
      */
-    public function triggerSubscribe($delegate,
-                                     $method,
-                                     &$one = NULL,
-                                     &$two = NULL,
-                                     &$three = NULL,
-                                     &$four = NULL)
-    {
+    public function triggerSubscribe(
+        $delegate,
+        $method,
+        &$one = null,
+        &$two = null,
+        &$three = null,
+        &$four = null
+    ) {
         $objectHash = spl_object_hash($delegate);
-        $return         = NULL;
+        $return     = null;
         if (isset($this->delegates[$objectHash])) {
             foreach ($this->delegates[$objectHash] as $target) {
                 $return = $target->$method($one, $two, $three, $four);
-                if ($return === FALSE) {
+                if ($return === false) {
                     break;
                 }
             }

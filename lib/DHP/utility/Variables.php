@@ -19,7 +19,7 @@ class Variables extends Constants
      */
     public function __get($name)
     {
-        switch (TRUE) {
+        switch (true) {
             case isset($this->values[$this->environment][$name]):
                 $return = $this->values[$this->environment][$name];
                 break;
@@ -27,7 +27,7 @@ class Variables extends Constants
                 $return = $this->values[self::DEFAULT_ENVIRONMENT][$name];
                 break;
             default:
-                $return = NULL;
+                $return = null;
         }
         return $return;
     }

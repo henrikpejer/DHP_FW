@@ -15,12 +15,12 @@ class Uuid extends Component
      * ID of the server that generated this unique id
      * @var int
      */
-    private $serverId = NULL;
+    private $serverId = null;
     /**
      * The actual uuId value
      * @var null
      */
-    private $uuId = NULL;
+    private $uuId = null;
 
     /**
      * Sets up the Uuid-component.
@@ -57,6 +57,9 @@ class Uuid extends Component
      *
      * @param string $ipAddress
      * @return string
+     *
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
     private function clientIPToHex($ipAddress = '')
     {
@@ -65,7 +68,7 @@ class Uuid extends Component
             $ipAddress = getEnv("REMOTE_ADDR");
         }
         $part = explode('.', $ipAddress);
-        # fix for when we have ipv6... and like to have ipv4 IP's....
+        # fix for when we have ipv6... and like to have ipv4 IPs....
         if (count($part) < 4) {
             if (!isset($_SERVER['REMOTE_ADDR'])) {
                 $ipAddress = gethostbyname(gethostbyaddr('127.0.0.1'));
@@ -113,11 +116,11 @@ class Uuid extends Component
      */
     public function decode()
     {
-        $uuid = $this->uuId;
-        $rez  = Array();
-        $uPart    = explode("-", $uuid);
-        if (is_array($uPart) == TRUE && count($uPart) == 5) {
-            $rez = Array(
+        $uuid  = $this->uuId;
+        $rez   = array();
+        $uPart = explode("-", $uuid);
+        if (is_array($uPart) == true && count($uPart) == 5) {
+            $rez = array(
                 'serverID' => $uPart[0],
                 'ip'       => $this->clientIPFromHex($uPart[1]),
                 'unixtime' => hexdec($uPart[2]),

@@ -15,7 +15,7 @@ class Util
      * @return NULL|array
      * @throws \Exception
      */
-    static public function classConstructorArguments($class)
+    public static function classConstructorArguments($class)
     {
         $args = array();
         try {
@@ -28,15 +28,15 @@ class Util
                         $arg =
                             array(
                                 'name'     => $param->getName(),
-                                'required' => TRUE,
-                                'class'    => NULL
+                                'required' => true,
+                                'class'    => null
                             );
                         if ($param->getClass()) {
                             $arg['class'] =
                                 $param->getClass()->getName();
                         }
                         if ($param->isOptional()) {
-                            $arg['required'] = FALSE;
+                            $arg['required'] = false;
                             $arg['default']  =
                                 $param->getDefaultValue();
                         }
@@ -54,13 +54,13 @@ class Util
      * @param $reflectionMethod
      * @return array
      */
-    static public function methodDocComments($reflectionMethod)
+    public static function methodDocComments($reflectionMethod)
     {
         $comments = array();
         # get the docs
         /** @noinspection PhpUndefinedMethodInspection */
         $comment = $reflectionMethod->getDocComment();
-        if (FALSE !== $comment) {
+        if (false !== $comment) {
             $lines = explode("\n", $comment);
             foreach ($lines as $line) {
                 $line = trim($line, ' *');
@@ -75,28 +75,30 @@ class Util
     /**
      * @param $name
      * @return null
+     * @SuppressWarnings(PHPMD.Superglobals)
+     * @SuppressWarnings(PHPMD.CamelCaseVariableName)
      */
-    static public function parseArgv($name)
+    public static function parseArgv($name)
     {
         $parsedValues = array();
         if (isset($_SERVER['argv'])) {
-            $ln = count($_SERVER['argv']);
-            for ($i = 0; $i < $ln; $i++) {
+            $length = count($_SERVER['argv']);
+            for ($i = 0; $i < $length; $i++) {
                 $value     = $_SERVER['argv'][$i];
                 $nextValue = isset($_SERVER['argv'][($i + 1)]) ?
-                    $_SERVER['argv'][($i + 1)] : NULL;
+                    $_SERVER['argv'][($i + 1)] : null;
                 if (substr($value, 0, 2) === '--') {
                     if (substr($nextValue, 0, 2) !== '--') {
                         $parsedValues[substr($value, 2)] = $nextValue;
                         ++$i;
                     } else {
-                        $parsedValues[substr($value, 2)] = TRUE;
+                        $parsedValues[substr($value, 2)] = true;
                     }
                 } else {
-                    $parsedValues[$value] = TRUE;
+                    $parsedValues[$value] = true;
                 }
             }
         }
-        return isset($parsedValues[$name]) ? $parsedValues[$name] : NULL;
+        return isset($parsedValues[$name]) ? $parsedValues[$name] : null;
     }
 }

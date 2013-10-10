@@ -21,8 +21,8 @@ class Response
         500 => 'Internal Server Error'
     );
     private $headers = array();
-    private $body = NULL;
-    private $headersSent = FALSE;
+    private $body = null;
+    private $headersSent = false;
 
     /**
      * The body can contain either a string or object / array. IF it is an object or array
@@ -54,10 +54,14 @@ class Response
             throw new \InvalidArgumentException("When appending, append with string data");
         }
         if (isset($this->body) && !is_string($this->body)) {
-            throw new \BadMethodCallException("Cannot append string to content, the content is of type " . gettype($this->body));
+            throw new \BadMethodCallException(
+                "Cannot append string to content, the content is of type " . gettype(
+                    $this->body
+                )
+            );
         }
         $this->body .= $dataToAppend;
-        return TRUE;
+        return true;
     }
 
     /**
@@ -68,7 +72,7 @@ class Response
      * @param $headerValue
      * @return $this
      */
-    public function setStatus($int, $headerName = NULL, $headerValue = NULL)
+    public function setStatus($int, $headerName = null, $headerValue = null)
     {
         if (isset($headerName)) {
             $this->addHeader($headerName, $headerValue, $int);
@@ -89,7 +93,7 @@ class Response
      * @return $this
      * @internal param Int $statusValue a int value for status
      */
-    public function addHeader($headerName, $headerValue = NULL, $statusCode = NULL)
+    public function addHeader($headerName, $headerValue = null, $statusCode = null)
     {
         $headerKeyName = $headerName;
         switch ($headerName) {
@@ -97,7 +101,13 @@ class Response
                 $headerName = '';
                 break;
         }
-        $this->headers[$headerKeyName] = array('value' => trim(sprintf("%s: %s", $this->formatHeaderName($headerName), $headerValue), ' :'), 'statusCode' => $statusCode);
+        $this->headers[$headerKeyName] = array(
+            'value'      => trim(
+                sprintf("%s: %s", $this->formatHeaderName($headerName), $headerValue),
+                ' :'
+            ),
+            'statusCode' => $statusCode
+        );
         return $this;
     }
 
@@ -127,18 +137,18 @@ class Response
      */
     private function sendHeaders()
     {
-        if (headers_sent() === TRUE && $this->headersSent === FALSE) {
+        if (headers_sent() === true && $this->headersSent === false) {
             throw new \RuntimeException("Headers already sent");
         }
         foreach ($this->headers as $headerDataArray) {
             if (isset($headerDataArray['statusCode'])) {
-                \header($headerDataArray['value'], TRUE, $headerDataArray['statusCode']);
+                \header($headerDataArray['value'], true, $headerDataArray['statusCode']);
             } else {
-                \header($headerDataArray['value'], TRUE);
+                \header($headerDataArray['value'], true);
             }
         }
-        $this->headersSent = TRUE;
-        return TRUE;
+        $this->headersSent = true;
+        return true;
     }
 
     /**
@@ -151,16 +161,17 @@ class Response
                 echo $this->body;
             } else {
                 $return = array(
-                    'meta'=>array(
-                        'status'   => $this->getStatus(TRUE),
-                        'messages' => array())
+                    'meta' => array(
+                        'status'   => $this->getStatus(true),
+                        'messages' => array()
+                    )
                 );
                 $return += $this->body;
                 $options = JSON_NUMERIC_CHECK;
-                if (PHP_SAPI == 'cli'){
+                if (PHP_SAPI == 'cli') {
                     $options = ($options + JSON_PRETTY_PRINT);
                 }
-                echo ")]}',\n".json_encode($return, $options);
+                echo ")]}',\n" . json_encode($return, $options);
             }
         }
     }
@@ -171,11 +182,11 @@ class Response
      * @param bool $intOnly defaults to true, returns only the
      * @return null
      */
-    public function getStatus($intOnly = TRUE)
+    public function getStatus($intOnly = true)
     {
-        $return = NULL;
+        $return = null;
         if (isset($this->headers['status'])) {
-            $return = $intOnly === TRUE ? $this->headers['status']['statusCode'] : $this->headers['status'];
+            $return = $intOnly === true ? $this->headers['status']['statusCode'] : $this->headers['status'];
         }
         return $return;
     }

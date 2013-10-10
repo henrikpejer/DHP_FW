@@ -12,7 +12,7 @@ abstract class Module
 {
 
     private $uriPrefix = '';
-    protected $routing = NULL;
+    protected $routing = null;
 
     /**
      * Sets up the dependency on Routing

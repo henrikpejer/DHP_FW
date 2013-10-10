@@ -43,7 +43,7 @@ class API
     /**
      * @param \DHP\Response $response
      * @param \DHP\Request  $request
-     * @param array         $dataMap an array containing the data-mapp
+     * @param array         $dataMap an array containing the data-map
      * @param string        $propelNamespace
      */
     public function __construct(Response $response, Request $request, array $dataMap, $propelNamespace = '')
@@ -126,7 +126,8 @@ class API
             $data[$command] = $dataApiObject->getData();
             if ($value === 'new') {
                 $gotResults = true;
-            } /** @noinspection PhpUndefinedMethodInspection */ elseif ($gotResults == false && $data[$command]->count() > 0) {
+            } /** @noinspection PhpUndefinedMethodInspection */ elseif ($gotResults == false && $data[$command]->count(                                                                                                ) > 0
+            ) {
                 $gotResults = true;
             }
             $previousCommand = $command;
@@ -186,27 +187,52 @@ class API
                 $tempData = $realData->toArray();
             }
             foreach ($tempData as $post) {
-                $data       = array();
-                $primaryKey = null;
-                if (!is_array($post)) {
-                    /** @noinspection PhpUndefinedMethodInspection */
-                    $primaryKey = $post->getPrimaryKey();
-                    /** @noinspection PhpUndefinedMethodInspection */
-                    $post = $post->toArray();
-                } else {
-                    $primaryKey = $post['Id'];
-                }
-                foreach ($this->dataMap[$model] as $key => $value) {
-                    # lets not allow underscore as first character - that means something special
-                    if ($key[0] == '_') {
-                        continue;
-                    }
-                    $data[$value] = is_numeric($key) ? $post[$value] : $post[$key];
-                }
+                $primaryKey                  = $this->getPrimaryKey($post);
+                $data                        = $this->extractDataFromDataMap($model, $post);
                 $return[$model][$primaryKey] = (object)$data;
             }
         }
         return $return;
+    }
+
+    /**
+     * Populates data with data from dataMap depending on the model
+     *
+     * @param $model
+     * @param $post
+     * @return array
+     */
+    private function extractDataFromDataMap($model, $post)
+    {
+        $data = array();
+        foreach ($this->dataMap[$model] as $key => $value) {
+            # lets not allow underscore as first character - that means something special
+            if ($key[0] == '_') {
+                continue;
+            }
+            $data[$value] = is_numeric($key) ? $post[$value] : $post[$key];
+        }
+        return $data;
+    }
+
+    /**
+     * Gets the primary key from a post
+     *
+     * @param $post
+     * @return mixed
+     */
+    private function getPrimaryKey($post)
+    {
+        $primaryKey = null;
+        if (!is_array($post)) {
+            /** @noinspection PhpUndefinedMethodInspection */
+            $primaryKey = $post->getPrimaryKey();
+            #/** @noinspection PhpUndefinedMethodInspection */
+            #$post = $post->toArray();  # So... why did we have this...? This could be a problem, leave it for history
+        } else {
+            $primaryKey = $post['Id'];
+        }
+        return $primaryKey;
     }
 
     /**

@@ -34,7 +34,7 @@ class Routing
         self::HTTP_METHOD_ANY
     );
     private $customParamTypes = array();
-    private $routeAliases     = array();
+    private $routeAliases = array();
 
     /**
      * returns routes matching the uri and the method
@@ -58,7 +58,7 @@ class Routing
         $uriToMatch    = trim($uri, '/');
         $routesMatched = array();
         foreach ($routesToProcess as $routeUri => $closure) {
-            if (FALSE !==
+            if (false !==
                 ($routeMatchReturn =
                     $this->matchUriToRoute($uriToMatch, $routeUri))
             ) {
@@ -81,16 +81,16 @@ class Routing
      */
     private function matchUriToRoute($uri, $routeUri)
     {
-        $__haveParams__ = strpos($routeUri, ':');
-        if ($__haveParams__ === FALSE && ($routeUri == $uri
+        $haveParams = strpos($routeUri, ':');
+        if ($haveParams === false && ($routeUri == $uri
                                           || preg_match('#^' . str_replace('*', '.*', $routeUri) . '$#', $uri))
         ) {
             return array();
         }
-        if (TRUE == $__haveParams__) {
+        if (true == $haveParams) {
             return $this->parseUriForParameters($uri, $routeUri);
         }
-        return FALSE;
+        return false;
     }
 
     /**
@@ -112,13 +112,13 @@ class Routing
         $routeUriParts = explode('/', trim($routeUri, '/'));
         $uriParts      = explode('/', trim($uri, '/'));
         if (count($uriParts) != count($routeUriParts)) {
-            return FALSE;
+            return false;
         }
         $return = array();
         foreach ($routeUriParts as $index => $part) {
             if ($part != $uriParts[$index]) {
                 if ($part{0} != ':') { #wrong route after all!
-                    return FALSE;
+                    return false;
                 }
                 $realValue = $this->cleanUriPartForParam($uriParts[$index]);
                 $return[]  = $this->checkParameterType($part, $realValue);
@@ -184,7 +184,7 @@ class Routing
      * @param      $controllerClass
      * @param null $uriNamespace
      */
-    public function makeRoutesForClass($controllerClass, $uriNamespace = NULL)
+    public function makeRoutesForClass($controllerClass, $uriNamespace = null)
     {
         $controller = new \ReflectionClass($controllerClass);
         foreach ($controller->getMethods(\ReflectionMethod::IS_PUBLIC) as $controllerMethod) {
@@ -200,8 +200,8 @@ class Routing
                 if (isset($uriNamespace)) {
                     $uri = trim($uriNamespace, '/') . '/' . trim($uri, '/');
                 }
-                $routeAlias = isset($methodDocComments['routeAlias'])?$methodDocComments['routeAlias']:NULL;
-                $this->registerRoute($method, $uri, $routeCall,$routeAlias);
+                $routeAlias = isset($methodDocComments['routeAlias']) ? $methodDocComments['routeAlias'] : null;
+                $this->registerRoute($method, $uri, $routeCall, $routeAlias);
             }
         }
     }
@@ -217,7 +217,7 @@ class Routing
      * @param mixed        $routeCall   is either a callable or an array of controller, method
      * @param String       $routeAlias  a Alias used to reference this route
      */
-    public function registerRoute($httpMethods, $uri, $routeCall,$routeAlias = NULL)
+    public function registerRoute($httpMethods, $uri, $routeCall, $routeAlias = null)
     {
         $httpMethods =
             is_array($httpMethods) ? $httpMethods : array($httpMethods);
@@ -225,7 +225,7 @@ class Routing
         foreach ($httpMethods as $method) {
             if (in_array($method, $httpMethods)) {
                 $this->routes[$method][$uri] = $routeCall;
-                if (isset( $routeAlias )) {
+                if (isset($routeAlias)) {
                     $this->routeAliases[$routeAlias] = $uri;
                 }
             }
@@ -263,12 +263,13 @@ class Routing
      *
      * returns blog/this-is-the-title
      *
-     * @param string $route the name of a route or a uri where we substitue values
-     * @param array $values an array with key => values
+     * @param string $route the name of a route or a uri where we substitute values
+     * @param array  $values an array with key => values
      * @return string
      */
-    public function generateUrlFromRoute($route,$values){
-        $routeUri = isset($this->routeAliases[$route])?$this->routeAliases[$route]:$route;
-        return str_replace(array_keys($values),array_values($values),$routeUri);
+    public function generateUrlFromRoute($route, $values)
+    {
+        $routeUri = isset($this->routeAliases[$route]) ? $this->routeAliases[$route] : $route;
+        return str_replace(array_keys($values), array_values($values), $routeUri);
     }
 }

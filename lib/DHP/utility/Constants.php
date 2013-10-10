@@ -43,12 +43,12 @@ class Constants
      * @param null  $defaultEnvironment
      * @internal param array $settings
      */
-    public function __construct(array $values = NULL, $defaultEnvironment = NULL)
+    public function __construct(array $values = null, $defaultEnvironment = null)
     {
-        if ($defaultEnvironment !== NULL) {
+        if ($defaultEnvironment !== null) {
             $this->environment = $defaultEnvironment;
         }
-        if ($values !== NULL) {
+        if ($values !== null) {
             $this->values                            = $values;
             $this->values[self::DEFAULT_ENVIRONMENT] = $this->values['values'];
             unset($this->values['values']);
@@ -71,7 +71,7 @@ class Constants
      */
     public function __get($name)
     {
-        switch (TRUE) {
+        switch (true) {
             case isset($this->values[$this->environment][$name]):
                 $return = $this->values[$this->environment][$name];
                 break;
@@ -79,7 +79,7 @@ class Constants
                 $return = $this->values[self::DEFAULT_ENVIRONMENT][$name];
                 break;
             default:
-                $return = NULL;
+                $return = null;
         }
         return $return;
     }

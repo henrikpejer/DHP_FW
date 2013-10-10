@@ -29,14 +29,16 @@ interface EventInterface
      * @param null   $seven
      * @return mixed
      */
-    function trigger($eventName,
-                     &$one = NULL,
-                     &$two = NULL,
-                     &$three = NULL,
-                     &$four = NULL,
-                     &$five = NULL,
-                     &$six = NULL,
-                     &$seven = NULL);
+    public function trigger(
+        $eventName,
+        &$one = null,
+        &$two = null,
+        &$three = null,
+        &$four = null,
+        &$five = null,
+        &$six = null,
+        &$seven = null
+    );
 
     /**
      * This is used to register a callable with a certain event.
@@ -45,7 +47,7 @@ interface EventInterface
      * @param Callable $callable
      * @return mixed
      */
-    function register($eventName, callable $callable);
+    public function register($eventName, callable $callable);
 
     /**
      * This is used when there are events that should not be publicly called but only
@@ -58,7 +60,7 @@ interface EventInterface
      * @param mixed $subscriber observer
      * @return mixed
      */
-    function subscribe($objectToSubscribeTo, &$subscriber);
+    public function subscribe($objectToSubscribeTo, &$subscriber);
 
     /**
      * This will call $method on all the observers to the delegate, usually an object
@@ -74,11 +76,12 @@ interface EventInterface
      * @param null   $four
      * @return mixed
      */
-    function triggerSubscribe($delegate,
-                              $method,
-                              &$one = NULL,
-                              &$two = NULL,
-                              &$three = NULL,
-                              &$four = NULL);
-
+    public function triggerSubscribe(
+        $delegate,
+        $method,
+        &$one = null,
+        &$two = null,
+        &$three = null,
+        &$four = null
+    );
 }

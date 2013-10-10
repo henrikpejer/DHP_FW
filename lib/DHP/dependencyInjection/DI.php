@@ -21,7 +21,8 @@ use DHP\utility\Util;
  */
 class DI
 {
-    public  $config, $store;
+    public $config;
+    public $store;
 
     /**
      * Starts the whole DI off.
@@ -33,7 +34,7 @@ class DI
      *
      * @param array $config
      */
-    function __construct(array $config = array())
+    public function __construct(array $config = array())
     {
         $this->config                    = (object)$config;
         $this->store                     = new \StdClass;
@@ -77,9 +78,9 @@ class DI
      *
      * @return $value
      */
-    public function set($name, $value = NULL)
+    public function set($name, $value = null)
     {
-        if ($value === NULL) {
+        if ($value === null) {
             $value = $name;
         }
         if (is_string($value)) {
@@ -98,32 +99,13 @@ class DI
      *
      * @return mixed
      */
-    function get($name)
+    public function get($name)
     {
-        if (!isset($this->store->{$name})) {
-            $frameworkClass = $this->findMatchWithinFramework($name);
-            if ($frameworkClass == NULL) {
-                # lets try to load this as-if it where a class being called, ok?
-                try {
-                    if (class_exists($name)) {
-                        $frameworkClass = $this->instantiateObject($name);
-                    } else {
-                        return NULL;
-                    }
-                } catch (\Exception $e) {
-                    return NULL;
-                }
-            }
-            $temp = new \ReflectionClass($frameworkClass);
-            switch (TRUE) {
-                case ($temp->isSubclassOf('DHP\blueprint\Component')):
-                    return $this->instantiateObject($frameworkClass);
-            }
-            unset($temp);
-            $this->set($name, $frameworkClass);
+        if (!isset($this->store->{$name}) && ($emptyStoreValue = $this->setEmptyStore($name)) !== true) {
+            return $emptyStoreValue;
         }
         if (is_string($this->store->{$name}) && isset($this->store->{$this->store->{$name}})) {
-            if ( is_string($this->store->{$this->store->{$name}})){
+            if (is_string($this->store->{$this->store->{$name}})) {
                 $objectToGet = $this->get($this->store->{$this->store->{$name}});
             } else {
                 $objectToGet = $this->store->{$this->store->{$name}};
@@ -131,10 +113,10 @@ class DI
         } else {
             $objectToGet = $this->store->{$name};
         }
-        if ( is_string($objectToGet) ){
+        if (is_string($objectToGet)) {
             $objectToGet = $this->instantiateObject($objectToGet);
         }
-        switch (TRUE) {
+        switch (true) {
             case (is_a($objectToGet, '\DHP\dependencyInjection\DiProxy')):
                 $initProcess = $objectToGet->get();
                 $instance    = $this->instantiateObject(
@@ -150,13 +132,46 @@ class DI
                         $methodAndArgs->args
                     );
                 }
-                $this->store->{$name} = & $instance;
+                $this->store->{$name}                = & $instance;
                 $this->store->{get_class($instance)} = & $instance;
                 #$this->alias(get_class($instance), $name);
                 $objectToGet = & $instance;
         }
         return $objectToGet;
         #return $this->store->{$name};
+    }
+
+    /**
+     * Whenever an object we want to get is not set, we use this to try to set it
+     *
+     * Here we may instantiate the object, save it to the store and work from there
+     *
+     * @param $name
+     * @return bool|null|object
+     */
+    private function setEmptyStore($name)
+    {
+        $frameworkClass = $this->findMatchWithinFramework($name);
+        if ($frameworkClass == null) {
+            # lets try to load this as-if it where a class being called, ok?
+            try {
+                if (class_exists($name)) {
+                    $frameworkClass = $this->instantiateObject($name);
+                } else {
+                    return null;
+                }
+            } catch (\Exception $e) {
+                return null;
+            }
+        }
+        $temp = new \ReflectionClass($frameworkClass);
+        switch (true) {
+            case ($temp->isSubclassOf('DHP\blueprint\Component')):
+                return $this->instantiateObject($frameworkClass);
+        }
+        unset($temp);
+        $this->set($name, $frameworkClass);
+        return true;
     }
 
     /**
@@ -171,7 +186,7 @@ class DI
     {
         $dhpFwClass = str_replace('Interface', '', $name);
         return strpos($name, 'DHP\\') === 0 && class_exists($dhpFwClass) ?
-            $dhpFwClass : NULL;
+            $dhpFwClass : null;
     }
 
     /**
@@ -188,53 +203,62 @@ class DI
         $constructorArguments = Util::classConstructorArguments($class);
         $classReflector       = new \ReflectionClass($class);
         if ($classReflector->isInterface() || $classReflector->isAbstract()) {
-            return NULL;
+            return null;
         }
-        $args = array();
+        $args        = array();
         $argsNotUsed = array_values($argsForObject);
         try {
-            foreach ($constructorArguments as $key => $constructorArgument) {
-                # get a value, if possible...
-                switch (TRUE) {
-                    case (!empty($constructorArgument['class']) &&
-                          ($arg =
-                              $this->get($constructorArgument['class'])) !== NULL):
-                    case (!empty($constructorArgument['name']) &&
-                          ($arg =
-                              $this->get($constructorArgument['name'])) !== NULL):
-                        $args[] = $arg;
-                        break;
-                    case isset($argsForObject[$key]):
-                        $args[] = $argsForObject[$key];
-                        break;
-                    case isset($argsForObject[$constructorArgument['name']]):
-                        $args[] = $argsForObject[$constructorArgument['name']];
-                        break;
-                    case isset($constructorArgument['default']):
-                        $args[] = $constructorArgument['default'];
-                        break;
-                    default:
-                        #$args[] = current($argsNotUsed);
-                        #next($argsNotUsed);
-                        $args[] = NULL;
-                }
-            }
+            $args += $this->getConstructorArguments($constructorArguments, $argsForObject);
             # add the argsNotUsed to the end, right?
-            $args +=$argsNotUsed;
-            $return = count($args) == 0 ? $classReflector->newInstance() :
-                $classReflector->newInstanceArgs($args);
+            $args += $argsNotUsed;
+            $return = count($args) == 0 ? $classReflector->newInstance() : $classReflector->newInstanceArgs($args);
         } catch (\Exception $e) {
             try {
                 $return = count($args) == 0 ? $classReflector->newInstance() :
                     $classReflector->newInstanceArgs($args);
             } catch (\Exception $e) {
-                $return = NULL;
+                $return = null;
             }
         }
         return $return;
     }
 
-    # todo : alias messes things up, somehing is really wonky when you set alias and it already exists etc, check the following cases : when DI::set('namespace') have been set before alias call, alias call with no original set before...
+    /**
+     * Extracts the constructor arguments from the arguments for the object
+     *
+     * @param $constructorArguments
+     * @param $argsForObject
+     * @return array
+     */
+    private function getConstructorArguments($constructorArguments, $argsForObject)
+    {
+        $args = array();
+        foreach ($constructorArguments as $key => $constructorArgument) {
+            # get a value, if possible...
+            switch (true) {
+                case (!empty($constructorArgument['class']) &&
+                      ($arg = $this->get($constructorArgument['class'])) !== null):
+                case (!empty($constructorArgument['name']) &&
+                      ($arg = $this->get($constructorArgument['name'])) !== null):
+                    $args[] = $arg;
+                    break;
+                case isset($argsForObject[$key]):
+                    $args[] = $argsForObject[$key];
+                    break;
+                case isset($argsForObject[$constructorArgument['name']]):
+                    $args[] = $argsForObject[$constructorArgument['name']];
+                    break;
+                case isset($constructorArgument['default']):
+                    $args[] = $constructorArgument['default'];
+                    break;
+                default:
+                    $args[] = null;
+            }
+        }
+        return $args;
+    }
+
+    # todo : alias messes things up, something is really wonky when you set alias and it already exists etc, check the following cases : when DI::set('namespace') have been set before alias call, alias call with no original set before...
     /**
      * Here we set an alias for an key:
      *

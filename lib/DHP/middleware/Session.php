@@ -11,7 +11,9 @@ namespace DHP\middleware;
 class Session
 {
 
-    private $sessionId, $sessionData, $flashData = NULL;
+    private $sessionId   = null;
+    private $sessionData = null;
+    private $flashData   = null;
 
     /**
      * Initiates the session library
@@ -29,6 +31,6 @@ class Session
      */
     private function getId()
     {
-
+        return $this->sessionId;
     }
 }
